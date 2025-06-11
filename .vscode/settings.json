@@ -1,0 +1,8 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  "cmake.sourceDirectory": "C:/Users/manny/Team3SkillSwap/2506Team03/node_modules/expo-modules-core/android"
+}
