@@ -1,75 +1,136 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { HelloWave } from '../components/HelloWave';
-import ParallaxScrollView from '../components/ParallaxScrollView';
-import { ThemedText } from '../components/ThemedText';
-import { ThemedView } from '../components/ThemedView';
+export default function LoginScreen() {
+  const [showLogin, setShowLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      {/* Logo Section */}
+      <View style={styles.logo}>
+        <Text style={styles.logoIcon}>🔃</Text>
+        <Text style={styles.title}>Skill Swap</Text>
+        <Text style={styles.subtitle}>For users, by users.</Text>
+      </View>
+
+      {/* Welcome Screen */}
+      {!showLogin && (
+        <TouchableOpacity style={styles.loginButton} onPress={() => setShowLogin(true)}>
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Login Form */}
+      {showLogin && (
+        <View style={styles.loginBox}>
+          <View style={styles.inputRow}>
+            <Text style={styles.label}>Email:</Text>
+            <TouchableOpacity onPress={() => console.log('Navigate to create account')}>
+              <Text style={styles.link}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="you@example.com"
+          />
+
+          <View style={styles.inputRow}>
+            <Text style={styles.label}>Password:</Text>
+            <TouchableOpacity onPress={() => console.log('Navigate to forgot password')}>
+              <Text style={styles.link}>Forgot password?</Text>
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="••••••••"
+            secureTextEntry
+          />
+
+          <TouchableOpacity style={styles.loginButton} onPress={() => console.log('Login')}>
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  logo: {
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 40,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  logoIcon: {
+    fontSize: 64,
+    marginBottom: 12,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#4a4a4a',
+    marginTop: 4,
+  },
+  loginBox: {
+    padding: 16,
+    backgroundColor: '#dce6f7',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  link: {
+    color: '#3a8ddf',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  input: {
+    backgroundColor: 'white',
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 16,
+    borderColor: '#ccc',
+    borderWidth: 1,
+  },
+  loginButton: {
+    backgroundColor: '#90e0a4',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2e7d32',
+    marginTop: 8,
+  },
+  loginButtonText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#000',
   },
 });
+
+
