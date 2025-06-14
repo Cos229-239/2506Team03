@@ -5,6 +5,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -38,31 +39,81 @@ const users = {
   },
 };
 
+const skillFilters = {
+  'Hands-on / Trade Skills': [
+    'Woodworking',
+    'Welding',
+    'Furniture Restoration',
+    'Automotive Repair',
+    'Home Improvement',
+  ],
+  'Creative / Art Skills': [
+    'Painting & Drawing',
+    'Graphic Design',
+    'Photography',
+    'Crafting & DIY',
+    'Music',
+  ],
+  'Tech / Digital Skills': [
+    'Web Design',
+    'Coding / Programming',
+    'Video Editing',
+    '3D Modeling',
+  ],
+  'Lifestyle & Personal Growth': [
+    'Cooking & Baking',
+    'Fitness Training',
+    'Language Tutoring – Italian',
+    'Language Tutoring – Spanish',
+    'Language Tutoring – French',
+    'Language Tutoring – German',
+    'Language Tutoring - Japanese',
+    'Gardening',
+    'Sewing & Tailoring',
+  ],
+};
+
 type CityKey = keyof typeof users;
 
 const Explore = () => {
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
   const [filterVisible, setFilterVisible] = useState(false);
   const [locationSearch, setLocationSearch] = useState('');
-  const [selectedSkillsToLearn, setSelectedSkillsToLearn] = useState<string[]>([]);
-  const [selectedSkillsToOffer, setSelectedSkillsToOffer] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
+
   const mockUser = users[selectedCity];
+
+const toggleSkill = (skill: string) => {
+  setSelectedSkills((prev) =>
+    prev.includes(skill)
+      ? prev.filter((s) => s !== skill)
+      : [...prev, skill]
+  );
+};
+
+const toggleCollapse = (category: string) => {
+  setCollapsedCategories((prev) =>
+    prev.includes(category)
+      ? prev.filter((c) => c !== category)
+      : [...prev, category]
+  );
+};
+
+  const clearFilters = () => {
+    setSelectedSkills([]);
+    setCollapsedCategories([]);
+  };
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.fullWidthHeader}>
         <Text style={styles.headerText}>Skill Swap</Text>
       </View>
       <View style={styles.fullWidthDivider} />
 
-      {/* MAP FRAME */}
       <View style={styles.mapFrame}>
-        {/* Location + Filter */}
-        <Pressable
-          onPress={() => setFilterVisible(true)}
-          style={styles.locationBar}
-        >
+        <Pressable onPress={() => setFilterVisible(true)} style={styles.locationBar}>
           <Text style={styles.locationText}>{mockUser.locationText}</Text>
           <Image source={FilterIcon} style={styles.filterIcon} resizeMode="contain" />
         </Pressable>
@@ -76,22 +127,11 @@ const Explore = () => {
             longitudeDelta: 0.015,
           }}
         >
-          <Marker
-            coordinate={{
-              latitude: mockUser.latitude,
-              longitude: mockUser.longitude,
-            }}
-          >
+          <Marker coordinate={{ latitude: mockUser.latitude, longitude: mockUser.longitude }}>
             <View>
               <Image
                 source={mockUser.avatar}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  borderWidth: 2,
-                  borderColor: '#fff',
-                }}
+                style={{ width: 60, height: 60, borderRadius: 30, borderWidth: 2, borderColor: '#fff' }}
               />
             </View>
 
@@ -107,17 +147,12 @@ const Explore = () => {
                   <Text style={styles.skillsLabel}>Skills:</Text>
                   <View style={styles.skillsList}>
                     {mockUser.skills.map((skill, index) => (
-                      <Text key={index} style={styles.skillItem}>
-                        {skill}
-                      </Text>
+                      <Text key={index} style={styles.skillItem}>{skill}</Text>
                     ))}
                   </View>
                   <View style={{ marginTop: 10, alignItems: 'center' }}>
                     <Pressable
-                      style={({ pressed }) => [
-                        styles.viewProfileButton,
-                        pressed && styles.viewProfileButtonPressed,
-                      ]}
+                      style={({ pressed }) => [styles.viewProfileButton, pressed && styles.viewProfileButtonPressed]}
                       onPress={() => console.log('View Profile pressed')}
                     >
                       <Text style={styles.viewProfileText}>View Profile</Text>
@@ -130,65 +165,98 @@ const Explore = () => {
           </Marker>
         </MapView>
 
-        {/* Toggle Button */}
-        <Pressable
-          onPress={() => console.log('Toggle view pressed')}
-          style={styles.floatingToggleButton}
-        >
+        <Pressable onPress={() => console.log('Toggle view pressed')} style={styles.floatingToggleButton}>
           <View style={styles.toggleButtonInner}>
             <Image source={ToggleIcon} style={styles.toggleImage} resizeMode="contain" />
           </View>
         </Pressable>
 
-        {/* Modal */}
         <Modal transparent={true} visible={filterVisible} animationType="fade">
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Filter Options</Text>
+            <View style={styles.modalBox}>
+              <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>✕</Text>
+              </TouchableOpacity>
 
-              {/* Location Search */}
-              <TextInput
-                placeholder="Search location (future feature)"
-                value={locationSearch}
-                onChangeText={setLocationSearch}
-                style={{
-                  borderWidth: 1,
-                  borderColor: '#ccc',
-                  padding: 8,
-                  borderRadius: 6,
-                  width: '100%',
-                  marginBottom: 12,
-                }}
-              />
+              <ScrollView contentContainerStyle={styles.modalContent} showsVerticalScrollIndicator={false}>
+                <Text style={styles.modalTitle}>Filter Options</Text>
 
-              <Text style={styles.modalTitle}>Switch City</Text>
-              {Object.keys(users).map((key) => (
-                <TouchableOpacity
-                  key={key}
-                  style={styles.modalOption}
-                  onPress={() => {
-                    setSelectedCity(key as CityKey);
-                    setFilterVisible(false);
+                <Text style={{ fontSize: 12, color: '#555', marginBottom: 6 }}>
+                  {selectedSkills.length} skill{selectedSkills.length !== 1 ? 's' : ''} selected
+                </Text>
+
+                <TextInput
+                  placeholder="Search location (future feature)"
+                  value={locationSearch}
+                  onChangeText={setLocationSearch}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                    padding: 8,
+                    borderRadius: 6,
+                    width: '100%',
+                    marginBottom: 12,
                   }}
-                >
-                  <Text style={styles.modalOptionText}>{users[key as CityKey].locationText}</Text>
-                </TouchableOpacity>
-              ))}
+                />
 
-              {/* Placeholder for Learn/Offer Filters */}
-              <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
-                <Text style={{ fontWeight: 'bold' }}>Skills You Want to Learn (Coming Soon)</Text>
-                <Text style={{ color: '#666', marginBottom: 8 }}>Select tags to filter by skills you'd like to learn.</Text>
-                <Text style={{ fontWeight: 'bold' }}>Skills You Can Offer (Coming Soon)</Text>
-                <Text style={{ color: '#666' }}>Select tags to filter by what you can teach or share.</Text>
-              </View>
+                <Text style={styles.modalTitle}>Switch City</Text>
+                {(Object.keys(users) as CityKey[]).map((key) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={styles.modalOption}
+                    onPress={() => {
+                      setSelectedCity(key);
+                      setFilterVisible(false);
+                    }}
+                  >
+                    <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
+                  </TouchableOpacity>
+                ))}
 
-              <Pressable
-                style={styles.modalClose}
-                onPress={() => setFilterVisible(false)}
-              >
-                <Text style={styles.modalCloseText}>Close</Text>
-              </Pressable>
+                <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
+                  {Object.entries(skillFilters).map(([category, skills]) => (
+                    <View key={category} style={{ marginBottom: 12 }}>
+                      <TouchableOpacity onPress={() => toggleCollapse(category)}>
+                        <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                          {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
+                        </Text>
+                      </TouchableOpacity>
+                      {!collapsedCategories.includes(category) && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                          {skills.map((skill) => {
+                            const selected = selectedSkills.includes(skill);
+                            return (
+                              <Pressable
+                                key={skill}
+                                onPress={() => toggleSkill(skill)}
+                                style={{
+                                  backgroundColor: selected ? '#b2dfdb' : '#eee',
+                                  paddingHorizontal: 10,
+                                  paddingVertical: 6,
+                                  borderRadius: 20,
+                                  marginRight: 6,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                <Text style={{ color: selected ? '#004d40' : '#333', fontSize: 12 }}>{skill}</Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.modalButtonRow}>
+                  <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
+                    <Text style={styles.clearButtonText}>Clear Filters</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setFilterVisible(false)} style={[styles.modalButton, styles.applyButton]}>
+                    <Text style={styles.applyButtonText}>Apply Filters</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
           </View>
         </Modal>
@@ -200,11 +268,7 @@ const Explore = () => {
 export default Explore;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingBottom: 8,
-  },
+  container: { flex: 1, backgroundColor: '#fff', paddingBottom: 8 },
   fullWidthHeader: {
     paddingTop: Platform.OS === 'ios' ? 64 : 48,
     paddingBottom: 8,
@@ -213,16 +277,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     width: '100%',
   },
-  fullWidthDivider: {
-    height: 1,
-    backgroundColor: '#ccc',
-    marginBottom: 12,
-    width: '100%',
-  },
-  headerText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
+  fullWidthDivider: { height: 1, backgroundColor: '#ccc', marginBottom: 12, width: '100%' },
+  headerText: { fontSize: 32, fontWeight: 'bold' },
   mapFrame: {
     marginHorizontal: 16,
     borderRadius: 16,
@@ -233,10 +289,7 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height * 0.75,
     position: 'relative',
   },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
+  map: { width: '100%', height: '100%' },
   locationBar: {
     position: 'absolute',
     top: 12,
@@ -251,16 +304,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
   },
-  locationText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  filterIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#fff',
-  },
+  locationText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  filterIcon: { width: 20, height: 20, tintColor: '#fff' },
   floatingToggleButton: {
     position: 'absolute',
     bottom: 16,
@@ -278,10 +323,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toggleImage: {
-    width: 40,
-    height: 40,
-  },
+  toggleImage: { width: 40, height: 40 },
   callout: {
     backgroundColor: 'white',
     padding: 10,
@@ -311,39 +353,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: -8,
   },
-  headerBar: {
-    backgroundColor: '#b2dfdb',
-    height: 4,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    marginBottom: 6,
-  },
-  boldText: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    textAlign: 'center',
-  },
-  italicText: {
-    fontStyle: 'italic',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  skillsLabel: {
-    marginTop: 4,
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 2,
-    textAlign: 'left',
-    alignSelf: 'flex-start',
-  },
-  skillsList: {
-    alignItems: 'flex-start',
-    marginTop: 4,
-  },
-  skillItem: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
+  headerBar: { backgroundColor: '#b2dfdb', height: 4, borderTopLeftRadius: 8, borderTopRightRadius: 8, marginBottom: 6 },
+  boldText: { fontWeight: 'bold', fontSize: 20, textAlign: 'center' },
+  italicText: { fontStyle: 'italic', fontSize: 14, textAlign: 'center' },
+  skillsLabel: { marginTop: 4, fontWeight: 'bold', fontSize: 14, marginBottom: 2, textAlign: 'left', alignSelf: 'flex-start' },
+  skillsList: { alignItems: 'flex-start', marginTop: 4 },
+  skillItem: { fontSize: 14, marginVertical: 2 },
   viewProfileButton: {
     backgroundColor: '#b2dfdb',
     borderRadius: 20,
@@ -355,45 +370,46 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#004d40',
   },
-  viewProfileButtonPressed: {
-    backgroundColor: '#a0ccc7',
-    transform: [{ scale: 0.97 }],
-  },
-  viewProfileText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#004d40',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: '#00000088',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
+  viewProfileButtonPressed: { backgroundColor: '#a0ccc7', transform: [{ scale: 0.97 }] },
+  viewProfileText: { fontSize: 14, fontWeight: 'bold', color: '#004d40' },
+  modalOverlay: { flex: 1, backgroundColor: '#00000088', justifyContent: 'center', alignItems: 'center' },
+  modalBox: {
     backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    width: '80%',
+    borderRadius: 16,
+    padding: 16,
+    maxHeight: Dimensions.get('window').height * 0.75,
+    width: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  modalOption: { paddingVertical: 10 },
+  modalOptionText: { fontSize: 16 },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  modalButton: {
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
     alignItems: 'center',
+    marginHorizontal: 5,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  modalOption: {
-    paddingVertical: 10,
-  },
-  modalOptionText: {
-    fontSize: 16,
-  },
-  modalClose: {
-    marginTop: 16,
-  },
-  modalCloseText: {
-    color: 'red',
-    fontWeight: 'bold',
+  applyButton: { backgroundColor: '#4caf50' },
+  clearButton: { backgroundColor: '#f44336' },
+  applyButtonText: { color: 'white', fontWeight: 'bold' },
+  clearButtonText: { color: 'white', fontWeight: 'bold' },
+  closeIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 1,
   },
 });
-
