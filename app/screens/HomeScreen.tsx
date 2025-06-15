@@ -1,5 +1,3 @@
-﻿import React from 'react';
-import { Text, View } from 'react-native';
 
 const HomeScreen = () => {
   return (
@@ -10,3 +8,4 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
+// Test Franck
