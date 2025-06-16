@@ -40,14 +40,12 @@ const currentRoute = state?.routes?.[state.index]?.name ?? '';
         }}
       />
       <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paper-plane" color={color} />
-          ),
-        }}
-      />
+  name="explore"
+  options={{
+    title: 'Explore',
+    tabBarIcon: ({ color }) => <IconSymbol size={28} name="compass" color={color} />,
+  }}
+/>
     </Tabs>
   );
 }
