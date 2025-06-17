@@ -117,7 +117,14 @@ const Explore = () => {
       <View style={styles.mapFrame}>
         <Pressable onPress={() => setFilterVisible(true)} style={styles.locationBar}>
           <Text style={styles.locationText}>{mockUser.locationText}</Text>
-          <Image source={FilterIcon} style={styles.filterIcon} resizeMode="contain" />
+          <Image
+  source={FilterIcon}
+  style={[
+    styles.filterIcon,
+    { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
+  ]}
+  resizeMode="contain"
+/>
         </Pressable>
 
         <MapView
@@ -174,7 +181,6 @@ const Explore = () => {
           </View>
         </Pressable>
 
-        {/* Filter Modal */}
 <Modal transparent visible={filterVisible} animationType="fade">
   <View style={styles.modalOverlay}>
     <KeyboardAvoidingView
@@ -187,7 +193,7 @@ const Explore = () => {
       <ScrollView
         contentContainerStyle={[styles.modalContent, { paddingBottom: 24 }]}
         showsVerticalScrollIndicator={false}
-        bounces={false} // disables iOS rubber-band
+        bounces={false} 
         overScrollMode="never"
       >
         <Text style={styles.modalTitle}>Filter Options</Text>
@@ -265,7 +271,6 @@ const Explore = () => {
   </View>
 </Modal>
 
-        {/* Profile Modal */}
 {profileVisible && markerScreenPosition && (
   <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
     <View style={StyleSheet.absoluteFillObject}>
@@ -276,10 +281,11 @@ const Explore = () => {
           left: markerScreenPosition.x - 120,
         }}
       >
-        {/* This blocks closing when you tap the card itself */}
+        
         <TouchableWithoutFeedback onPress={() => {}}>
           <View>
             <View style={styles.calloutBox}>
+              <View style={styles.calloutAccentBar} />
               <Text style={styles.calloutName}>{mockUser.name}</Text>
               <Text style={styles.calloutJob}>{mockUser.profession}</Text>
               <Text style={styles.skillsLabel}>Skills:</Text>
@@ -339,7 +345,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#000000cc',
+    backgroundColor: '#000',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -440,24 +446,26 @@ const styles = StyleSheet.create({
   elevation: 6,
 },
   calloutName: {
-  fontSize: 18,
+  fontSize: 20,
   fontWeight: 'bold',
   textAlign: 'center',
 },
   calloutJob: {
-  fontSize: 14,
+  fontSize: 16,
   fontStyle: 'italic',
   textAlign: 'center',
-  marginBottom: 8,
+  marginBottom: 12,
 },
   skillsLabel: { 
     fontWeight: 'bold', 
     fontSize: 14, 
-    alignSelf: 'flex-start' 
+    alignSelf: 'flex-start',
+    marginBottom: 4,
   },
   skillItem: { 
     fontSize: 14, 
-    alignSelf: 'flex-start' 
+    alignSelf: 'flex-start', 
+    marginBottom: 3,
   },
   viewProfileBtn: {
     backgroundColor: '#9DD4B6',
@@ -472,5 +480,12 @@ const styles = StyleSheet.create({
   color: '#222',
   fontWeight: 'bold',
   textAlign: 'center',
+},
+calloutAccentBar: {
+  height: 6,
+  width: '100%',
+  backgroundColor: '#9DD4B6',
+  borderRadius: 12,
+  marginBottom: 12,
 },
 });
