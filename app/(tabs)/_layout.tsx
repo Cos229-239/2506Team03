@@ -2,7 +2,7 @@ import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
-import AntDesign from '@expo/vector-icons/AntDesign'; // ← Add this line
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { HapticTab } from '../components/HapticTab';
 import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
@@ -31,7 +31,6 @@ export default function TabLayout() {
               }),
       }}
     >
-      {/* Home Tab */}
       <Tabs.Screen
         name="index"
         options={{
@@ -42,7 +41,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Explore Tab */}
       <Tabs.Screen
         name="explore"
         options={{
@@ -53,13 +51,22 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Message Tab */}
       <Tabs.Screen
         name="message"
         options={{
           title: 'Message',
           tabBarIcon: ({ color }) => (
             <AntDesign name="message1" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="setting" size={24} color={color} />
           ),
         }}
       />
