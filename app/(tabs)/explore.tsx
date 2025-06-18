@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -9,11 +10,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import MapView, { Marker } from 'react-native-maps';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import MockAvatar from '../../assets/images/mock-avatar.png';
@@ -184,92 +185,139 @@ const Explore = () => {
 <Modal transparent visible={filterVisible} animationType="fade">
   <View style={styles.modalOverlay}>
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.modalBox}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, width: '100%' }}
     >
-      <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
-        <Text style={styles.closeText}>✕</Text>
-      </TouchableOpacity>
-      <ScrollView
-        contentContainerStyle={[styles.modalContent, { paddingBottom: 24 }]}
-        showsVerticalScrollIndicator={false}
-        bounces={false} 
-        overScrollMode="never"
-      >
-        <Text style={styles.modalTitle}>Filter Options</Text>
-        <Text style={styles.modalSubtitle}>
-          {selectedSkills.length} skill{selectedSkills.length !== 1 ? 's' : ''} selected
-        </Text>
-        <TextInput
-          placeholder="Search location (future feature)"
-          value={locationSearch}
-          onChangeText={setLocationSearch}
-          style={styles.input}
-        />
-        <Text style={styles.modalTitle}>Switch City</Text>
-        {(Object.keys(users) as CityKey[]).map((key) => (
-          <TouchableOpacity
-            key={key}
-            style={styles.modalOption}
-            onPress={() => {
-              setSelectedCity(key);
-              setFilterVisible(false);
+      <View style={styles.modalBox}>
+        {/* Close Button */}
+        <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
+          <Text style={styles.closeText}>✕</Text>
+        </TouchableOpacity>
+
+        {/* Static Header Section */}
+        <View style={{ marginBottom: 12 }}>
+          <Text style={styles.modalTitle}>Filter Options</Text>
+          <Text style={styles.modalSubtitle}>
+            {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
+          </Text>
+
+          {/* GooglePlacesAutocomplete */}
+          <GooglePlacesAutocomplete
+            placeholder="Search for a city"
+            fetchDetails={true}
+            onPress={(data, details = null) => {
+              console.log('Selected city:', data.description);
+              Keyboard.dismiss();
             }}
-          >
-            <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
-          </TouchableOpacity>
-        ))}
-        <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
-          {Object.entries(skillFilters).map(([category, skills]) => (
-            <View key={category} style={{ marginBottom: 12 }}>
-              <TouchableOpacity onPress={() => toggleCollapse(category)}>
-                <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                  {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
-                </Text>
-              </TouchableOpacity>
-              {!collapsedCategories.includes(category) && (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {skills.map((skill: string) => {
-                    const selected = selectedSkills.includes(skill);
-                    return (
-                      <Pressable
-                        key={skill}
-                        onPress={() => toggleSkill(skill)}
-                        style={{
-                          backgroundColor: selected ? '#b2dfdb' : '#eee',
-                          paddingHorizontal: 10,
-                          paddingVertical: 6,
-                          borderRadius: 20,
-                          marginRight: 6,
-                          marginBottom: 6,
-                        }}
-                      >
-                        <Text style={{ color: selected ? '#004d40' : '#333', fontSize: 12 }}>
-                          {skill}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
+            query={{
+              key: 'AIzaSyCb-uYNyD6IflNZXbferg0Vwz56PgyShQA',
+              language: 'en',
+              types: '(cities)',
+            }}
+            predefinedPlaces={[]}
+            textInputProps={{
+              onFocus: () => {},
+              autoCorrect: false,
+              autoComplete: 'off',
+              autoCapitalize: 'none',
+              placeholderTextColor: '#999',
+              importantForAutofill: 'no',
+            }}
+            styles={{
+              container: { width: '100%', marginBottom: 12, zIndex: 10 },
+              textInput: {
+                height: 40,
+                fontSize: 16,
+                backgroundColor: '#fff',
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                paddingHorizontal: 10,
+              },
+            }}
+          />
+
+          {/* Switch City */}
+          <Text style={styles.modalTitle}>Switch City</Text>
+          {(Object.keys(users) as CityKey[]).map((key) => (
+            <TouchableOpacity
+              key={key}
+              style={styles.modalOption}
+              onPress={() => {
+                setSelectedCity(key);
+                setFilterVisible(false);
+              }}
+            >
+              <Text style={styles.modalOptionText}>
+  {String(users[key].locationText)}
+</Text>
+            </TouchableOpacity>
           ))}
         </View>
-        <View style={styles.modalButtonRow}>
-          <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
-            <Text style={styles.clearButtonText}>Clear Filters</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setFilterVisible(false)}
-            style={[styles.modalButton, styles.applyButton]}
-          >
-            <Text style={styles.applyButtonText}>Apply Filters</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+
+        {/* Scrollable Section */}
+        <ScrollView
+          style={{ flexGrow: 1 }}
+          contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          overScrollMode="never"
+          nestedScrollEnabled
+        >
+          {/* Skill Filter Chips */}
+          <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
+            {Object.entries(skillFilters).map(([category, skills]) => (
+              <View key={category} style={{ marginBottom: 12 }}>
+                <TouchableOpacity onPress={() => toggleCollapse(category)}>
+                  <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                    {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
+                  </Text>
+                </TouchableOpacity>
+                {!collapsedCategories.includes(category) && (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {skills.map((skill: string) => {
+                      const selected = selectedSkills.includes(skill);
+                      return (
+                        <Pressable
+                          key={skill}
+                          onPress={() => toggleSkill(skill)}
+                          style={{
+                            backgroundColor: selected ? '#b2dfdb' : '#eee',
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            borderRadius: 20,
+                            marginRight: 6,
+                            marginBottom: 6,
+                          }}
+                        >
+                          <Text style={{ color: selected ? '#004d40' : '#333', fontSize: 12 }}>
+                            {skill}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+
+          {/* Clear + Apply Buttons */}
+          <View style={styles.modalButtonRow}>
+            <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
+              <Text style={styles.clearButtonText}>Clear Filters</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setFilterVisible(false)} style={[styles.modalButton, styles.applyButton]}>
+              <Text style={styles.applyButtonText}>Apply Filters</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   </View>
 </Modal>
+
 
 {profileVisible && markerScreenPosition && (
   <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
@@ -389,10 +437,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
-    maxHeight: Dimensions.get('window').height * 0.75,
-    width: Dimensions.get('window').width * 0.85,
+    height: '85%',
+    width: '90%',
     alignSelf: 'center',
-    flex: 1,
   },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
