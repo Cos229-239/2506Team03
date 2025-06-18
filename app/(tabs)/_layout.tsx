@@ -1,11 +1,13 @@
 import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-import { HapticTab } from './../components/HapticTab';
-import { IconSymbol } from './../components/ui/IconSymbol';
-import TabBarBackground from './../components/ui/TabBarBackground';
-import { Colors } from './../constants/Colors';
-import { useColorScheme } from './../hooks/useColorScheme';
+
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { HapticTab } from '../components/HapticTab';
+import { IconSymbol } from '../components/ui/IconSymbol';
+import TabBarBackground from '../components/ui/TabBarBackground';
+import { Colors } from '../constants/Colors';
+import { useColorScheme } from '../hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -13,6 +15,7 @@ export default function TabLayout() {
   const state = navigation?.getState?.();
   const currentRoute = state?.routes?.[state.index]?.name ?? '';
 
+  // Hide tab bar on specific routes
   const hideTabBarRoutes = ['login', 'index'];
   const shouldHideTabBar = hideTabBarRoutes.includes(currentRoute);
 
@@ -40,12 +43,33 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="compass" color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="message"
+        options={{
+          title: 'Message',
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="message1" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="setting" size={24} color={color} />
           ),
         }}
       />
