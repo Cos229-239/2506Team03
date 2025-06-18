@@ -1,17 +1,16 @@
-﻿import { initializeApp } from 'firebase/app';
+﻿// app/firebaseConfig.ts
+import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
   apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
+  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
   projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
+  storageBucket: 'YOUR_PROJECT_ID.appspot.com',
   messagingSenderId: 'YOUR_SENDER_ID',
   appId: 'YOUR_APP_ID',
 };
 
 const app = initializeApp(firebaseConfig);
-export default app;
 
 
-
-import { getDatabase } from 'firebase/database';
+export default firebaseConfig;
