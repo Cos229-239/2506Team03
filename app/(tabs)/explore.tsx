@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -14,8 +14,9 @@ import {
   TouchableWithoutFeedback,
   View
 } from 'react-native';
+import 'react-native-get-random-values';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import MapView, { Marker } from 'react-native-maps';
+import type MapViewType from 'react-native-maps';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import MockAvatar from '../../assets/images/mock-avatar.png';
 import Mock2Avatar from '../../assets/images/mock2-avatar.png';
@@ -105,7 +106,25 @@ const Explore = () => {
     setCollapsedCategories([]);
   };
 
-  const mapRef = useRef<MapView | null>(null);
+  const mapRef = useRef<MapViewType | null>(null);
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+useEffect(() => {
+  const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+  const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+
+  return () => {
+    showSub.remove();
+    hideSub.remove();
+  };
+}, []);
+
+  let MapView, Marker;
+  if (Platform.OS !== 'web') {
+    MapView = require('react-native-maps').default;
+    Marker = require('react-native-maps').Marker;
+  }
 
   return (
     <View style={styles.container}>
@@ -119,13 +138,13 @@ const Explore = () => {
         <Pressable onPress={() => setFilterVisible(true)} style={styles.locationBar}>
           <Text style={styles.locationText}>{mockUser.locationText}</Text>
           <Image
-  source={FilterIcon}
-  style={[
-    styles.filterIcon,
-    { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
-  ]}
-  resizeMode="contain"
-/>
+            source={FilterIcon}
+            style={[
+              styles.filterIcon,
+              { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
+            ]}
+            resizeMode="contain"
+          />
         </Pressable>
 
         <MapView
@@ -139,41 +158,43 @@ const Explore = () => {
           }}
         >
           <Marker
-  coordinate={{
-    latitude: mockUser.latitude,
-    longitude: mockUser.longitude,
-  }}
-  anchor={{ x: 0.5, y: 1 }} // bottom center anchor
-  onPress={async () => {
-  if (mapRef.current) {
-    const point = await mapRef.current.pointForCoordinate({
-      latitude: mockUser.latitude,
-      longitude: mockUser.longitude,
-    });
-    setMarkerScreenPosition(point);
-    setProfileVisible(true);
-  }
-}}
->
-  <View style={{ alignItems: 'center', marginBottom: 18 }}>
-    <Image
-  source={mockUser.avatar}
-  style={{
-    width: 38,
-    height: 38,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: '#222',
-    backgroundColor: '#eee',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-  }}
-  resizeMode="cover"
-/>
-  </View>
-</Marker>
+            coordinate={{
+              latitude: mockUser.latitude,
+              longitude: mockUser.longitude,
+            }}
+            anchor={{ x: 0.5, y: 1 }} // bottom center anchor
+            onPress={async () => {
+              if (mapRef.current) {
+                const point = await mapRef.current.pointForCoordinate({
+                  latitude: mockUser.latitude,
+                  longitude: mockUser.longitude,
+                });
+                setMarkerScreenPosition(point);
+                setProfileVisible(true);
+              }
+            }}
+          >
+            <View style={{ alignItems: 'center', marginBottom: 18 }}>
+              <Image
+                source={mockUser.avatar}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 18,
+                  borderWidth: 2,
+                  borderColor: '#222',
+                  backgroundColor: '#eee',
+                  shadowColor: '#000',
+                  shadowOpacity: 0.3,
+                  shadowRadius: 3,
+                  shadowOffset: { width: 0, height: 2 },
+                }}
+                resizeMode="cover"
+              />
+
+
+            </View>
+          </Marker>
         </MapView>
 
         <Pressable onPress={() => console.log('Toggle view pressed')} style={styles.floatingToggleButton}>
@@ -182,178 +203,193 @@ const Explore = () => {
           </View>
         </Pressable>
 
-<Modal transparent visible={filterVisible} animationType="fade">
-  <View style={styles.modalOverlay}>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1, width: '100%' }}
-    >
-      <View style={styles.modalBox}>
-        {/* Close Button */}
-        <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
-          <Text style={styles.closeText}>✕</Text>
-        </TouchableOpacity>
-
-        {/* Static Header Section */}
-        <View style={{ marginBottom: 12 }}>
-          <Text style={styles.modalTitle}>Filter Options</Text>
-          <Text style={styles.modalSubtitle}>
-            {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
-          </Text>
-
-          {/* GooglePlacesAutocomplete */}
-          <GooglePlacesAutocomplete
-            placeholder="Search for a city"
-            fetchDetails={true}
-            onPress={(data, details = null) => {
-              console.log('Selected city:', data.description);
-              Keyboard.dismiss();
-            }}
-            query={{
-              key: 'AIzaSyCb-uYNyD6IflNZXbferg0Vwz56PgyShQA',
-              language: 'en',
-              types: '(cities)',
-            }}
-            predefinedPlaces={[]}
-            textInputProps={{
-              onFocus: () => {},
-              autoCorrect: false,
-              autoComplete: 'off',
-              autoCapitalize: 'none',
-              placeholderTextColor: '#999',
-              importantForAutofill: 'no',
-            }}
-            styles={{
-              container: { width: '100%', marginBottom: 12, zIndex: 10 },
-              textInput: {
-                height: 40,
-                fontSize: 16,
-                backgroundColor: '#fff',
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#ccc',
-                paddingHorizontal: 10,
-              },
-            }}
-          />
-
-          {/* Switch City */}
-          <Text style={styles.modalTitle}>Switch City</Text>
-          {(Object.keys(users) as CityKey[]).map((key) => (
-            <TouchableOpacity
-              key={key}
-              style={styles.modalOption}
-              onPress={() => {
-                setSelectedCity(key);
-                setFilterVisible(false);
-              }}
+        <Modal transparent visible={filterVisible} animationType="fade">
+          <View style={styles.modalOverlay}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={{ flex: 1, width: '100%' }}
             >
-              <Text style={styles.modalOptionText}>
-  {String(users[key].locationText)}
-</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Scrollable Section */}
-        <ScrollView
-          style={{ flexGrow: 1 }}
-          contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          overScrollMode="never"
-          nestedScrollEnabled
-        >
-          {/* Skill Filter Chips */}
-          <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
-            {Object.entries(skillFilters).map(([category, skills]) => (
-              <View key={category} style={{ marginBottom: 12 }}>
-                <TouchableOpacity onPress={() => toggleCollapse(category)}>
-                  <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                    {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
-                  </Text>
+              <View
+  style={[
+    styles.modalBox,
+    {
+      marginTop: 60,
+      height:
+        Platform.OS === 'ios'
+          ? keyboardVisible
+            ? '80%'
+            : '85%'
+          : keyboardVisible
+          ? '85%'
+          : '85%',
+    },
+  ]}
+>
+                {/* Close Button */}
+                <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
+                  <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
-                {!collapsedCategories.includes(category) && (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {skills.map((skill: string) => {
-                      const selected = selectedSkills.includes(skill);
-                      return (
-                        <Pressable
-                          key={skill}
-                          onPress={() => toggleSkill(skill)}
-                          style={{
-                            backgroundColor: selected ? '#b2dfdb' : '#eee',
-                            paddingHorizontal: 10,
-                            paddingVertical: 6,
-                            borderRadius: 20,
-                            marginRight: 6,
-                            marginBottom: 6,
-                          }}
-                        >
-                          <Text style={{ color: selected ? '#004d40' : '#333', fontSize: 12 }}>
-                            {skill}
+
+                {/* Static Header Section */}
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={styles.modalTitle}>Filter Options</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
+                  </Text>
+
+                  {/* GooglePlacesAutocomplete */}
+                  <GooglePlacesAutocomplete
+                    placeholder="Search for a city"
+                    fetchDetails={true}
+                    onPress={(data, details = null) => {
+                      console.log('Selected city:', data.description);
+                      Keyboard.dismiss();
+                    }}
+                    query={{
+                      key: 'AIzaSyCb-uYNyD6IflNZXbferg0Vwz56PgyShQA',
+                      language: 'en',
+                      types: '(cities)',
+                    }}
+                    predefinedPlaces={[]}
+                    textInputProps={{
+                      onFocus: () => { },
+                      autoCorrect: false,
+                      autoComplete: 'off',
+                      autoCapitalize: 'none',
+                      placeholderTextColor: '#999',
+                      importantForAutofill: 'no',
+                    }}
+                    styles={{
+                      container: { width: '100%', marginBottom: 12, zIndex: 10 },
+                      textInput: {
+                        height: 40,
+                        fontSize: 16,
+                        backgroundColor: '#fff',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        borderColor: '#ccc',
+                        paddingHorizontal: 10,
+                      },
+                    }}
+                  />
+
+                  {/* Switch City */}
+                  <Text style={styles.modalTitle}>Switch City</Text>
+                  {(Object.keys(users) as CityKey[]).map((key) => (
+                    <TouchableOpacity
+                      key={key}
+                      style={styles.modalOption}
+                      onPress={() => {
+                        setSelectedCity(key);
+                        setFilterVisible(false);
+                      }}
+                    >
+                      <Text style={styles.modalOptionText}>
+                        {String(users[key].locationText)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Scrollable Section */}
+                <ScrollView
+                  style={{ flexGrow: 1 }}
+                  contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                  overScrollMode="never"
+                  nestedScrollEnabled
+                >
+                  {/* Skill Filter Chips */}
+                  <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
+                    {Object.entries(skillFilters).map(([category, skills]) => (
+                      <View key={category} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onPress={() => toggleCollapse(category)}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                            {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
                           </Text>
-                        </Pressable>
-                      );
-                    })}
+                        </TouchableOpacity>
+                        {!collapsedCategories.includes(category) && (
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                            {skills.map((skill: string) => {
+                              const selected = selectedSkills.includes(skill);
+                              return (
+                                <Pressable
+                                  key={skill}
+                                  onPress={() => toggleSkill(skill)}
+                                  style={{
+                                    backgroundColor: selected ? '#ACC3EE' : '#eee',
+                                    paddingHorizontal: 10,
+                                    paddingVertical: 6,
+                                    borderRadius: 20,
+                                    marginRight: 6,
+                                    marginBottom: 6,
+                                  }}
+                                >
+                                  <Text style={{ color: selected ? '#222' : '#333', fontSize: 12 }}>
+                                    {skill}
+                                  </Text>
+                                </Pressable>
+                              );
+                            })}
+                          </View>
+                        )}
+                      </View>
+                    ))}
                   </View>
-                )}
+
+                  {/* Clear + Apply Buttons */}
+                  <View style={styles.modalButtonRow}>
+                    <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
+                      <Text style={styles.clearButtonText}>Clear Filters</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setFilterVisible(false)} style={[styles.modalButton, styles.applyButton]}>
+                      <Text style={styles.applyButtonText}>Apply Filters</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
               </View>
-            ))}
+            </KeyboardAvoidingView>
           </View>
-
-          {/* Clear + Apply Buttons */}
-          <View style={styles.modalButtonRow}>
-            <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
-              <Text style={styles.clearButtonText}>Clear Filters</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setFilterVisible(false)} style={[styles.modalButton, styles.applyButton]}>
-              <Text style={styles.applyButtonText}>Apply Filters</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
-    </KeyboardAvoidingView>
-  </View>
-</Modal>
+        </Modal>
 
 
-{profileVisible && markerScreenPosition && (
-  <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
-    <View style={StyleSheet.absoluteFillObject}>
-      <View
-        style={{
-          position: 'absolute',
-          top: markerScreenPosition.y - 280,
-          left: markerScreenPosition.x - 120,
-        }}
-      >
-        
-        <TouchableWithoutFeedback onPress={() => {}}>
-          <View>
-            <View style={styles.calloutBox}>
-              <View style={styles.calloutAccentBar} />
-              <Text style={styles.calloutName}>{mockUser.name}</Text>
-              <Text style={styles.calloutJob}>{mockUser.profession}</Text>
-              <Text style={styles.skillsLabel}>Skills:</Text>
-              {mockUser.skills.map((skill, index) => (
-                <Text key={index} style={styles.skillItem}>{skill}</Text>
-              ))}
-              <TouchableOpacity
-                style={styles.viewProfileBtn}
-                onPress={() => console.log('View Profile Pressed')}
+        {profileVisible && markerScreenPosition && (
+          <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
+            <View style={StyleSheet.absoluteFillObject}>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: markerScreenPosition.y - 280,
+                  left: markerScreenPosition.x - 120,
+                }}
               >
-                <Text style={styles.viewProfileBtnText}>View Profile</Text>
-              </TouchableOpacity>
+
+                <TouchableWithoutFeedback onPress={() => { }}>
+                  <View>
+                    <View style={styles.calloutBox}>
+                      <View style={styles.calloutAccentBar} />
+                      <Text style={styles.calloutName}>{mockUser.name}</Text>
+                      <Text style={styles.calloutJob}>{mockUser.profession}</Text>
+                      <Text style={styles.skillsLabel}>Skills:</Text>
+                      {mockUser.skills.map((skill, index) => (
+                        <Text key={index} style={styles.skillItem}>{skill}</Text>
+                      ))}
+                      <TouchableOpacity
+                        style={styles.viewProfileBtn}
+                        onPress={() => console.log('View Profile Pressed')}
+                      >
+                        <Text style={styles.viewProfileBtnText}>View Profile</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.triangle} />
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
             </View>
-            <View style={styles.triangle} />
-          </View>
-        </TouchableWithoutFeedback>
-      </View>
-    </View>
-  </TouchableWithoutFeedback>
-)}
+          </TouchableWithoutFeedback>
+        )}
       </View>
     </View>
   );
@@ -417,9 +453,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toggleImage: { 
-    width: 40, 
-    height: 40, 
+  toggleImage: {
+    width: 40,
+    height: 40,
   },
   avatarImage: {
     width: 36,
@@ -462,7 +498,7 @@ const styles = StyleSheet.create({
   clearButtonText: { color: 'white', fontWeight: 'bold' },
   closeIcon: { position: 'absolute', top: 8, right: 8, zIndex: 1 },
   closeText: { fontSize: 18, fontWeight: 'bold' },
-  calloutContainer: { 
+  calloutContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -479,39 +515,39 @@ const styles = StyleSheet.create({
     alignSelf: 'center',  // centers the triangle under the box
   },
   calloutBox: {
-  backgroundColor: '#fff',
-  borderRadius: 12,
-  padding: 16,
-  width: 240,
-  shadowColor: '#000',
-  shadowOffset: { 
-    width: 0, 
-    height: 4 
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    width: 240,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  shadowOpacity: 0.2,
-  shadowRadius: 8,
-  elevation: 6,
-},
   calloutName: {
-  fontSize: 20,
-  fontWeight: 'bold',
-  textAlign: 'center',
-},
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   calloutJob: {
-  fontSize: 16,
-  fontStyle: 'italic',
-  textAlign: 'center',
-  marginBottom: 12,
-},
-  skillsLabel: { 
-    fontWeight: 'bold', 
-    fontSize: 14, 
+    fontSize: 16,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  skillsLabel: {
+    fontWeight: 'bold',
+    fontSize: 14,
     alignSelf: 'flex-start',
     marginBottom: 4,
   },
-  skillItem: { 
-    fontSize: 14, 
-    alignSelf: 'flex-start', 
+  skillItem: {
+    fontSize: 14,
+    alignSelf: 'flex-start',
     marginBottom: 3,
   },
   viewProfileBtn: {
@@ -523,16 +559,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   viewProfileBtnText: {
-  fontSize: 14,
-  color: '#222',
-  fontWeight: 'bold',
-  textAlign: 'center',
-},
-calloutAccentBar: {
-  height: 6,
-  width: '100%',
-  backgroundColor: '#9DD4B6',
-  borderRadius: 12,
-  marginBottom: 12,
-},
+    fontSize: 14,
+    color: '#222',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  calloutAccentBar: {
+    height: 6,
+    width: '100%',
+    backgroundColor: '#9DD4B6',
+    borderRadius: 12,
+    marginBottom: 12,
+  },
 });
