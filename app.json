@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "2506Team03",
-    "slug": "2506Team03",
+    "name": "my-clean-test-app",
+    "slug": "my-clean-test-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "2506team03",
+    "scheme": "mycleantestapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -33,8 +33,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-font"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
