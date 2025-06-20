@@ -110,15 +110,15 @@ const Explore = () => {
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-useEffect(() => {
-  const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-  const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
 
-  return () => {
-    showSub.remove();
-    hideSub.remove();
-  };
-}, []);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   let MapView, Marker;
   if (Platform.OS !== 'web') {
@@ -162,7 +162,7 @@ useEffect(() => {
               latitude: mockUser.latitude,
               longitude: mockUser.longitude,
             }}
-            anchor={{ x: 0.5, y: 1 }} // bottom center anchor
+            anchor={{ x: 0.5, y: 1 }}
             onPress={async () => {
               if (mapRef.current) {
                 const point = await mapRef.current.pointForCoordinate({
@@ -210,34 +210,34 @@ useEffect(() => {
               style={{ flex: 1, width: '100%' }}
             >
               <View
-  style={[
-    styles.modalBox,
-    {
-      marginTop: 60,
-      height:
-        Platform.OS === 'ios'
-          ? keyboardVisible
-            ? '80%'
-            : '85%'
-          : keyboardVisible
-          ? '85%'
-          : '85%',
-    },
-  ]}
->
-                {/* Close Button */}
+                style={[
+                  styles.modalBox,
+                  {
+                    marginTop: 60,
+                    height:
+                      Platform.OS === 'ios'
+                        ? keyboardVisible
+                          ? '80%'
+                          : '85%'
+                        : keyboardVisible
+                          ? '80%'
+                          : '85%',
+                  },
+                ]}
+              >
+
                 <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
                   <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
 
-                {/* Static Header Section */}
+
                 <View style={{ marginBottom: 12 }}>
                   <Text style={styles.modalTitle}>Filter Options</Text>
                   <Text style={styles.modalSubtitle}>
                     {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
                   </Text>
 
-                  {/* GooglePlacesAutocomplete */}
+
                   <GooglePlacesAutocomplete
                     placeholder="Search for a city"
                     fetchDetails={true}
@@ -273,7 +273,7 @@ useEffect(() => {
                     }}
                   />
 
-                  {/* Switch City */}
+
                   <Text style={styles.modalTitle}>Switch City</Text>
                   {(Object.keys(users) as CityKey[]).map((key) => (
                     <TouchableOpacity
@@ -291,7 +291,7 @@ useEffect(() => {
                   ))}
                 </View>
 
-                {/* Scrollable Section */}
+
                 <ScrollView
                   style={{ flexGrow: 1 }}
                   contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
@@ -301,7 +301,7 @@ useEffect(() => {
                   overScrollMode="never"
                   nestedScrollEnabled
                 >
-                  {/* Skill Filter Chips */}
+
                   <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
                     {Object.entries(skillFilters).map(([category, skills]) => (
                       <View key={category} style={{ marginBottom: 12 }}>
@@ -339,7 +339,7 @@ useEffect(() => {
                     ))}
                   </View>
 
-                  {/* Clear + Apply Buttons */}
+
                   <View style={styles.modalButtonRow}>
                     <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
                       <Text style={styles.clearButtonText}>Clear Filters</Text>
@@ -511,8 +511,8 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#fff',
-    marginTop: 6,         // adds space between the box and triangle
-    alignSelf: 'center',  // centers the triangle under the box
+    marginTop: 6,
+    alignSelf: 'center',
   },
   calloutBox: {
     backgroundColor: '#fff',
