@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   FlatList,
-  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -32,68 +31,77 @@ const following = [
   { id: '4', name: 'Thalia V.', role: 'Gardener' },
   { id: '5', name: 'Enzo B.', role: 'Language Tutor' },
   { id: '6', name: 'John S.', role: 'Carpenter' },
+  { id: '7', name: 'Lana M.', role: 'Yoga Instructor' },
+  { id: '8', name: 'Miguel H.', role: 'Photographer' },
+  { id: '9', name: 'Chloe K.', role: 'Designer' },
+  { id: '10', name: 'Sam R.', role: 'Mechanic' },
+  { id: '11', name: 'Ava G.', role: 'Makeup Artist' },
+  { id: '12', name: 'Derek L.', role: 'Cycling Coach' },
 ];
 
 const MessageScreen = () => {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Messages Header */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Messages</Text>
-        <Text style={styles.seeAll}>See all...</Text>
-      </View>
-
-      {/* Messages List */}
-      {messages.map((msg) => (
-        <View key={msg.id} style={styles.messageCard}>
-          <Avatar.Text
-            size={48}
-            label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            style={styles.messageAvatar}
-            labelStyle={{ fontSize: 18 }}
-          />
-          <View style={styles.messageContent}>
-            <Text style={styles.messageName}>{msg.name}</Text>
-            <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
-          </View>
+    <View style={styles.container}>
+      {/* Messages Section (Static) */}
+      <View>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Messages</Text>
+          <Text style={styles.seeAll}>See all...</Text>
         </View>
-      ))}
 
-      {/* Following Header */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Following</Text>
-        <Text style={styles.seeAll}>See all...</Text>
+        {messages.map((msg) => (
+          <View key={msg.id} style={styles.messageCard}>
+            <Avatar.Text
+              size={48}
+              label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              style={styles.messageAvatar}
+              labelStyle={{ fontSize: 18 }}
+            />
+            <View style={styles.messageContent}>
+              <Text style={styles.messageName}>{msg.name}</Text>
+              <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+            </View>
+          </View>
+        ))}
       </View>
 
-      {/* Following Grid (3 per row) */}
-      <FlatList
-        data={following}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 24 }}
-        scrollEnabled={false}
-        renderItem={({ item }) => (
-          <View style={styles.followingItem}>
-            <Avatar.Text
-              size={80}
-              label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              style={styles.followAvatar}
-              labelStyle={{ fontSize: 24 }}
-            />
-            <Text style={styles.followName}>{item.name}</Text>
-            <Text style={styles.followRole}>{item.role}</Text>
-          </View>
-        )}
-      />
-    </ScrollView>
+      {/* Following Section (Scrollable) */}
+      <View style={styles.followingWrapper}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Following</Text>
+          <Text style={styles.seeAll}>See all...</Text>
+        </View>
+
+        <FlatList
+          data={following}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 24 }}
+          showsVerticalScrollIndicator={true}
+          renderItem={({ item }) => (
+            <View style={styles.followingItem}>
+              <Avatar.Text
+                size={80}
+                label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                style={styles.followAvatar}
+                labelStyle={{ fontSize: 24 }}
+              />
+              <Text style={styles.followName}>{item.name}</Text>
+              <Text style={styles.followRole}>{item.role}</Text>
+            </View>
+          )}
+        />
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    paddingBottom: 100,
+    flex: 1,
     backgroundColor: '#fff',
+    padding: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -132,6 +140,10 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 14,
+  },
+  followingWrapper: {
+    flex: 1,
+    marginTop: 16,
   },
   followingItem: {
     width: '30%',
