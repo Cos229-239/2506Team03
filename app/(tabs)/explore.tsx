@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
@@ -109,6 +110,7 @@ const Explore = () => {
   const mapRef = useRef<MapViewType | null>(null);
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const apiKey = Constants.expoConfig?.extra?.googleApiKey ?? '';
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -246,7 +248,7 @@ const Explore = () => {
                       Keyboard.dismiss();
                     }}
                     query={{
-                      key: 'AIzaSyCb-uYNyD6IflNZXbferg0Vwz56PgyShQA',
+                      key: apiKey,
                       language: 'en',
                       types: '(cities)',
                     }}
