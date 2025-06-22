@@ -14,34 +14,27 @@ import {
 } from 'react-native';
 import 'react-native-get-random-values';
 import type MapViewType from 'react-native-maps';
+import groupedCities from '../../assets/data/groupedCities.js';
+import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-import MockAvatar from '../../assets/images/mock-avatar.png';
-import Mock2Avatar from '../../assets/images/mock2-avatar.png';
 import ToggleIcon from '../../assets/images/toggle-icon.png';
-import { groupedCities } from '../../constants/cities';
 
-const users = {
-  seattle: {
-    name: 'John Smith',
-    profession: 'Carpenter',
-    skills: ['Woodworking', 'Welding', 'Painting & Drawing'],
-    latitude: 47.6062,
-    longitude: -122.3321,
-    avatar: MockAvatar,
-    locationText: 'Seattle, WA',
-  },
-  newyork: {
-    name: 'Enzo Bartolli',
-    profession: 'Language Tutor',
-    skills: ['Language Tutoring - Italian', 'Fitness Training'],
-    latitude: 40.7128,
-    longitude: -74.006,
-    avatar: Mock2Avatar,
-    locationText: 'New York, NY',
-  },
+type UserType = {
+  name: string;
+  profession: string;
+  skills: string[];
+  latitude: number;
+  longitude: number;
+  avatar: any;
+  locationText: string;
 };
 
-type CityKey = keyof typeof users;
+type City = {
+  key: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+};
 
 const skillFilters: Record<string, string[]> = {
   'Hands-on / Trade Skills': [
@@ -78,30 +71,39 @@ const skillFilters: Record<string, string[]> = {
 };
 
 const Explore = () => {
-  const [selectedCity, setSelectedCity] = useState<'seattle' | 'newyork'>('seattle');
+  const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
-  const mockUser = users[selectedCity] || {
+  const selectedUser = users[selectedCity];
+  const selectedCityData = Object.values(groupedCities)
+    .flat()
+    .find((c) => c.key === selectedCity);
+
+  const mapCenter = selectedCityData
+    ? {
+      latitude: selectedCityData.latitude,
+      longitude: selectedCityData.longitude,
+      latitudeDelta: 0.025,
+      longitudeDelta: 0.015,
+    }
+    : {
+      latitude: 37.7749, // San Francisco fallback
+      longitude: -122.4194,
+      latitudeDelta: 0.025,
+      longitudeDelta: 0.015,
+    };
+  const mockUser: MockUser = selectedUser ?? {
     name: '',
     profession: '',
     skills: [],
-    avatar: MockAvatar,
-    locationText:
-      Object.values(groupedCities)
-        .flat()
-        .find((c) => c.key === selectedCity)?.name ?? '',
-    latitude:
-      Object.values(groupedCities)
-        .flat()
-        .find((c) => c.key === selectedCity)?.latitude ?? 0,
-    longitude:
-      Object.values(groupedCities)
-        .flat()
-        .find((c) => c.key === selectedCity)?.longitude ?? 0,
+    avatar: null,
+    locationText: selectedCityData?.name ?? '',
+    latitude: selectedCityData?.latitude ?? 0,
+    longitude: selectedCityData?.longitude ?? 0,
   };
   const mapRef = useRef<MapViewType | null>(null);
   const [cityModalVisible, setCityModalVisible] = useState(false);
@@ -143,6 +145,20 @@ const Explore = () => {
     Marker = require('react-native-maps').Marker;
   }
 
+  const selectCity = (cityKey: string) => {
+    setSelectedCity(cityKey);
+    setCityModalVisible(false);
+  };
+
+  if (
+    !selectedCityData ||
+    !Number.isFinite(selectedCityData.latitude) ||
+    !Number.isFinite(selectedCityData.longitude)
+  ) {
+    console.warn('⚠️ Invalid selectedCityData — skipping render to avoid map crash');
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.fullWidthHeader}>
@@ -176,12 +192,7 @@ const Explore = () => {
           key={selectedCity}
           ref={mapRef}
           style={styles.map}
-          region={{
-            latitude: mockUser.latitude,
-            longitude: mockUser.longitude,
-            latitudeDelta: 0.025,
-            longitudeDelta: 0.015,
-          }}
+          region={mapCenter}
         >
           {users[selectedCity] && (
             <Marker
@@ -317,36 +328,26 @@ const Explore = () => {
                   bounces={false}
                   style={{ flex: 1, width: '100%' }}
                 >
-                  {Object.entries(groupedCities)
-                    .sort(([a], [b]) => a.localeCompare(b)) // Sort states
-                    .map(([state, cityList]) => (
-                      <View key={state} style={{ marginBottom: 12 }}>
-                        <TouchableOpacity onPress={() => toggleStateCollapse(state)}>
-                          <Text style={{ fontWeight: 'bold', marginBottom: 6 }}>
-                            {collapsedStates.includes(state) ? '▶' : '▼'} {state}
-                          </Text>
-                        </TouchableOpacity>
+                  {Object.entries(groupedCities).map(([state, cities]) => (
+                    <View key={state}>
+                      <TouchableOpacity onPress={() => toggleStateCollapse(state)}>
+                        <Text>{collapsedStates.includes(state) ? '▶' : '▼'} {state}</Text>
+                      </TouchableOpacity>
 
-                        {!collapsedStates.includes(state) && (
-                          <View>
-                            {cityList
-                              .sort((a, b) => a.name.localeCompare(b.name))
-                              .map((city) => (
-                                <TouchableOpacity
-                                  key={city.key}
-                                  style={styles.modalOption}
-                                  onPress={() => {
-                                    setSelectedCity(city.key as CityKey);
-                                    setCityModalVisible(false);
-                                  }}
-                                >
-                                  <Text style={styles.modalOptionText}>{city.name}</Text>
-                                </TouchableOpacity>
-                              ))}
-                          </View>
-                        )}
-                      </View>
-                    ))}
+                      {!collapsedStates.includes(state) && (
+                        <View>
+                          {cities.map((city: City) => (
+                            <TouchableOpacity
+                              key={city.key}
+                              onPress={() => selectCity(city.key)}
+                            >
+                              <Text>{city.name.split(',')[0]}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  ))}
                 </ScrollView>
               </View>
             </View>
@@ -364,8 +365,8 @@ const Explore = () => {
                       <Text style={styles.calloutName}>{mockUser.name}</Text>
                       <Text style={styles.calloutJob}>{mockUser.profession}</Text>
                       <Text style={styles.skillsLabel}>Skills:</Text>
-                      {mockUser.skills.map((skill, index) => (
-                        <Text key={index} style={styles.skillItem}>{skill}</Text>
+                      {mockUser.skills.map((skill: string, index: number) => (
+                        <Text key={index}>{skill}</Text>
                       ))}
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
