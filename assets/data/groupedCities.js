@@ -4,7 +4,7 @@ const groupedByState = cities.reduce((acc, cityObj) => {
     const { city, state, latitude, longitude, population } = cityObj;
     if (!acc[state]) acc[state] = [];
     acc[state].push({
-        key: city.toLowerCase().replace(/\s+/g, ''),
+        key: city.toLowerCase().replace(/\s+/g, ''),  // <-- fixed here
         name: `${city}, ${state}`,
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
