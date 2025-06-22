@@ -91,7 +91,7 @@ const Explore = () => {
       longitudeDelta: 0.015,
     }
     : {
-      latitude: 37.7749, // San Francisco fallback
+      latitude: 37.7749,
       longitude: -122.4194,
       latitudeDelta: 0.025,
       longitudeDelta: 0.015,
@@ -138,6 +138,13 @@ const Explore = () => {
     setSelectedSkills([]);
     setCollapsedCategories([]);
   };
+
+  const applyFilters = () => {
+    setFilterVisible(false);
+  };
+
+  const collapseAllStates = () => setCollapsedStates(Object.keys(groupedCities));
+  const expandAllStates = () => setCollapsedStates([]);
 
   let MapView, Marker;
   if (Platform.OS !== 'web') {
@@ -244,15 +251,28 @@ const Explore = () => {
           <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
             <View style={styles.modalOverlay}>
               <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
+
                 <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
                   <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
+
 
                 <Text style={styles.modalTitle}>Filter Skills</Text>
                 <View style={styles.cityModalAccentBar} />
                 <Text style={styles.modalSubtitle}>
                   {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
                 </Text>
+
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingHorizontal: 16, marginTop: 12 }}>
+                  <TouchableOpacity onPress={clearFilters} style={{ flex: 1, backgroundColor: '#50403e', padding: 8, borderRadius: 6 }}>
+                    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Clear Filters</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={applyFilters} style={{ flex: 1, backgroundColor: '#445f50', padding: 8, borderRadius: 6 }}>
+                    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Apply Filters</Text>
+                  </TouchableOpacity>
+                </View>
+
 
                 <ScrollView
                   showsVerticalScrollIndicator={false}
@@ -265,7 +285,7 @@ const Explore = () => {
                     {Object.entries(skillFilters).map(([category, skills]) => (
                       <View key={category} style={{ marginBottom: 12 }}>
                         <TouchableOpacity onPress={() => toggleCollapse(category)}>
-                          <Text style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 4 }}>
                             {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
                           </Text>
                         </TouchableOpacity>
@@ -286,7 +306,7 @@ const Explore = () => {
                                     marginBottom: 6,
                                   }}
                                 >
-                                  <Text style={{ color: selected ? '#222' : '#333', fontSize: 12 }}>
+                                  <Text style={{ color: selected ? '#222' : '#333', fontSize: 14 }}>
                                     {skill}
                                   </Text>
                                 </Pressable>
@@ -296,15 +316,6 @@ const Explore = () => {
                         )}
                       </View>
                     ))}
-                  </View>
-
-                  <View style={styles.modalButtonRow}>
-                    <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
-                      <Text style={styles.clearButtonText}>Clear Filters</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setFilterVisible(false)} style={[styles.modalButton, styles.applyButton]}>
-                      <Text style={styles.applyButtonText}>Apply Filters</Text>
-                    </TouchableOpacity>
                   </View>
                 </ScrollView>
               </View>
@@ -319,8 +330,45 @@ const Explore = () => {
                 <TouchableOpacity onPress={() => setCityModalVisible(false)} style={styles.closeIcon}>
                   <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
+
                 <Text style={styles.modalTitle}>Select City</Text>
                 <View style={styles.cityModalAccentBar} />
+
+
+                <View style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 16,
+                  marginTop: 0,
+                  marginBottom: 12,
+                }}>
+                  <TouchableOpacity
+                    onPress={collapseAllStates}
+                    style={{
+                      flex: 1,
+                      backgroundColor: '#50403e',
+                      padding: 8,
+                      borderRadius: 6,
+                      marginRight: 6
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Collapse All</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={expandAllStates}
+                    style={{
+                      flex: 1,
+                      backgroundColor: '#445f50',
+                      padding: 8,
+                      borderRadius: 6,
+                      marginLeft: 6
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Expand All</Text>
+                  </TouchableOpacity>
+                </View>
+
                 <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{ paddingBottom: 16 }}
@@ -329,19 +377,22 @@ const Explore = () => {
                   style={{ flex: 1, width: '100%' }}
                 >
                   {Object.entries(groupedCities).map(([state, cities]) => (
-                    <View key={state}>
-                      <TouchableOpacity onPress={() => toggleStateCollapse(state)}>
-                        <Text>{collapsedStates.includes(state) ? '▶' : '▼'} {state}</Text>
+                    <View key={state} style={{ marginBottom: 16 }}>
+                      <TouchableOpacity onPress={() => toggleStateCollapse(state)} style={{ paddingHorizontal: 16 }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                          {collapsedStates.includes(state) ? '▶' : '▼'} {state}
+                        </Text>
                       </TouchableOpacity>
 
                       {!collapsedStates.includes(state) && (
-                        <View>
+                        <View style={{ paddingLeft: 32, paddingTop: 4 }}>
                           {cities.map((city: City) => (
                             <TouchableOpacity
                               key={city.key}
                               onPress={() => selectCity(city.key)}
+                              style={{ paddingVertical: 4 }}
                             >
-                              <Text>{city.name.split(',')[0]}</Text>
+                              <Text style={{ fontSize: 15 }}>{city.name.split(',')[0]}</Text>
                             </TouchableOpacity>
                           ))}
                         </View>
@@ -353,6 +404,7 @@ const Explore = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
+
 
         {profileVisible && markerScreenPosition && (
           <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
@@ -478,7 +530,7 @@ const styles = StyleSheet.create({
   },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
-  modalSubtitle: { fontSize: 12, color: '#555', marginBottom: 6 },
+  modalSubtitle: { fontSize: 14, color: '#555', marginBottom: 4, textAlign: 'center', fontStyle: 'italic' },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -585,7 +637,7 @@ const styles = StyleSheet.create({
   cityModalAccentBar: {
     height: 6,
     width: '85%',
-    backgroundColor: '#9DD4B6',
+    backgroundColor: '#CBA16B',
     borderRadius: 12,
     alignSelf: 'center',
     marginTop: 8,
