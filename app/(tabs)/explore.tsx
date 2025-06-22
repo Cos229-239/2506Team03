@@ -18,6 +18,7 @@ import FilterIcon from '../../assets/images/filter-icon.png';
 import MockAvatar from '../../assets/images/mock-avatar.png';
 import Mock2Avatar from '../../assets/images/mock2-avatar.png';
 import ToggleIcon from '../../assets/images/toggle-icon.png';
+import { groupedCities } from '../../constants/cities';
 
 const users = {
   seattle: {
@@ -77,13 +78,31 @@ const skillFilters: Record<string, string[]> = {
 };
 
 const Explore = () => {
-  const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
+  const [selectedCity, setSelectedCity] = useState<'seattle' | 'newyork'>('seattle');
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
-  const mockUser = users[selectedCity];
+  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
+  const mockUser = users[selectedCity] || {
+    name: '',
+    profession: '',
+    skills: [],
+    avatar: MockAvatar,
+    locationText:
+      Object.values(groupedCities)
+        .flat()
+        .find((c) => c.key === selectedCity)?.name ?? '',
+    latitude:
+      Object.values(groupedCities)
+        .flat()
+        .find((c) => c.key === selectedCity)?.latitude ?? 0,
+    longitude:
+      Object.values(groupedCities)
+        .flat()
+        .find((c) => c.key === selectedCity)?.longitude ?? 0,
+  };
   const mapRef = useRef<MapViewType | null>(null);
   const [cityModalVisible, setCityModalVisible] = useState(false);
   const platformModalOffset = Platform.select({
@@ -102,6 +121,14 @@ const Explore = () => {
   const toggleCollapse = (category: string) => {
     setCollapsedCategories((prev) =>
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    );
+  };
+
+  const toggleStateCollapse = (state: string) => {
+    setCollapsedStates((prev) =>
+      prev.includes(state)
+        ? prev.filter((s) => s !== state)
+        : [...prev, state]
     );
   };
 
@@ -146,6 +173,7 @@ const Explore = () => {
         </View>
 
         <MapView
+          key={selectedCity}
           ref={mapRef}
           style={styles.map}
           region={{
@@ -155,42 +183,44 @@ const Explore = () => {
             longitudeDelta: 0.015,
           }}
         >
-          <Marker
-            coordinate={{
-              latitude: mockUser.latitude,
-              longitude: mockUser.longitude,
-            }}
-            anchor={{ x: 0.5, y: 1 }}
-            onPress={async () => {
-              if (mapRef.current) {
-                const point = await mapRef.current.pointForCoordinate({
-                  latitude: mockUser.latitude,
-                  longitude: mockUser.longitude,
-                });
-                setMarkerScreenPosition(point);
-                setProfileVisible(true);
-              }
-            }}
-          >
-            <View style={{ alignItems: 'center', marginBottom: 18 }}>
-              <Image
-                source={mockUser.avatar}
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 18,
-                  borderWidth: 2,
-                  borderColor: '#222',
-                  backgroundColor: '#eee',
-                  shadowColor: '#000',
-                  shadowOpacity: 0.3,
-                  shadowRadius: 3,
-                  shadowOffset: { width: 0, height: 2 },
-                }}
-                resizeMode="cover"
-              />
-            </View>
-          </Marker>
+          {users[selectedCity] && (
+            <Marker
+              coordinate={{
+                latitude: mockUser.latitude,
+                longitude: mockUser.longitude,
+              }}
+              anchor={{ x: 0.5, y: 1 }}
+              onPress={async () => {
+                if (mapRef.current) {
+                  const point = await mapRef.current.pointForCoordinate({
+                    latitude: mockUser.latitude,
+                    longitude: mockUser.longitude,
+                  });
+                  setMarkerScreenPosition(point);
+                  setProfileVisible(true);
+                }
+              }}
+            >
+              <View style={{ alignItems: 'center', marginBottom: 18 }}>
+                <Image
+                  source={mockUser.avatar}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 18,
+                    borderWidth: 2,
+                    borderColor: '#222',
+                    backgroundColor: '#eee',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.3,
+                    shadowRadius: 3,
+                    shadowOffset: { width: 0, height: 2 },
+                  }}
+                  resizeMode="cover"
+                />
+              </View>
+            </Marker>
+          )}
         </MapView>
 
         <Pressable onPress={() => console.log('Toggle view pressed')} style={styles.floatingToggleButton}>
@@ -287,20 +317,36 @@ const Explore = () => {
                   bounces={false}
                   style={{ flex: 1, width: '100%' }}
                 >
-                  {(Object.keys(users) as CityKey[]).sort((a, b) =>
-                    users[a].locationText.localeCompare(users[b].locationText)
-                  ).map((key) => (
-                    <TouchableOpacity
-                      key={key}
-                      style={styles.modalOption}
-                      onPress={() => {
-                        setSelectedCity(key);
-                        setCityModalVisible(false);
-                      }}
-                    >
-                      <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {Object.entries(groupedCities)
+                    .sort(([a], [b]) => a.localeCompare(b)) // Sort states
+                    .map(([state, cityList]) => (
+                      <View key={state} style={{ marginBottom: 12 }}>
+                        <TouchableOpacity onPress={() => toggleStateCollapse(state)}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 6 }}>
+                            {collapsedStates.includes(state) ? '▶' : '▼'} {state}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {!collapsedStates.includes(state) && (
+                          <View>
+                            {cityList
+                              .sort((a, b) => a.name.localeCompare(b.name))
+                              .map((city) => (
+                                <TouchableOpacity
+                                  key={city.key}
+                                  style={styles.modalOption}
+                                  onPress={() => {
+                                    setSelectedCity(city.key as CityKey);
+                                    setCityModalVisible(false);
+                                  }}
+                                >
+                                  <Text style={styles.modalOptionText}>{city.name}</Text>
+                                </TouchableOpacity>
+                              ))}
+                          </View>
+                        )}
+                      </View>
+                    ))}
                 </ScrollView>
               </View>
             </View>
