@@ -285,7 +285,7 @@ const Explore = () => {
                     {Object.entries(skillFilters).map(([category, skills]) => (
                       <View key={category} style={{ marginBottom: 12 }}>
                         <TouchableOpacity onPress={() => toggleCollapse(category)}>
-                          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 4 }}>
+                          <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>
                             {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
                           </Text>
                         </TouchableOpacity>
