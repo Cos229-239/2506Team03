@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
@@ -16,7 +15,6 @@ import {
   View
 } from 'react-native';
 import 'react-native-get-random-values';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import type MapViewType from 'react-native-maps';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import MockAvatar from '../../assets/images/mock-avatar.png';
@@ -83,12 +81,13 @@ const skillFilters: Record<string, string[]> = {
 const Explore = () => {
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
   const [filterVisible, setFilterVisible] = useState(false);
-  const [locationSearch, setLocationSearch] = useState('');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const mockUser = users[selectedCity];
+  const mapRef = useRef<MapViewType | null>(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
@@ -107,15 +106,9 @@ const Explore = () => {
     setCollapsedCategories([]);
   };
 
-  const mapRef = useRef<MapViewType | null>(null);
-
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  const apiKey = Constants.expoConfig?.extra?.googleApiKey ?? '';
-
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
     const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-
     return () => {
       showSub.remove();
       hideSub.remove();
@@ -193,8 +186,6 @@ const Explore = () => {
                 }}
                 resizeMode="cover"
               />
-
-
             </View>
           </Marker>
         </MapView>
@@ -211,71 +202,12 @@ const Explore = () => {
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
               style={{ flex: 1, width: '100%' }}
             >
-              <View
-                style={[
-                  styles.modalBox,
-                  {
-                    marginTop: 60,
-                    height:
-                      Platform.OS === 'ios'
-                        ? keyboardVisible
-                          ? '80%'
-                          : '85%'
-                        : keyboardVisible
-                          ? '80%'
-                          : '85%',
-                  },
-                ]}
-              >
-
+              <View style={[styles.modalBox, { marginTop: 60 }]}>
                 <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
                   <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
 
-
                 <View style={{ marginBottom: 12 }}>
-                  <Text style={styles.modalTitle}>Filter Options</Text>
-                  <Text style={styles.modalSubtitle}>
-                    {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
-                  </Text>
-
-
-                  <GooglePlacesAutocomplete
-                    placeholder="Search for a city"
-                    fetchDetails={true}
-                    onPress={(data, details = null) => {
-                      console.log('Selected city:', data.description);
-                      Keyboard.dismiss();
-                    }}
-                    query={{
-                      key: apiKey,
-                      language: 'en',
-                      types: '(cities)',
-                    }}
-                    predefinedPlaces={[]}
-                    textInputProps={{
-                      onFocus: () => { },
-                      autoCorrect: false,
-                      autoComplete: 'off',
-                      autoCapitalize: 'none',
-                      placeholderTextColor: '#999',
-                      importantForAutofill: 'no',
-                    }}
-                    styles={{
-                      container: { width: '100%', marginBottom: 12, zIndex: 10 },
-                      textInput: {
-                        height: 40,
-                        fontSize: 16,
-                        backgroundColor: '#fff',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: '#ccc',
-                        paddingHorizontal: 10,
-                      },
-                    }}
-                  />
-
-
                   <Text style={styles.modalTitle}>Switch City</Text>
                   {(Object.keys(users) as CityKey[]).map((key) => (
                     <TouchableOpacity
@@ -286,13 +218,15 @@ const Explore = () => {
                         setFilterVisible(false);
                       }}
                     >
-                      <Text style={styles.modalOptionText}>
-                        {String(users[key].locationText)}
-                      </Text>
+                      <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
                     </TouchableOpacity>
                   ))}
-                </View>
 
+                  <Text style={styles.modalTitle}>Filter Skills</Text>
+                  <Text style={styles.modalSubtitle}>
+                    {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
+                  </Text>
+                </View>
 
                 <ScrollView
                   style={{ flexGrow: 1 }}
@@ -303,7 +237,6 @@ const Explore = () => {
                   overScrollMode="never"
                   nestedScrollEnabled
                 >
-
                   <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
                     {Object.entries(skillFilters).map(([category, skills]) => (
                       <View key={category} style={{ marginBottom: 12 }}>
@@ -314,7 +247,7 @@ const Explore = () => {
                         </TouchableOpacity>
                         {!collapsedCategories.includes(category) && (
                           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                            {skills.map((skill: string) => {
+                            {skills.map((skill) => {
                               const selected = selectedSkills.includes(skill);
                               return (
                                 <Pressable
@@ -341,7 +274,6 @@ const Explore = () => {
                     ))}
                   </View>
 
-
                   <View style={styles.modalButtonRow}>
                     <TouchableOpacity onPress={clearFilters} style={[styles.modalButton, styles.clearButton]}>
                       <Text style={styles.clearButtonText}>Clear Filters</Text>
@@ -356,19 +288,11 @@ const Explore = () => {
           </View>
         </Modal>
 
-
         {profileVisible && markerScreenPosition && (
           <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
             <View style={StyleSheet.absoluteFillObject}>
-              <View
-                style={{
-                  position: 'absolute',
-                  top: markerScreenPosition.y - 280,
-                  left: markerScreenPosition.x - 120,
-                }}
-              >
-
-                <TouchableWithoutFeedback onPress={() => { }}>
+              <View style={{ position: 'absolute', top: markerScreenPosition.y - 280, left: markerScreenPosition.x - 120 }}>
+                <TouchableWithoutFeedback>
                   <View>
                     <View style={styles.calloutBox}>
                       <View style={styles.calloutAccentBar} />

@@ -5,6 +5,5 @@ export default {
   ...appJson,
   extra: {
     ...(appJson.extra || {}),
-    googleApiKey: process.env.GOOGLE_API_KEY,
   }
 };
