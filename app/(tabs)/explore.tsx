@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
-  Keyboard,
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -87,7 +85,13 @@ const Explore = () => {
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const mockUser = users[selectedCity];
   const mapRef = useRef<MapViewType | null>(null);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [cityModalVisible, setCityModalVisible] = useState(false);
+  const platformModalOffset = Platform.select({
+    ios: { marginTop: 25 },
+    android: { marginTop: -5 },
+  });
+
+  const mapFrameHeight = Dimensions.get('window').height * 0.75;
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
@@ -106,15 +110,6 @@ const Explore = () => {
     setCollapsedCategories([]);
   };
 
-  useEffect(() => {
-    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
-
   let MapView, Marker;
   if (Platform.OS !== 'web') {
     MapView = require('react-native-maps').default;
@@ -129,18 +124,26 @@ const Explore = () => {
 
       <View style={styles.fullWidthDivider} />
 
-      <View style={styles.mapFrame}>
-        <Pressable onPress={() => setFilterVisible(true)} style={styles.locationBar}>
-          <Text style={styles.locationText}>{mockUser.locationText}</Text>
-          <Image
-            source={FilterIcon}
-            style={[
-              styles.filterIcon,
-              { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
-            ]}
-            resizeMode="contain"
-          />
-        </Pressable>
+      <View style={[styles.mapFrameBase, { height: mapFrameHeight }]}>
+        <View style={styles.locationBar}>
+          <Pressable onPress={() => setCityModalVisible(true)}>
+            <View style={styles.cityPicker}>
+              <Text style={styles.locationText}>{mockUser.locationText}</Text>
+              <Text style={styles.chevron}>▼</Text>
+            </View>
+          </Pressable>
+
+          <Pressable onPress={() => setFilterVisible(true)}>
+            <Image
+              source={FilterIcon}
+              style={[
+                styles.filterIcon,
+                { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
+              ]}
+              resizeMode="contain"
+            />
+          </Pressable>
+        </View>
 
         <MapView
           ref={mapRef}
@@ -197,45 +200,25 @@ const Explore = () => {
         </Pressable>
 
         <Modal transparent visible={filterVisible} animationType="fade">
-          <View style={styles.modalOverlay}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={{ flex: 1, width: '100%' }}
-            >
-              <View style={[styles.modalBox, { marginTop: 60 }]}>
+          <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
                 <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
                   <Text style={styles.closeText}>✕</Text>
                 </TouchableOpacity>
 
-                <View style={{ marginBottom: 12 }}>
-                  <Text style={styles.modalTitle}>Switch City</Text>
-                  {(Object.keys(users) as CityKey[]).map((key) => (
-                    <TouchableOpacity
-                      key={key}
-                      style={styles.modalOption}
-                      onPress={() => {
-                        setSelectedCity(key);
-                        setFilterVisible(false);
-                      }}
-                    >
-                      <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
-                    </TouchableOpacity>
-                  ))}
-
-                  <Text style={styles.modalTitle}>Filter Skills</Text>
-                  <Text style={styles.modalSubtitle}>
-                    {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
-                  </Text>
-                </View>
+                <Text style={styles.modalTitle}>Filter Skills</Text>
+                <View style={styles.cityModalAccentBar} />
+                <Text style={styles.modalSubtitle}>
+                  {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
+                </Text>
 
                 <ScrollView
-                  style={{ flexGrow: 1 }}
-                  contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
-                  keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
-                  bounces={false}
+                  contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
                   overScrollMode="never"
-                  nestedScrollEnabled
+                  bounces={false}
+                  style={{ flex: 1, width: '100%' }}
                 >
                   <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
                     {Object.entries(skillFilters).map(([category, skills]) => (
@@ -284,8 +267,44 @@ const Explore = () => {
                   </View>
                 </ScrollView>
               </View>
-            </KeyboardAvoidingView>
-          </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        <Modal transparent visible={cityModalVisible} animationType="fade">
+          <TouchableWithoutFeedback onPress={() => setCityModalVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
+                <TouchableOpacity onPress={() => setCityModalVisible(false)} style={styles.closeIcon}>
+                  <Text style={styles.closeText}>✕</Text>
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>Select City</Text>
+                <View style={styles.cityModalAccentBar} />
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 16 }}
+                  overScrollMode="never"
+                  bounces={false}
+                  style={{ flex: 1, width: '100%' }}
+                >
+                  {(Object.keys(users) as CityKey[]).sort((a, b) =>
+                    users[a].locationText.localeCompare(users[b].locationText)
+                  ).map((key) => (
+                    <TouchableOpacity
+                      key={key}
+                      style={styles.modalOption}
+                      onPress={() => {
+                        setSelectedCity(key);
+                        setCityModalVisible(false);
+                      }}
+                    >
+                      <Text style={styles.modalOptionText}>{users[key].locationText}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
         </Modal>
 
         {profileVisible && markerScreenPosition && (
@@ -335,14 +354,13 @@ const styles = StyleSheet.create({
   },
   fullWidthDivider: { height: 1, backgroundColor: '#ccc', marginBottom: 12, width: '100%' },
   headerText: { fontSize: 32, fontWeight: 'bold' },
-  mapFrame: {
+  mapFrameBase: {
     marginHorizontal: 16,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#222',
     backgroundColor: '#fff',
-    height: Dimensions.get('window').height * 0.75,
     position: 'relative',
   },
   map: { width: '100%', height: '100%' },
@@ -403,8 +421,16 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
   },
+  modalBoxLargeBase: {
+    width: '92%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    alignSelf: 'center',
+  },
   modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8, textAlign: 'center' },
   modalSubtitle: { fontSize: 12, color: '#555', marginBottom: 6 },
   input: {
     borderWidth: 1,
@@ -414,7 +440,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 12,
   },
-  modalOption: { paddingVertical: 10 },
+  modalOption: { paddingVertical: 10, paddingHorizontal: 16, },
   modalOptionText: { fontSize: 16 },
   modalButtonRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 },
   modalButton: { padding: 10, borderRadius: 8, flex: 1, alignItems: 'center', marginHorizontal: 5 },
@@ -496,5 +522,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#9DD4B6',
     borderRadius: 12,
     marginBottom: 12,
+  },
+  cityPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    minWidth: 100,
+  },
+  chevron: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 6,
+    marginTop: 2,
+  },
+  cityModalAccentBar: {
+    height: 6,
+    width: '85%',
+    backgroundColor: '#9DD4B6',
+    borderRadius: 12,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 16,
   },
 });
