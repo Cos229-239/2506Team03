@@ -2,11 +2,11 @@ import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
+import { useColorScheme } from 'react-native';
 import { HapticTab } from '../components/HapticTab';
 import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
 import { Colors } from '../constants/Colors';
-import { useColorScheme } from '../hooks/useColorScheme';
 
 import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ New import for settings icon
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -17,6 +17,10 @@ export default function TabLayout() {
   const state = navigation?.getState?.();
   const currentRoute = state?.routes?.[state.index]?.name ?? '';
 
+  // Hide tab bar on specific routes
+  const hideTabBarRoutes = ['login', 'index'];
+  const shouldHideTabBar = hideTabBarRoutes.includes(currentRoute);
+
   return (
     <Tabs
       screenOptions={{
@@ -24,18 +28,17 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle:
-          currentRoute === 'index'
-            ? { display: 'none' }
-            : Platform.select({
-                ios: { position: 'absolute' },
-                default: {},
-              }),
+        tabBarStyle: shouldHideTabBar
+          ? { display: 'none' }
+          : Platform.select({
+              ios: { position: 'absolute' },
+              default: {},
+            }),
       }}
     >
       {/* Home Tab */}
       <Tabs.Screen
-        name="index"
+        name="ProfileScreen"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
@@ -79,3 +82,4 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
