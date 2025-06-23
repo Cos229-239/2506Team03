@@ -248,161 +248,153 @@ const Explore = () => {
         </Pressable>
 
         <Modal transparent visible={filterVisible} animationType="fade">
-          <TouchableWithoutFeedback onPress={() => setFilterVisible(false)}>
-            <View style={styles.modalOverlay}>
-              <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
 
-                <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
-                  <Text style={styles.closeText}>✕</Text>
+              <TouchableOpacity onPress={() => setFilterVisible(false)} style={styles.closeIcon}>
+                <Text style={styles.closeText}>✕</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.modalTitle}>Filter Skills</Text>
+              <View style={styles.cityModalAccentBar} />
+              <Text style={styles.modalSubtitle}>
+                {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
+              </Text>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingHorizontal: 16, marginTop: 12 }}>
+                <TouchableOpacity onPress={clearFilters} style={{ flex: 1, backgroundColor: '#50403e', padding: 8, borderRadius: 6 }}>
+                  <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Clear Filters</Text>
                 </TouchableOpacity>
-
-
-                <Text style={styles.modalTitle}>Filter Skills</Text>
-                <View style={styles.cityModalAccentBar} />
-                <Text style={styles.modalSubtitle}>
-                  {`${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
-                </Text>
-
-
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingHorizontal: 16, marginTop: 12 }}>
-                  <TouchableOpacity onPress={clearFilters} style={{ flex: 1, backgroundColor: '#50403e', padding: 8, borderRadius: 6 }}>
-                    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Clear Filters</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={applyFilters} style={{ flex: 1, backgroundColor: '#445f50', padding: 8, borderRadius: 6 }}>
-                    <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Apply Filters</Text>
-                  </TouchableOpacity>
-                </View>
-
-
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
-                  overScrollMode="never"
-                  bounces={false}
-                  style={{ flex: 1, width: '100%' }}
-                >
-                  <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
-                    {Object.entries(skillFilters).map(([category, skills]) => (
-                      <View key={category} style={{ marginBottom: 12 }}>
-                        <TouchableOpacity onPress={() => toggleCollapse(category)}>
-                          <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>
-                            {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
-                          </Text>
-                        </TouchableOpacity>
-                        {!collapsedCategories.includes(category) && (
-                          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                            {skills.map((skill) => {
-                              const selected = selectedSkills.includes(skill);
-                              return (
-                                <Pressable
-                                  key={skill}
-                                  onPress={() => toggleSkill(skill)}
-                                  style={{
-                                    backgroundColor: selected ? '#ACC3EE' : '#eee',
-                                    paddingHorizontal: 10,
-                                    paddingVertical: 6,
-                                    borderRadius: 20,
-                                    marginRight: 6,
-                                    marginBottom: 6,
-                                  }}
-                                >
-                                  <Text style={{ color: selected ? '#222' : '#333', fontSize: 14 }}>
-                                    {skill}
-                                  </Text>
-                                </Pressable>
-                              );
-                            })}
-                          </View>
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                </ScrollView>
+                <TouchableOpacity onPress={applyFilters} style={{ flex: 1, backgroundColor: '#445f50', padding: 8, borderRadius: 6 }}>
+                  <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold', fontSize: 16 }}>Apply Filters</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
 
-        <Modal transparent visible={cityModalVisible} animationType="fade">
-          <TouchableWithoutFeedback onPress={() => setCityModalVisible(false)}>
-            <View style={styles.modalOverlay}>
-              <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
-                <TouchableOpacity onPress={() => setCityModalVisible(false)} style={styles.closeIcon}>
-                  <Text style={styles.closeText}>✕</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.modalTitle}>Select City</Text>
-                <View style={styles.cityModalAccentBar} />
-
-
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 16,
-                  marginTop: 0,
-                  marginBottom: 12,
-                }}>
-                  <TouchableOpacity
-                    onPress={collapseAllStates}
-                    style={{
-                      flex: 1,
-                      backgroundColor: '#50403e',
-                      padding: 8,
-                      borderRadius: 6,
-                      marginRight: 6
-                    }}
-                  >
-                    <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Collapse All</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={expandAllStates}
-                    style={{
-                      flex: 1,
-                      backgroundColor: '#445f50',
-                      padding: 8,
-                      borderRadius: 6,
-                      marginLeft: 6
-                    }}
-                  >
-                    <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Expand All</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{ paddingBottom: 16 }}
-                  overScrollMode="never"
-                  bounces={false}
-                  style={{ flex: 1, width: '100%' }}
-                >
-                  {Object.entries(groupedCities).map(([state, cities]) => (
-                    <View key={state} style={{ marginBottom: 16 }}>
-                      <TouchableOpacity onPress={() => toggleStateCollapse(state)} style={{ paddingHorizontal: 16 }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
-                          {collapsedStates.includes(state) ? '▶' : '▼'} {state}
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 24, alignItems: 'flex-start' }}
+                overScrollMode="never"
+                bounces={false}
+                style={{ flex: 1, width: '100%' }}
+              >
+                <View style={{ marginTop: 16, alignItems: 'flex-start', width: '100%' }}>
+                  {Object.entries(skillFilters).map(([category, skills]) => (
+                    <View key={category} style={{ marginBottom: 12 }}>
+                      <TouchableOpacity onPress={() => toggleCollapse(category)}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}>
+                          {collapsedCategories.includes(category) ? '▶' : '▼'} {category}
                         </Text>
                       </TouchableOpacity>
-
-                      {!collapsedStates.includes(state) && (
-                        <View style={{ paddingLeft: 32, paddingTop: 4 }}>
-                          {cities.map((city: City) => (
-                            <TouchableOpacity
-                              key={city.key}
-                              onPress={() => selectCity(city.key)}
-                              style={{ paddingVertical: 4 }}
-                            >
-                              <Text style={{ fontSize: 15 }}>{city.name.split(',')[0]}</Text>
-                            </TouchableOpacity>
-                          ))}
+                      {!collapsedCategories.includes(category) && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                          {skills.map((skill) => {
+                            const selected = selectedSkills.includes(skill);
+                            return (
+                              <Pressable
+                                key={skill}
+                                onPress={() => toggleSkill(skill)}
+                                style={{
+                                  backgroundColor: selected ? '#ACC3EE' : '#eee',
+                                  paddingHorizontal: 10,
+                                  paddingVertical: 6,
+                                  borderRadius: 20,
+                                  marginRight: 6,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                <Text style={{ color: selected ? '#222' : '#333', fontSize: 14 }}>
+                                  {skill}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
                         </View>
                       )}
                     </View>
                   ))}
-                </ScrollView>
-              </View>
+                </View>
+              </ScrollView>
             </View>
-          </TouchableWithoutFeedback>
+          </View>
+        </Modal>
+
+        <Modal transparent visible={cityModalVisible} animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalBoxLargeBase, { height: mapFrameHeight }, platformModalOffset]}>
+              <TouchableOpacity onPress={() => setCityModalVisible(false)} style={styles.closeIcon}>
+                <Text style={styles.closeText}>✕</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.modalTitle}>Select City</Text>
+              <View style={styles.cityModalAccentBar} />
+
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingHorizontal: 16,
+                marginTop: 0,
+                marginBottom: 12,
+              }}>
+                <TouchableOpacity
+                  onPress={collapseAllStates}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#50403e',
+                    padding: 8,
+                    borderRadius: 6,
+                    marginRight: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Collapse All</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={expandAllStates}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#445f50',
+                    padding: 8,
+                    borderRadius: 6,
+                    marginLeft: 6
+                  }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>Expand All</Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 16 }}
+                overScrollMode="never"
+                bounces={false}
+                style={{ flex: 1, width: '100%' }}
+              >
+                {Object.entries(groupedCities).map(([state, cities]) => (
+                  <View key={state} style={{ marginBottom: 16 }}>
+                    <TouchableOpacity onPress={() => toggleStateCollapse(state)} style={{ paddingHorizontal: 16 }}>
+                      <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                        {collapsedStates.includes(state) ? '▶' : '▼'} {state}
+                      </Text>
+                    </TouchableOpacity>
+
+                    {!collapsedStates.includes(state) && (
+                      <View style={{ paddingLeft: 32, paddingTop: 4 }}>
+                        {cities.map((city: City) => (
+                          <TouchableOpacity
+                            key={city.key}
+                            onPress={() => selectCity(city.key)}
+                            style={{ paddingVertical: 4 }}
+                          >
+                            <Text style={{ fontSize: 15 }}>{city.name.split(',')[0]}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
         </Modal>
 
 
