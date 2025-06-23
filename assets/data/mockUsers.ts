@@ -19,7 +19,7 @@ export const users: Record<string, MockUser> = {
         latitude: 47.6062,
         longitude: -122.3321,
         avatar: MockAvatar,
-        locationText: 'Seattle, Washington',
+        locationText: 'Seattle',
     },
     newyork: {
         name: 'Enzo Bartolli',
@@ -28,7 +28,7 @@ export const users: Record<string, MockUser> = {
         latitude: 40.7128,
         longitude: -74.006,
         avatar: Mock2Avatar,
-        locationText: 'New York, New York',
+        locationText: 'New York',
     },
 };
 

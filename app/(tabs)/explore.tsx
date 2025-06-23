@@ -178,7 +178,7 @@ const Explore = () => {
         <View style={styles.locationBar}>
           <Pressable onPress={() => setCityModalVisible(true)}>
             <View style={styles.cityPicker}>
-              <Text style={styles.locationText}>{mockUser.locationText}</Text>
+              <Text style={styles.locationText}>{selectedCityData?.name.split(',')[0]}</Text>
               <Text style={styles.chevron}>▼</Text>
             </View>
           </Pressable>
@@ -406,7 +406,7 @@ const Explore = () => {
         </Modal>
 
 
-        {profileVisible && markerScreenPosition && (
+        {profileVisible && markerScreenPosition && mockUser.avatar && (
           <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
             <View style={StyleSheet.absoluteFillObject}>
               <View style={{ position: 'absolute', top: markerScreenPosition.y - 280, left: markerScreenPosition.x - 120 }}>
