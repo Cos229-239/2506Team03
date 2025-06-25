@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   Image,
   Modal,
   Platform,
@@ -87,6 +89,30 @@ const Explore = () => {
     const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
     setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
   };
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (showTooltip) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [showTooltip]);
+
   const selectedUser = users[selectedCity];
   const selectedCityData = Object.values(groupedCities)
     .flat()
@@ -296,33 +322,44 @@ const Explore = () => {
           {showTooltip && (
             <TouchableWithoutFeedback onPress={() => setShowTooltip(false)}>
               <View style={{ position: 'absolute', bottom: 130, alignSelf: 'center', zIndex: 11 }}>
-                <View style={{
-                  backgroundColor: '#000',
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  borderRadius: 12,
-                  shadowColor: '#000',
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
-                  shadowOffset: { width: 0, height: 2 }
-                }}>
-                  <Text style={{
-                    color: '#fff',
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                  }}>
-                    Let’s swap!
+                <Animated.View
+                  style={{
+                    transform: [{ scale: pulseAnim }],
+                    backgroundColor: '#fff',
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 3,
+                    borderColor: '#222',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.15,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 2 },
+                  }}
+                >
+                  <Text style={{ color: '#000', fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
+                    Let’s Skill Swap!
                   </Text>
-                  <Text style={{
-                    color: '#ccc',
-                    fontSize: 12,
-                    textAlign: 'center',
-                    marginTop: 2
-                  }}>
+                  <Text style={{ color: '#333', fontSize: 12, textAlign: 'center', marginTop: 2 }}>
                     Tap circle to toggle...
                   </Text>
-                </View>
+                </Animated.View>
+
+                {/* Bubble tail */}
+                <View
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderLeftWidth: 10,
+                    borderRightWidth: 10,
+                    borderTopWidth: 10,
+                    borderLeftColor: 'transparent',
+                    borderRightColor: 'transparent',
+                    borderTopColor: '#333',
+                    alignSelf: 'center',
+                    marginTop: 6,
+                  }}
+                />
               </View>
             </TouchableWithoutFeedback>
           )}
@@ -363,7 +400,7 @@ const Explore = () => {
                       : toggleMode === 'learn'
                         ? '#9DD4B6'
                         : '#CBA16B',
-                  backgroundColor: '#000',
+                  backgroundColor: '#111',
                 },
               ]}>
               <Text
@@ -605,7 +642,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#000',
+    backgroundColor: '#222',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -622,7 +659,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#000',
+    backgroundColor: '#111',
     borderWidth: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -693,24 +730,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 10,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#fff',
+    borderTopColor: '#222',
     marginTop: 6,
     alignSelf: 'center',
   },
   calloutBox: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    width: 240,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
-  },
+  backgroundColor: '#fff',
+  borderRadius: 12,
+  padding: 16,
+  width: 240,
+  borderWidth: 3,
+  borderColor: '#222', // soft green tone (matches your filter Apply button)
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.2,
+  shadowRadius: 8,
+  elevation: 6,
+},
   calloutName: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -734,7 +770,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   viewProfileBtn: {
-    backgroundColor: '#9DD4B6',
+    backgroundColor: '#445f50',
     paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -743,14 +779,14 @@ const styles = StyleSheet.create({
   },
   viewProfileBtnText: {
     fontSize: 14,
-    color: '#222',
+    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
   calloutAccentBar: {
     height: 6,
     width: '100%',
-    backgroundColor: '#9DD4B6',
+    backgroundColor: '#4e6487',
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -784,7 +820,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    shadowColor: '#000',
+    shadowColor: '#111',
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
