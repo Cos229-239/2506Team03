@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import {
   Dimensions,
@@ -17,7 +18,6 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-import ToggleIcon from '../../assets/images/toggle-icon.png';
 
 type UserType = {
   name: string;
@@ -70,6 +70,8 @@ const skillFilters: Record<string, string[]> = {
   ],
 };
 
+const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
+
 const Explore = () => {
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
   const [filterVisible, setFilterVisible] = useState(false);
@@ -78,6 +80,13 @@ const Explore = () => {
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
+  const [showTooltip, setShowTooltip] = useState(true);
+  const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
+  const cycleToggleMode = () => {
+    const currentIndex = TOGGLE_MODES.indexOf(toggleMode);
+    const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
+    setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
+  };
   const selectedUser = users[selectedCity];
   const selectedCityData = Object.values(groupedCities)
     .flat()
@@ -178,8 +187,36 @@ const Explore = () => {
         <View style={styles.locationBar}>
           <Pressable onPress={() => setCityModalVisible(true)}>
             <View style={styles.cityPicker}>
-              <Text style={styles.locationText}>{selectedCityData?.name.split(',')[0]}</Text>
-              <Text style={styles.chevron}>▼</Text>
+              <Text
+                style={[
+                  styles.locationText,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}
+              >
+                {selectedCityData?.name.split(',')[0]}
+              </Text>
+              <Text
+                style={[
+                  styles.chevron,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}
+              >
+                ▼
+              </Text>
             </View>
           </Pressable>
 
@@ -188,7 +225,14 @@ const Explore = () => {
               source={FilterIcon}
               style={[
                 styles.filterIcon,
-                { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
+                {
+                  tintColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                },
               ]}
               resizeMode="contain"
             />
@@ -241,9 +285,106 @@ const Explore = () => {
           )}
         </MapView>
 
-        <Pressable onPress={() => console.log('Toggle view pressed')} style={styles.floatingToggleButton}>
-          <View style={styles.toggleButtonInner}>
-            <Image source={ToggleIcon} style={styles.toggleImage} resizeMode="contain" />
+
+        <Pressable
+          onPress={() => {
+            cycleToggleMode();
+            setShowTooltip(false);
+          }}
+          style={styles.floatingToggleButton}
+        >
+          {showTooltip && (
+            <TouchableWithoutFeedback onPress={() => setShowTooltip(false)}>
+              <View style={{ position: 'absolute', bottom: 130, alignSelf: 'center', zIndex: 11 }}>
+                <View style={{
+                  backgroundColor: '#000',
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 12,
+                  shadowColor: '#000',
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  shadowOffset: { width: 0, height: 2 }
+                }}>
+                  <Text style={{
+                    color: '#fff',
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                  }}>
+                    Let’s swap!
+                  </Text>
+                  <Text style={{
+                    color: '#ccc',
+                    fontSize: 12,
+                    textAlign: 'center',
+                    marginTop: 2
+                  }}>
+                    Tap circle to toggle...
+                  </Text>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          )}
+
+          <View style={{ alignItems: 'center' }}>
+            <View
+              style={[
+                styles.toggleButtonInner,
+                {
+                  borderColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                },
+              ]}>
+              <Ionicons
+                name="sync"
+                size={32}
+                color={
+                  toggleMode === 'teach'
+                    ? '#98ADD4'
+                    : toggleMode === 'learn'
+                      ? '#9DD4B6'
+                      : '#CBA16B'
+                }
+              />
+            </View>
+
+            <View
+              style={[
+                styles.toggleLabel,
+                {
+                  borderColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                  backgroundColor: '#000',
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.toggleLabelText,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}>
+                {toggleMode === 'teach'
+                  ? 'Who Needs My Skills?'
+                  : toggleMode === 'learn'
+                    ? 'Who Can Teach Me?'
+                    : 'All Nearby Users'}
+              </Text>
+            </View>
           </View>
         </Pressable>
 
@@ -474,19 +615,18 @@ const styles = StyleSheet.create({
   floatingToggleButton: {
     position: 'absolute',
     bottom: 16,
-    left: '50%',
-    transform: [{ translateX: -50 }],
+    alignSelf: 'center',
     zIndex: 10,
   },
   toggleButtonInner: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f4fdfd',
+    backgroundColor: '#000',
     borderWidth: 10,
-    borderColor: '#b2dfdb',
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   toggleImage: {
     width: 40,
@@ -634,5 +774,30 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 8,
     marginBottom: 16,
+  },
+  toggleLabel: {
+    marginTop: 6,
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#aaa',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  toggleLabelText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  toggleHintText: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+    textAlign: 'center',
+    letterSpacing: 0.5,
   },
 });

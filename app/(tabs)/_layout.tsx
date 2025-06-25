@@ -8,7 +8,7 @@ import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
 import { Colors } from '../constants/Colors';
 
-import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ New import for settings icon
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
