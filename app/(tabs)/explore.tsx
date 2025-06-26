@@ -280,12 +280,29 @@ const Explore = () => {
               anchor={{ x: 0.5, y: 1 }}
               onPress={async () => {
                 if (mapRef.current) {
-                  const point = await mapRef.current.pointForCoordinate({
-                    latitude: mockUser.latitude,
+                  const region = {
+                    latitude: mockUser.latitude + 0.0012,
                     longitude: mockUser.longitude,
-                  });
-                  setMarkerScreenPosition(point);
-                  setProfileVisible(true);
+                    latitudeDelta: 0.025,
+                    longitudeDelta: 0.015,
+                  };
+
+                  mapRef.current.animateToRegion(region, 350);
+
+                  setTimeout(async () => {
+                    const updatedPoint = await mapRef.current?.pointForCoordinate({
+                      latitude: mockUser.latitude,
+                      longitude: mockUser.longitude,
+                    });
+
+                    if (updatedPoint) {
+                      setMarkerScreenPosition({
+                        x: updatedPoint.x,
+                        y: updatedPoint.y - 20,
+                      });
+                      setProfileVisible(true);
+                    }
+                  }, 400);
                 }
               }}
             >
@@ -735,18 +752,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   calloutBox: {
-  backgroundColor: '#fff',
-  borderRadius: 12,
-  padding: 16,
-  width: 240,
-  borderWidth: 3,
-  borderColor: '#222', // soft green tone (matches your filter Apply button)
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.2,
-  shadowRadius: 8,
-  elevation: 6,
-},
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    width: 240,
+    borderWidth: 3,
+    borderColor: '#222', // soft green tone (matches your filter Apply button)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
   calloutName: {
     fontSize: 20,
     fontWeight: 'bold',
