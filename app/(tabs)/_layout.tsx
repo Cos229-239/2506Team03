@@ -36,51 +36,63 @@ export default function TabLayout() {
           }),
       }}
     >
-      {/* Home Tab */}
-      <Tabs.Screen
-        name="ProfileScreen"
-        options={{
-          href: '/(tabs)/ProfileScreen',
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="home" color={color} />
-          ),
-        }}
-      />
+   {/* Explore Tab */}
+<Tabs.Screen
+  name="explore"
+  options={{
+    href: "/explore",
+    title: 'Explore',
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="compass" color={color} />
+    ),
+  }}
+/>
 
+{/* Profile Tab */}
+<Tabs.Screen
+  name="profile"
+  options={{
+    href: "/profile",
+    title: 'Profile',
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="person" size={24} color={color} />
+    ),
+  }}
+/>
 
-      {/* Explore Tab */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="compass" color={color} />
-          ),
-        }}
-      />
+{/* Home Tab (center default) */}
+<Tabs.Screen
+  name="home"
+  options={{
+    href: "/home",
+    title: 'Home',
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="home" color={color} />
+    ),
+  }}
+/>
 
-      {/* Message Tab */}
-      <Tabs.Screen
-        name="message"
-        options={{
-          title: 'Message',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="message" size={24} color={color} />
-          ),
-        }}
-      />
+{/* Message Tab */}
+<Tabs.Screen
+  name="message"
+  options={{
+    title: 'Messages',
+    tabBarIcon: ({ color }) => (
+      <MaterialIcons name="message" size={24} color={color} />
+    ),
+  }}
+/>
 
-      {/* Settings Tab (Updated Icon) */}
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="settings-sharp" size={24} color={color} />
-          ),
-        }}
-      />
+{/* Settings Tab */}
+<Tabs.Screen
+  name="settings"
+  options={{
+    title: 'Settings',
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="settings-sharp" size={24} color={color} />
+    ),
+  }}
+/>
     </Tabs>
   );
 }

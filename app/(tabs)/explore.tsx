@@ -58,6 +58,7 @@ const skillFilters: Record<string, string[]> = {
     'Coding / Programming',
     'Video Editing',
     '3D Modeling',
+    'IT Support',
   ],
   'Lifestyle & Personal Growth': [
     'Cooking & Baking',
@@ -181,7 +182,9 @@ const Explore = () => {
   const collapseAllStates = () => setCollapsedStates(Object.keys(groupedCities));
   const expandAllStates = () => setCollapsedStates([]);
 
-  let MapView, Marker;
+  let MapView: any;
+  let Marker: any;
+
   if (Platform.OS !== 'web') {
     MapView = require('react-native-maps').default;
     Marker = require('react-native-maps').Marker;
@@ -204,10 +207,7 @@ const Explore = () => {
   return (
     <View style={styles.container}>
       <View style={styles.fullWidthHeader}>
-        <Text style={styles.headerText}>Skill Swap</Text>
       </View>
-
-      <View style={styles.fullWidthDivider} />
 
       <View style={[styles.mapFrameBase, { height: mapFrameHeight }]}>
         <View style={styles.locationBar}>
@@ -271,18 +271,19 @@ const Explore = () => {
           style={styles.map}
           region={mapCenter}
         >
-          {users[selectedCity] && (
+          {Object.values(users).map((user, index) => (
             <Marker
+              key={index}
               coordinate={{
-                latitude: mockUser.latitude,
-                longitude: mockUser.longitude,
+                latitude: user.latitude,
+                longitude: user.longitude,
               }}
               anchor={{ x: 0.5, y: 1 }}
               onPress={async () => {
                 if (mapRef.current) {
                   const region = {
-                    latitude: mockUser.latitude + 0.0012,
-                    longitude: mockUser.longitude,
+                    latitude: user.latitude + 0.0012,
+                    longitude: user.longitude,
                     latitudeDelta: 0.025,
                     longitudeDelta: 0.015,
                   };
@@ -291,8 +292,8 @@ const Explore = () => {
 
                   setTimeout(async () => {
                     const updatedPoint = await mapRef.current?.pointForCoordinate({
-                      latitude: mockUser.latitude,
-                      longitude: mockUser.longitude,
+                      latitude: user.latitude,
+                      longitude: user.longitude,
                     });
 
                     if (updatedPoint) {
@@ -308,13 +309,13 @@ const Explore = () => {
             >
               <View style={{ alignItems: 'center', marginBottom: 18 }}>
                 <Image
-                  source={mockUser.avatar}
+                  source={user.avatar}
                   style={{
                     width: 38,
                     height: 38,
-                    borderRadius: 18,
+                    borderRadius: 19,
                     borderWidth: 2,
-                    borderColor: '#222',
+                    borderColor: '#000',
                     backgroundColor: '#eee',
                     shadowColor: '#000',
                     shadowOpacity: 0.3,
@@ -325,7 +326,7 @@ const Explore = () => {
                 />
               </View>
             </Marker>
-          )}
+          ))}
         </MapView>
 
 
@@ -372,7 +373,7 @@ const Explore = () => {
                     borderTopWidth: 10,
                     borderLeftColor: 'transparent',
                     borderRightColor: 'transparent',
-                    borderTopColor: '#333',
+                    borderTopColor: '#000',
                     alignSelf: 'center',
                     marginTop: 6,
                   }}
@@ -629,25 +630,24 @@ const Explore = () => {
 export default Explore;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingBottom: 8 },
+  container: { flex: 1, backgroundColor: '#50403e', paddingBottom: 8 },
   fullWidthHeader: {
-    paddingTop: Platform.OS === 'ios' ? 64 : 48,
+    paddingTop: Platform.OS === 'ios' ? 64 : 30,
     paddingBottom: 8,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
     width: '100%',
   },
-  fullWidthDivider: { height: 1, backgroundColor: '#ccc', marginBottom: 12, width: '100%' },
+
   headerText: { fontSize: 32, fontWeight: 'bold' },
   mapFrameBase: {
-    marginHorizontal: 16,
+    marginHorizontal: 12,
     borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#222',
+    borderWidth: 3,
+    borderColor: '#000',
     backgroundColor: '#fff',
     position: 'relative',
+    minHeight: Platform.OS === 'ios' ? 700 : 785,
   },
   map: { width: '100%', height: '100%' },
   locationBar: {
@@ -659,12 +659,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#222',
+    backgroundColor: '#000',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
-  locationText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  locationText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   filterIcon: { width: 20, height: 20, tintColor: '#fff' },
   floatingToggleButton: {
     position: 'absolute',
@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#111',
+    backgroundColor: '#000',
     borderWidth: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -687,11 +687,11 @@ const styles = StyleSheet.create({
     height: 40,
   },
   avatarImage: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 18,
     borderWidth: 2,
-    borderColor: '#222',
+    borderColor: '#000',
     backgroundColor: '#eee',
     shadowColor: '#000',
     shadowOpacity: 0.3,
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
     padding: 16,
     width: 240,
     borderWidth: 3,
-    borderColor: '#222', // soft green tone (matches your filter Apply button)
+    borderColor: '#000',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -844,7 +844,7 @@ const styles = StyleSheet.create({
   toggleLabelText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#000',
   },
   toggleHintText: {
     fontSize: 10,

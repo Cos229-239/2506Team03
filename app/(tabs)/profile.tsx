@@ -4,7 +4,7 @@ import { Chip } from 'react-native-paper';
 
 console.log("✅ Home screen is loaded");
 
-export default function ProfileScreen() {
+export default function Profile() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Skill Swap</Text>
