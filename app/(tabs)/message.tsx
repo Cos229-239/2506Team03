@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   seeAllButton: {
-    backgroundColor: '#9DD4B6', // Green from palette
+    backgroundColor: '#9DD4B6',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -119,14 +119,14 @@ const styles = StyleSheet.create({
   },
   messageCard: {
     flexDirection: 'row',
-    backgroundColor: '#98ADD4', // Blue message bubble
+    backgroundColor: '#98ADD4',
     borderRadius: 16,
     padding: 12,
     marginBottom: 10,
     alignItems: 'center',
   },
   messageAvatar: {
-    backgroundColor: '#A0837F', // Mauve for avatars
+    backgroundColor: '#A0837F',
   },
   messageContent: {
     marginLeft: 12,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   followAvatar: {
-    backgroundColor: '#A0837F', // Same mauve for visual cohesion
+    backgroundColor: '#A0837F',
     marginBottom: 4,
   },
   followName: {
