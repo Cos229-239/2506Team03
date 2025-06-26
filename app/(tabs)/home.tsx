@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   welcome: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '600',
     marginBottom: 28,
   },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 10,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   button: {
     backgroundColor: '#9DD4B6',
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 18,
   },
   sectionTitle: {
     fontSize: 20,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   upcomingTitle: {
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 18,
     marginTop: 4,
     marginBottom: 4,
     color: '#000',
