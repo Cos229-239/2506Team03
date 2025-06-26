@@ -31,21 +31,23 @@ export default function TabLayout() {
         tabBarStyle: shouldHideTabBar
           ? { display: 'none' }
           : Platform.select({
-              ios: { position: 'absolute' },
-              default: {},
-            }),
+            ios: { position: 'absolute' },
+            default: {},
+          }),
       }}
     >
       {/* Home Tab */}
       <Tabs.Screen
-        name="index"
+        name="ProfileScreen"
         options={{
+          href: '/(tabs)/ProfileScreen',
           title: 'Home',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="home" color={color} />
           ),
         }}
       />
+
 
       {/* Explore Tab */}
       <Tabs.Screen
