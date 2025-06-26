@@ -12,14 +12,14 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Platform.OS === 'ios' ? 64 : 40,
+    paddingTop: Platform.OS === 'ios' ? 36 : 40,
     paddingHorizontal: 16,
     paddingBottom: 16,
     alignItems: 'center',
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
   },

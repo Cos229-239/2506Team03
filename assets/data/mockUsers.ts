@@ -18,7 +18,7 @@ export const users: Record<string, MockUser> = {
     seattle: {
     name: 'John Smith',
     profession: 'Carpenter',
-    skills: ['Woodworking', 'Welding', 'Painting & Drawing'],
+    skills: ['Carpentry', 'Digital Art', 'Woodworking', 'Furniture Repair'],
     latitude: 47.6062,
     longitude: -122.3321,
     avatar: AvatarJohn,
@@ -27,7 +27,7 @@ export const users: Record<string, MockUser> = {
   newyork: {
     name: 'Enzo Bartolli',
     profession: 'Language Tutor',
-    skills: ['Language Tutoring – Italian', 'Fitness Training'],
+    skills: ['Language Tutoring – Italian', 'Fitness'],
     latitude: 40.7128,
     longitude: -74.006,
     avatar: AvatarEnzo,
@@ -36,7 +36,7 @@ export const users: Record<string, MockUser> = {
   seattle2: {
     name: 'Lisa Kerry',
     profession: 'Personal Chef',
-    skills: ['Cooking & Baking', 'Photography'],
+    skills: ['Cooking', 'Baking', 'Photography'],
     latitude: 47.6085,
     longitude: -122.3340,
     avatar: AvatarLisa,
@@ -45,7 +45,7 @@ export const users: Record<string, MockUser> = {
   newyork2: {
     name: 'Cody Tanner',
     profession: 'IT Support',
-    skills: ['Coding/Programming', 'Web Design', 'IT Support'],
+    skills: ['Programming', 'Web Design', 'IT Support'],
     latitude: 40.7150,
     longitude: -74.0082,
     avatar: AvatarCody,

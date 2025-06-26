@@ -42,27 +42,32 @@ const skillFilters: Record<string, string[]> = {
   'Hands-on / Trade Skills': [
     'Woodworking',
     'Welding',
-    'Furniture Restoration',
-    'Automotive Repair',
+    'Furniture Repair',
+    'Car Repair',
     'Home Improvement',
+    'Carpentry'
   ],
   'Creative / Art Skills': [
-    'Painting & Drawing',
-    'Graphic Design',
+    'Painting',
+    'Drawing',
+    'Digital Art',
     'Photography',
     'Crafting & DIY',
-    'Music',
+    'Guitar',
+    'Piano',
   ],
   'Tech / Digital Skills': [
     'Web Design',
-    'Coding / Programming',
+    'Programming',
     'Video Editing',
     '3D Modeling',
     'IT Support',
   ],
   'Lifestyle & Personal Growth': [
-    'Cooking & Baking',
-    'Fitness Training',
+    'Cooking',
+    'Baking',
+    'Fitness',
+    'Languages',
     'Language Tutoring – Italian',
     'Language Tutoring – Spanish',
     'Language Tutoring – French',
@@ -77,6 +82,7 @@ const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
 
 const Explore = () => {
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
+  const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
@@ -114,7 +120,6 @@ const Explore = () => {
     }
   }, [showTooltip]);
 
-  const selectedUser = users[selectedCity];
   const selectedCityData = Object.values(groupedCities)
     .flat()
     .find((c) => c.key === selectedCity);
@@ -191,6 +196,8 @@ const Explore = () => {
   }
 
   const selectCity = (cityKey: string) => {
+    setProfileVisible(false);
+    setSelectedUser(null);
     setSelectedCity(cityKey);
     setCityModalVisible(false);
   };
@@ -280,6 +287,8 @@ const Explore = () => {
               }}
               anchor={{ x: 0.5, y: 1 }}
               onPress={async () => {
+                setSelectedUser(user);
+
                 if (mapRef.current) {
                   const region = {
                     latitude: user.latitude + 0.0012,
@@ -594,18 +603,18 @@ const Explore = () => {
         </Modal>
 
 
-        {profileVisible && markerScreenPosition && mockUser.avatar && (
+        {profileVisible && markerScreenPosition && selectedUser && (
           <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
             <View style={StyleSheet.absoluteFillObject}>
-              <View style={{ position: 'absolute', top: markerScreenPosition.y - 280, left: markerScreenPosition.x - 120 }}>
+              <View style={{ position: 'absolute', top: markerScreenPosition.y - (Platform.OS === 'ios' ? 250 : 280), left: markerScreenPosition.x - 120 }}>
                 <TouchableWithoutFeedback>
                   <View>
                     <View style={styles.calloutBox}>
                       <View style={styles.calloutAccentBar} />
-                      <Text style={styles.calloutName}>{mockUser.name}</Text>
-                      <Text style={styles.calloutJob}>{mockUser.profession}</Text>
+                      <Text style={styles.calloutName}>{selectedUser.name}</Text>
+                      <Text style={styles.calloutJob}>{selectedUser.profession}</Text>
                       <Text style={styles.skillsLabel}>Skills:</Text>
-                      {mockUser.skills.map((skill: string, index: number) => (
+                      {selectedUser.skills.map((skill: string, index: number) => (
                         <Text key={index}>{skill}</Text>
                       ))}
                       <TouchableOpacity
@@ -630,7 +639,7 @@ const Explore = () => {
 export default Explore;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#50403e', paddingBottom: 8 },
+  container: { flex: 1, backgroundColor: '#fff', paddingBottom: 8 },
   fullWidthHeader: {
     paddingTop: Platform.OS === 'ios' ? 64 : 30,
     paddingBottom: 8,
