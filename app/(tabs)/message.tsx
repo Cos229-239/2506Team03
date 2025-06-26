@@ -1,27 +1,11 @@
 import React from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { Avatar, Text } from 'react-native-paper';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Avatar, Text, TouchableRipple } from 'react-native-paper';
 
 const messages = [
-  {
-    id: '1',
-    name: 'Amber Edison',
-    text: 'Thanks for your help! Can’t wait to plan...',
-  },
-  {
-    id: '2',
-    name: 'Enzo Bartolli',
-    text: "Sunday looks good. I'll send the Zoom...",
-  },
-  {
-    id: '3',
-    name: 'Robert Campbell',
-    text: 'Looking forward to the skill swap - let...',
-  },
+  { id: '1', name: 'Amber Edison', text: 'Thanks for your help! Can’t wait to plan...' },
+  { id: '2', name: 'Enzo Bartolli', text: "Sunday looks good. I'll send the Zoom..." },
+  { id: '3', name: 'Robert Campbell', text: 'Looking forward to the skill swap - let...' },
 ];
 
 const following = [
@@ -42,11 +26,15 @@ const following = [
 const MessageScreen = () => {
   return (
     <View style={styles.container}>
-      {/* Messages Section (Static) */}
+      {/* Messages Section */}
       <View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Messages</Text>
-          <Text style={styles.seeAll}>See all...</Text>
+          <TouchableRipple onPress={() => {}} borderless>
+            <View style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>See all...</Text>
+            </View>
+          </TouchableRipple>
         </View>
 
         {messages.map((msg) => (
@@ -65,11 +53,15 @@ const MessageScreen = () => {
         ))}
       </View>
 
-      {/* Following Section (Scrollable) */}
+      {/* Following Section */}
       <View style={styles.followingWrapper}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Following</Text>
-          <Text style={styles.seeAll}>See all...</Text>
+          <TouchableRipple onPress={() => {}} borderless>
+            <View style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>See all...</Text>
+            </View>
+          </TouchableRipple>
         </View>
 
         <FlatList
@@ -114,21 +106,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
-  seeAll: {
-    color: '#2E7D32',
+  seeAllButton: {
+    backgroundColor: '#9DD4B6',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  seeAllText: {
+    color: 'black',
+    fontSize: 13,
     fontWeight: '600',
-    fontSize: 14,
   },
   messageCard: {
     flexDirection: 'row',
-    backgroundColor: '#d8e7ff',
+    backgroundColor: '#98ADD4',
     borderRadius: 16,
     padding: 12,
     marginBottom: 10,
     alignItems: 'center',
   },
   messageAvatar: {
-    backgroundColor: '#bbdefb',
+    backgroundColor: '#A0837F',
   },
   messageContent: {
     marginLeft: 12,
@@ -137,9 +135,11 @@ const styles = StyleSheet.create({
   messageName: {
     fontWeight: 'bold',
     fontSize: 15,
+    color: '#000',
   },
   messageText: {
     fontSize: 14,
+    color: '#000',
   },
   followingWrapper: {
     flex: 1,
@@ -150,13 +150,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   followAvatar: {
-    backgroundColor: '#cfd8dc',
+    backgroundColor: '#A0837F',
     marginBottom: 4,
   },
   followName: {
     fontWeight: 'bold',
     fontSize: 14,
     textAlign: 'center',
+    color: '#000',
   },
   followRole: {
     fontSize: 12,

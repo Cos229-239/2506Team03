@@ -2,12 +2,14 @@ import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { useColorScheme } from 'react-native';
 import { HapticTab } from '../components/HapticTab';
 import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
 import { Colors } from '../constants/Colors';
-import { useColorScheme } from '../hooks/useColorScheme';
+
+import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ New import for settings icon
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -34,6 +36,7 @@ export default function TabLayout() {
             }),
       }}
     >
+      {/* Home Tab */}
       <Tabs.Screen
         name="ProfileScreen"
         options={{
@@ -44,6 +47,7 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Explore Tab */}
       <Tabs.Screen
         name="explore"
         options={{
@@ -54,22 +58,24 @@ export default function TabLayout() {
         }}
       />
 
+      {/* Message Tab */}
       <Tabs.Screen
         name="message"
         options={{
           title: 'Message',
           tabBarIcon: ({ color }) => (
-            <AntDesign name="message1" size={24} color={color} />
+            <MaterialIcons name="message" size={24} color={color} />
           ),
         }}
       />
 
+      {/* Settings Tab (Updated Icon) */}
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => (
-            <AntDesign name="setting" size={24} color={color} />
+            <Ionicons name="settings-sharp" size={24} color={color} />
           ),
         }}
       />
