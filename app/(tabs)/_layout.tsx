@@ -8,7 +8,7 @@ import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
 import { Colors } from '../constants/Colors';
 
-import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ New import for settings icon
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function TabLayout() {
@@ -31,55 +31,67 @@ export default function TabLayout() {
         tabBarStyle: shouldHideTabBar
           ? { display: 'none' }
           : Platform.select({
-              ios: { position: 'absolute' },
-              default: {},
-            }),
+            ios: { position: 'absolute' },
+            default: {},
+          }),
       }}
     >
-      {/* Home Tab */}
-      <Tabs.Screen
-        name="ProfileScreen"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="home" color={color} />
-          ),
-        }}
-      />
+   {/* Explore Tab */}
+<Tabs.Screen
+  name="explore"
+  options={{
+    href: "/explore",
+    title: 'Explore',
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="compass" color={color} />
+    ),
+  }}
+/>
 
-      {/* Explore Tab */}
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="compass" color={color} />
-          ),
-        }}
-      />
+{/* Profile Tab */}
+<Tabs.Screen
+  name="profile"
+  options={{
+    href: "/profile",
+    title: 'Profile',
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="person" size={24} color={color} />
+    ),
+  }}
+/>
 
-      {/* Message Tab */}
-      <Tabs.Screen
-        name="message"
-        options={{
-          title: 'Message',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="message" size={24} color={color} />
-          ),
-        }}
-      />
+{/* Home Tab (center default) */}
+<Tabs.Screen
+  name="home"
+  options={{
+    href: "/home",
+    title: 'Home',
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="home" color={color} />
+    ),
+  }}
+/>
 
-      {/* Settings Tab (Updated Icon) */}
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="settings-sharp" size={24} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
-  );
-}
+{/* Message Tab */}
+<Tabs.Screen
+  name="message"
+  options={{
+    title: 'Messages',
+    tabBarIcon: ({ color }) => (
+      <MaterialIcons name="message" size={24} color={color} />
+    ),
+  }}
+/>
 
+{/* Settings Tab */}
+<Tabs.Screen
+  name="settings"
+  options={{
+    title: 'Settings',
+    tabBarIcon: ({ color }) => (
+      <Ionicons name="settings-sharp" size={24} color={color} />
+    ),
+  }}
+/>
+  </Tabs>
+)};

@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { Chip } from 'react-native-paper';
 
-export default function ProfileScreen() {
+console.log("✅ Home screen is loaded");
+
+export default function Profile() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Skill Swap</Text>

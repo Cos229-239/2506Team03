@@ -1,6 +1,9 @@
-import React, { useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   Image,
   Modal,
   Platform,
@@ -17,7 +20,6 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-import ToggleIcon from '../../assets/images/toggle-icon.png';
 
 type UserType = {
   name: string;
@@ -40,26 +42,32 @@ const skillFilters: Record<string, string[]> = {
   'Hands-on / Trade Skills': [
     'Woodworking',
     'Welding',
-    'Furniture Restoration',
-    'Automotive Repair',
+    'Furniture Repair',
+    'Car Repair',
     'Home Improvement',
+    'Carpentry'
   ],
   'Creative / Art Skills': [
-    'Painting & Drawing',
-    'Graphic Design',
+    'Painting',
+    'Drawing',
+    'Digital Art',
     'Photography',
     'Crafting & DIY',
-    'Music',
+    'Guitar',
+    'Piano',
   ],
   'Tech / Digital Skills': [
     'Web Design',
-    'Coding / Programming',
+    'Programming',
     'Video Editing',
     '3D Modeling',
+    'IT Support',
   ],
   'Lifestyle & Personal Growth': [
-    'Cooking & Baking',
-    'Fitness Training',
+    'Cooking',
+    'Baking',
+    'Fitness',
+    'Languages',
     'Language Tutoring – Italian',
     'Language Tutoring – Spanish',
     'Language Tutoring – French',
@@ -70,15 +78,48 @@ const skillFilters: Record<string, string[]> = {
   ],
 };
 
+const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
+
 const Explore = () => {
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
+  const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
-  const selectedUser = users[selectedCity];
+  const [showTooltip, setShowTooltip] = useState(true);
+  const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
+  const cycleToggleMode = () => {
+    const currentIndex = TOGGLE_MODES.indexOf(toggleMode);
+    const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
+    setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
+  };
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (showTooltip) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [showTooltip]);
+
   const selectedCityData = Object.values(groupedCities)
     .flat()
     .find((c) => c.key === selectedCity);
@@ -146,13 +187,17 @@ const Explore = () => {
   const collapseAllStates = () => setCollapsedStates(Object.keys(groupedCities));
   const expandAllStates = () => setCollapsedStates([]);
 
-  let MapView, Marker;
+  let MapView: any;
+  let Marker: any;
+
   if (Platform.OS !== 'web') {
     MapView = require('react-native-maps').default;
     Marker = require('react-native-maps').Marker;
   }
 
   const selectCity = (cityKey: string) => {
+    setProfileVisible(false);
+    setSelectedUser(null);
     setSelectedCity(cityKey);
     setCityModalVisible(false);
   };
@@ -169,17 +214,42 @@ const Explore = () => {
   return (
     <View style={styles.container}>
       <View style={styles.fullWidthHeader}>
-        <Text style={styles.headerText}>Skill Swap</Text>
       </View>
-
-      <View style={styles.fullWidthDivider} />
 
       <View style={[styles.mapFrameBase, { height: mapFrameHeight }]}>
         <View style={styles.locationBar}>
           <Pressable onPress={() => setCityModalVisible(true)}>
             <View style={styles.cityPicker}>
-              <Text style={styles.locationText}>{selectedCityData?.name.split(',')[0]}</Text>
-              <Text style={styles.chevron}>▼</Text>
+              <Text
+                style={[
+                  styles.locationText,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}
+              >
+                {selectedCityData?.name.split(',')[0]}
+              </Text>
+              <Text
+                style={[
+                  styles.chevron,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}
+              >
+                ▼
+              </Text>
             </View>
           </Pressable>
 
@@ -188,7 +258,14 @@ const Explore = () => {
               source={FilterIcon}
               style={[
                 styles.filterIcon,
-                { tintColor: selectedSkills.length > 0 ? '#CBA16B' : '#fff' },
+                {
+                  tintColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                },
               ]}
               resizeMode="contain"
             />
@@ -201,33 +278,53 @@ const Explore = () => {
           style={styles.map}
           region={mapCenter}
         >
-          {users[selectedCity] && (
+          {Object.values(users).map((user, index) => (
             <Marker
+              key={index}
               coordinate={{
-                latitude: mockUser.latitude,
-                longitude: mockUser.longitude,
+                latitude: user.latitude,
+                longitude: user.longitude,
               }}
               anchor={{ x: 0.5, y: 1 }}
               onPress={async () => {
+                setSelectedUser(user);
+
                 if (mapRef.current) {
-                  const point = await mapRef.current.pointForCoordinate({
-                    latitude: mockUser.latitude,
-                    longitude: mockUser.longitude,
-                  });
-                  setMarkerScreenPosition(point);
-                  setProfileVisible(true);
+                  const region = {
+                    latitude: user.latitude + 0.0012,
+                    longitude: user.longitude,
+                    latitudeDelta: 0.025,
+                    longitudeDelta: 0.015,
+                  };
+
+                  mapRef.current.animateToRegion(region, 350);
+
+                  setTimeout(async () => {
+                    const updatedPoint = await mapRef.current?.pointForCoordinate({
+                      latitude: user.latitude,
+                      longitude: user.longitude,
+                    });
+
+                    if (updatedPoint) {
+                      setMarkerScreenPosition({
+                        x: updatedPoint.x,
+                        y: updatedPoint.y - 20,
+                      });
+                      setProfileVisible(true);
+                    }
+                  }, 400);
                 }
               }}
             >
               <View style={{ alignItems: 'center', marginBottom: 18 }}>
                 <Image
-                  source={mockUser.avatar}
+                  source={user.avatar}
                   style={{
                     width: 38,
                     height: 38,
-                    borderRadius: 18,
+                    borderRadius: 19,
                     borderWidth: 2,
-                    borderColor: '#222',
+                    borderColor: '#000',
                     backgroundColor: '#eee',
                     shadowColor: '#000',
                     shadowOpacity: 0.3,
@@ -238,12 +335,120 @@ const Explore = () => {
                 />
               </View>
             </Marker>
-          )}
+          ))}
         </MapView>
 
-        <Pressable onPress={() => console.log('Toggle view pressed')} style={styles.floatingToggleButton}>
-          <View style={styles.toggleButtonInner}>
-            <Image source={ToggleIcon} style={styles.toggleImage} resizeMode="contain" />
+
+        <Pressable
+          onPress={() => {
+            cycleToggleMode();
+            setShowTooltip(false);
+          }}
+          style={styles.floatingToggleButton}
+        >
+          {showTooltip && (
+            <TouchableWithoutFeedback onPress={() => setShowTooltip(false)}>
+              <View style={{ position: 'absolute', bottom: 130, alignSelf: 'center', zIndex: 11 }}>
+                <Animated.View
+                  style={{
+                    transform: [{ scale: pulseAnim }],
+                    backgroundColor: '#fff',
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    borderRadius: 12,
+                    borderWidth: 3,
+                    borderColor: '#222',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.15,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 2 },
+                  }}
+                >
+                  <Text style={{ color: '#000', fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
+                    Let’s Skill Swap!
+                  </Text>
+                  <Text style={{ color: '#333', fontSize: 12, textAlign: 'center', marginTop: 2 }}>
+                    Tap circle to toggle...
+                  </Text>
+                </Animated.View>
+
+                {/* Bubble tail */}
+                <View
+                  style={{
+                    width: 0,
+                    height: 0,
+                    borderLeftWidth: 10,
+                    borderRightWidth: 10,
+                    borderTopWidth: 10,
+                    borderLeftColor: 'transparent',
+                    borderRightColor: 'transparent',
+                    borderTopColor: '#000',
+                    alignSelf: 'center',
+                    marginTop: 6,
+                  }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          )}
+
+          <View style={{ alignItems: 'center' }}>
+            <View
+              style={[
+                styles.toggleButtonInner,
+                {
+                  borderColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                },
+              ]}>
+              <Ionicons
+                name="sync"
+                size={32}
+                color={
+                  toggleMode === 'teach'
+                    ? '#98ADD4'
+                    : toggleMode === 'learn'
+                      ? '#9DD4B6'
+                      : '#CBA16B'
+                }
+              />
+            </View>
+
+            <View
+              style={[
+                styles.toggleLabel,
+                {
+                  borderColor:
+                    toggleMode === 'teach'
+                      ? '#98ADD4'
+                      : toggleMode === 'learn'
+                        ? '#9DD4B6'
+                        : '#CBA16B',
+                  backgroundColor: '#111',
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.toggleLabelText,
+                  {
+                    color:
+                      toggleMode === 'teach'
+                        ? '#98ADD4'
+                        : toggleMode === 'learn'
+                          ? '#9DD4B6'
+                          : '#CBA16B',
+                  },
+                ]}>
+                {toggleMode === 'teach'
+                  ? 'Who Needs My Skills?'
+                  : toggleMode === 'learn'
+                    ? 'Who Can Teach Me?'
+                    : 'All Nearby Users'}
+              </Text>
+            </View>
           </View>
         </Pressable>
 
@@ -398,18 +603,18 @@ const Explore = () => {
         </Modal>
 
 
-        {profileVisible && markerScreenPosition && mockUser.avatar && (
+        {profileVisible && markerScreenPosition && selectedUser && (
           <TouchableWithoutFeedback onPress={() => setProfileVisible(false)}>
             <View style={StyleSheet.absoluteFillObject}>
-              <View style={{ position: 'absolute', top: markerScreenPosition.y - 280, left: markerScreenPosition.x - 120 }}>
+              <View style={{ position: 'absolute', top: markerScreenPosition.y - (Platform.OS === 'ios' ? 250 : 280), left: markerScreenPosition.x - 120 }}>
                 <TouchableWithoutFeedback>
                   <View>
                     <View style={styles.calloutBox}>
                       <View style={styles.calloutAccentBar} />
-                      <Text style={styles.calloutName}>{mockUser.name}</Text>
-                      <Text style={styles.calloutJob}>{mockUser.profession}</Text>
+                      <Text style={styles.calloutName}>{selectedUser.name}</Text>
+                      <Text style={styles.calloutJob}>{selectedUser.profession}</Text>
                       <Text style={styles.skillsLabel}>Skills:</Text>
-                      {mockUser.skills.map((skill: string, index: number) => (
+                      {selectedUser.skills.map((skill: string, index: number) => (
                         <Text key={index}>{skill}</Text>
                       ))}
                       <TouchableOpacity
@@ -436,23 +641,22 @@ export default Explore;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingBottom: 8 },
   fullWidthHeader: {
-    paddingTop: Platform.OS === 'ios' ? 64 : 48,
+    paddingTop: Platform.OS === 'ios' ? 64 : 30,
     paddingBottom: 8,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
     width: '100%',
   },
-  fullWidthDivider: { height: 1, backgroundColor: '#ccc', marginBottom: 12, width: '100%' },
+
   headerText: { fontSize: 32, fontWeight: 'bold' },
   mapFrameBase: {
-    marginHorizontal: 16,
+    marginHorizontal: 12,
     borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#222',
+    borderWidth: 3,
+    borderColor: '#000',
     backgroundColor: '#fff',
     position: 'relative',
+    minHeight: Platform.OS === 'ios' ? 700 : 785,
   },
   map: { width: '100%', height: '100%' },
   locationBar: {
@@ -469,35 +673,34 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
   },
-  locationText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
+  locationText: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   filterIcon: { width: 20, height: 20, tintColor: '#fff' },
   floatingToggleButton: {
     position: 'absolute',
     bottom: 16,
-    left: '50%',
-    transform: [{ translateX: -50 }],
+    alignSelf: 'center',
     zIndex: 10,
   },
   toggleButtonInner: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f4fdfd',
+    backgroundColor: '#000',
     borderWidth: 10,
-    borderColor: '#b2dfdb',
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   toggleImage: {
     width: 40,
     height: 40,
   },
   avatarImage: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: 18,
     borderWidth: 2,
-    borderColor: '#222',
+    borderColor: '#000',
     backgroundColor: '#eee',
     shadowColor: '#000',
     shadowOpacity: 0.3,
@@ -553,7 +756,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 10,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#fff',
+    borderTopColor: '#222',
     marginTop: 6,
     alignSelf: 'center',
   },
@@ -562,11 +765,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     width: 240,
+    borderWidth: 3,
+    borderColor: '#000',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
@@ -594,7 +796,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   viewProfileBtn: {
-    backgroundColor: '#9DD4B6',
+    backgroundColor: '#445f50',
     paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 20,
@@ -603,14 +805,14 @@ const styles = StyleSheet.create({
   },
   viewProfileBtnText: {
     fontSize: 14,
-    color: '#222',
+    color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
   },
   calloutAccentBar: {
     height: 6,
     width: '100%',
-    backgroundColor: '#9DD4B6',
+    backgroundColor: '#4e6487',
     borderRadius: 12,
     marginBottom: 12,
   },
@@ -634,5 +836,30 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 8,
     marginBottom: 16,
+  },
+  toggleLabel: {
+    marginTop: 6,
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#aaa',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    shadowColor: '#111',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  toggleLabelText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  toggleHintText: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+    textAlign: 'center',
+    letterSpacing: 0.5,
   },
 });
