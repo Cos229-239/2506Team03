@@ -38,18 +38,26 @@ const MessageScreen = () => {
         </View>
 
         {messages.map((msg) => (
-          <View key={msg.id} style={styles.messageCard}>
-            <Avatar.Text
-              size={48}
-              label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              style={styles.messageAvatar}
-              labelStyle={{ fontSize: 18 }}
-            />
-            <View style={styles.messageContent}>
-              <Text style={styles.messageName}>{msg.name}</Text>
-              <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+          <TouchableRipple
+            key={msg.id}
+            onPress={() => {}}
+            rippleColor="rgba(0,0,0,0.1)"
+            borderless={false}
+            style={styles.rippleWrapper}
+          >
+            <View style={styles.messageCard}>
+              <Avatar.Text
+                size={48}
+                label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                style={styles.messageAvatar}
+                labelStyle={{ fontSize: 18 }}
+              />
+              <View style={styles.messageContent}>
+                <Text style={styles.messageName}>{msg.name}</Text>
+                <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+              </View>
             </View>
-          </View>
+          </TouchableRipple>
         ))}
       </View>
 
@@ -72,16 +80,23 @@ const MessageScreen = () => {
           columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 24 }}
           showsVerticalScrollIndicator={true}
           renderItem={({ item }) => (
-            <View style={styles.followingItem}>
-              <Avatar.Text
-                size={80}
-                label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                style={styles.followAvatar}
-                labelStyle={{ fontSize: 24 }}
-              />
-              <Text style={styles.followName}>{item.name}</Text>
-              <Text style={styles.followRole}>{item.role}</Text>
-            </View>
+            <TouchableRipple
+              onPress={() => {}}
+              rippleColor="rgba(0,0,0,0.1)"
+              style={styles.followingRipple}
+              borderless
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Avatar.Text
+                  size={80}
+                  label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  style={styles.followAvatar}
+                  labelStyle={{ fontSize: 24 }}
+                />
+                <Text style={styles.followName}>{item.name}</Text>
+                <Text style={styles.followRole}>{item.role}</Text>
+              </View>
+            </TouchableRipple>
           )}
         />
       </View>
@@ -107,7 +122,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   seeAllButton: {
-    backgroundColor: '#9DD4B6', // Green from palette
+    backgroundColor: '#9DD4B6',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -117,16 +132,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  rippleWrapper: {
+    borderRadius: 16,
+    marginBottom: 10,
+  },
   messageCard: {
     flexDirection: 'row',
-    backgroundColor: '#98ADD4', // Blue message bubble
+    backgroundColor: '#98ADD4',
     borderRadius: 16,
     padding: 12,
-    marginBottom: 10,
     alignItems: 'center',
   },
   messageAvatar: {
-    backgroundColor: '#A0837F', // Mauve for avatars
+    backgroundColor: '#A0837F',
   },
   messageContent: {
     marginLeft: 12,
@@ -145,13 +163,17 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 16,
   },
-  followingItem: {
+  followingRipple: {
     width: '30%',
     alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden', // ensure ripple is clipped inside
+    marginBottom: 16,
   },
   followAvatar: {
-    backgroundColor: '#A0837F', // Same mauve for visual cohesion
+    backgroundColor: '#A0837F',
     marginBottom: 4,
+    alignSelf: 'center',
   },
   followName: {
     fontWeight: 'bold',
