@@ -8,8 +8,8 @@ import { IconSymbol } from '../components/ui/IconSymbol';
 import TabBarBackground from '../components/ui/TabBarBackground';
 import { Colors } from '../constants/Colors';
 
-import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ New import for settings icon
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons'; // ✅ Settings icon
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'; // ✅ Message icon
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -69,7 +69,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Settings Tab (Updated Icon) */}
+      {/* Settings Tab */}
       <Tabs.Screen
         name="settings"
         options={{
