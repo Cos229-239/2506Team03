@@ -4,20 +4,30 @@ import {
   Animated,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TouchableWithoutFeedback,
   View,
+  useColorScheme,
 } from 'react-native';
 
+import { Colors } from '../constants/Colors';
+
 const SettingsScreen = () => {
+  const systemScheme = useColorScheme();
+  const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
+
+  const theme = isDarkMode ? Colors.dark : Colors.light;
+
   const colors = {
-    background: '#FFFFFF',
-    sectionText: '#888888',
-    text: '#333333',
-    border: '#EEEEEE',
+    background: theme.background,
+    sectionText: theme.sectionText ?? '#888888',
+    text: theme.text,
+    border: theme.border ?? '#EEEEEE',
     iconBlue: '#98ADD4',
     iconMauve: '#A0837F',
     iconGold: '#CBA16B',
+    pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0', // dark mode fix
   };
 
   return (
@@ -29,30 +39,35 @@ const SettingsScreen = () => {
         label="Account"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
       <SettingsItem
         icon={<Feather name="settings" size={24} color={colors.iconBlue} />}
         label="User Settings"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
       <SettingsItem
         icon={<MaterialCommunityIcons name="book-outline" size={24} color={colors.iconBlue} />}
         label="Preferences"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
       <SettingsItem
         icon={<Ionicons name="notifications-outline" size={24} color={colors.iconBlue} />}
         label="Notifications"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
       <SettingsItem
         icon={<MaterialCommunityIcons name="logout" size={24} color={colors.iconMauve} />}
         label="Logout"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
 
       <Text style={[styles.sectionTitle, { color: colors.sectionText }]}>FEEDBACK</Text>
@@ -62,13 +77,26 @@ const SettingsScreen = () => {
         label="Report a Bug"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
       <SettingsItem
         icon={<Feather name="message-square" size={24} color={colors.iconGold} />}
         label="Send Feedback"
         textColor={colors.text}
         borderColor={colors.border}
+        pressColor={colors.pressHighlight}
       />
+
+      <Text style={[styles.sectionTitle, { color: colors.sectionText }]}>APPEARANCE</Text>
+      <View style={[styles.toggleContainer, { borderColor: colors.border }]}>
+        <Text style={[styles.toggleLabel, { color: colors.text }]}>Dark Mode</Text>
+        <Switch
+          value={isDarkMode}
+          onValueChange={setIsDarkMode}
+          trackColor={{ false: '#ccc', true: '#666' }}
+          thumbColor={isDarkMode ? '#fff' : '#fff'}
+        />
+      </View>
     </ScrollView>
   );
 };
@@ -78,11 +106,13 @@ const SettingsItem = ({
   label,
   textColor,
   borderColor,
+  pressColor,
 }: {
   icon: React.ReactNode;
   label: string;
   textColor: string;
   borderColor: string;
+  pressColor: string;
 }) => {
   const scale = useRef(new Animated.Value(1)).current;
   const [isPressed, setIsPressed] = useState(false);
@@ -110,7 +140,7 @@ const SettingsItem = ({
           styles.item,
           {
             borderBottomColor: borderColor,
-            backgroundColor: isPressed ? '#f0f0f0' : 'transparent',
+            backgroundColor: isPressed ? pressColor : 'transparent',
           },
         ]}
       >
@@ -158,6 +188,19 @@ const styles = StyleSheet.create({
   itemLabel: {
     fontSize: 16,
     marginLeft: 15,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    marginTop: 10,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
