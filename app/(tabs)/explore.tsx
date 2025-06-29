@@ -207,7 +207,7 @@ const Explore = () => {
     !Number.isFinite(selectedCityData.latitude) ||
     !Number.isFinite(selectedCityData.longitude)
   ) {
-    console.warn('⚠️ Invalid selectedCityData — skipping render to avoid map crash');
+    console.warn('Invalid selectedCityData — skipping render to avoid map crash');
     return null;
   }
 
@@ -338,7 +338,6 @@ const Explore = () => {
           ))}
         </MapView>
 
-
         <Pressable
           onPress={() => {
             cycleToggleMode();
@@ -372,7 +371,6 @@ const Explore = () => {
                   </Text>
                 </Animated.View>
 
-                {/* Bubble tail */}
                 <View
                   style={{
                     width: 0,

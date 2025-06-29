@@ -7,10 +7,8 @@ const Home = () => {
   return (
     <ScrollView style={styles.container}>
       <Header />
-      {/* Welcome Message */}
       <Text style={styles.welcome}>Welcome back, Sarah! 🎉</Text>
 
-      {/* Button Grid */}
       <View style={styles.buttonGrid}>
         <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>Request Skills</Text></TouchableOpacity>
         <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>Offer Skills</Text></TouchableOpacity>
@@ -18,7 +16,6 @@ const Home = () => {
         <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>View Swaps</Text></TouchableOpacity>
       </View>
 
-      {/* Featured Matches */}
       <Text style={styles.sectionTitle}>Featured Matches</Text>
       <View style={styles.featuredRow}>
         {[users.denver, users.seattle2, users.newyork2].map((user, index) => (
@@ -33,7 +30,6 @@ const Home = () => {
         ))}
       </View>
 
-      {/* Upcoming Swaps */}
       <Text style={styles.sectionTitle}>Upcoming Swaps</Text>
       <View style={styles.upcomingRow}>
         {[
