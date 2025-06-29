@@ -27,7 +27,7 @@ const SettingsScreen = () => {
     iconBlue: '#98ADD4',
     iconMauve: '#A0837F',
     iconGold: '#CBA16B',
-    pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0', // dark mode fix
+    pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0', 
   };
 
   return (
