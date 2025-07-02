@@ -1,19 +1,42 @@
-﻿import React from 'react';
+﻿import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { CompositeNavigationProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../components/Header';
+import { RootStackParamList } from '../constants/navigation';
+
+
+type HomeScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<RootStackParamList, 'Home'>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 const Home = () => {
+  // 2. Strongly type useNavigation
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
   return (
     <ScrollView style={styles.container}>
       <Header />
       <Text style={styles.welcome}>Welcome back, Sarah! 🎉</Text>
 
       <View style={styles.buttonGrid}>
-        <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>Request Skills</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>Offer Skills</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>Browse Skills</Text></TouchableOpacity>
-        <TouchableOpacity style={styles.button}><Text style={styles.buttonText}>View Swaps</Text></TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('explore', { mode: 'Learn' })}
+        >
+          <Text style={styles.buttonText}>Learn New Skills</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('explore', { mode: 'Teach' })}
+        >
+          <Text style={styles.buttonText}>Offer Your Skills</Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.sectionTitle}>Featured Matches</Text>
@@ -72,9 +95,7 @@ const styles = StyleSheet.create({
   },
   buttonGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 10,
     marginBottom: 20,
   },
   button: {

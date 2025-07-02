@@ -1,15 +1,16 @@
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { getAuth } from 'firebase/auth';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import * as Yup from 'yup';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getAuth } from 'firebase/auth';
 
 // Define the route names for your stack
 type RootStackParamList = {
   Signup: undefined;
   Login: undefined;
   Home: undefined;
+  explore: { mode: 'Learn' | 'Teach' };
 };
 
 // Type for the navigation prop

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -20,6 +21,7 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
+import { RootStackParamList } from '../constants/navigation';
 
 type UserType = {
   name: string;
@@ -37,6 +39,10 @@ type City = {
   latitude: number;
   longitude: number;
 };
+
+type ExploreParams = {
+  mode?: 'Learn' | 'Teach';
+}
 
 const skillFilters: Record<string, string[]> = {
   'Hands-on / Trade Skills': [
@@ -98,6 +104,14 @@ const Explore = () => {
   };
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
+
+  useEffect(() => {
+    const mode = route.params?.mode;
+    if (mode === 'Learn') setToggleMode('learn');
+    else if (mode === 'Teach') setToggleMode('teach');
+  }, [route.params]);
 
   useEffect(() => {
     if (showTooltip) {
