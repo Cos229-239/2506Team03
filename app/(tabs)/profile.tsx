@@ -1,6 +1,6 @@
 import { useRoute } from '@react-navigation/native';
 import React from 'react';
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Chip } from 'react-native-paper';
 import { users } from '../../assets/data/mockUsers';
 
@@ -21,6 +21,8 @@ const Profile = () => {
       skills: ['Guitar', 'Digital Art', 'Graphic Design', 'Baking'],
       interests: ['Gardening', 'Photography', 'Fitness', 'Car Repair'],
     };
+
+     const isOwnProfile = !userId || userId === 'me';
 
   return (
     <View style={styles.root}>
@@ -43,14 +45,22 @@ const Profile = () => {
           <Text style={styles.location}>{user.locationText}</Text>
         </View>
 
-        <View style={styles.buttonRow}>
-          <View style={styles.button}>
-            <Text style={styles.buttonText}>Follow</Text>
-          </View>
-          <View style={[styles.button, styles.messageButton]}>
-            <Text style={styles.buttonText}>Message</Text>
-          </View>
-        </View>
+        {isOwnProfile ? (
+  <View style={styles.editButtonRow}>
+    <TouchableOpacity style={styles.editButton} onPress={() => {/* future: navigation.navigate('editProfile') */}}>
+      <Text style={styles.buttonText}>Edit Profile</Text>
+    </TouchableOpacity>
+  </View>
+) : (
+  <View style={styles.buttonRow}>
+    <View style={styles.button}>
+      <Text style={styles.buttonText}>Follow</Text>
+    </View>
+    <View style={[styles.button, styles.messageButton]}>
+      <Text style={styles.buttonText}>Message</Text>
+    </View>
+  </View>
+)}
 
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>Bio</Text>
@@ -216,6 +226,21 @@ const styles = StyleSheet.create({
   avatarSpacer: {
     height: Platform.OS === 'android' ? 50 : 45,
   },
+  editButtonRow: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  marginBottom: 12,
+},
+editButton: {
+  backgroundColor: '#32425b',
+  paddingHorizontal: 20,
+  paddingVertical: 8,
+  alignItems: 'center',
+  borderRadius: 20,
+  borderWidth: 2,
+  borderColor: '#222',
+  minWidth: 160,
+},
 });
 
 export default Profile;

@@ -24,7 +24,7 @@ const UserProfile = () => {
             latitude: 0,
             longitude: 0,
         };
-
+    const isOwnProfile = !userId || userId === 'me';
     return (
         <View style={styles.root}>
             <View style={styles.closeIconContainer}>
@@ -50,14 +50,22 @@ const UserProfile = () => {
                     <Text style={styles.location}>{user.locationText}</Text>
                 </View>
 
-                <View style={styles.buttonRow}>
-                    <View style={styles.button}>
-                        <Text style={styles.buttonText}>Follow</Text>
+                {isOwnProfile ? (
+                    <View style={styles.editButtonRow}>
+                        <TouchableOpacity style={styles.editButton} onPress={() => {/* future: navigation.navigate('editProfile') */ }}>
+                            <Text style={styles.buttonText}>Edit Profile</Text>
+                        </TouchableOpacity>
                     </View>
-                    <View style={[styles.button, styles.messageButton]}>
-                        <Text style={styles.buttonText}>Message</Text>
+                ) : (
+                    <View style={styles.buttonRow}>
+                        <View style={styles.button}>
+                            <Text style={styles.buttonText}>Follow</Text>
+                        </View>
+                        <View style={[styles.button, styles.messageButton]}>
+                            <Text style={styles.buttonText}>Message</Text>
+                        </View>
                     </View>
-                </View>
+                )}
 
                 <View style={styles.sectionDivider} />
                 <Text style={styles.sectionTitle}>Bio</Text>
@@ -234,6 +242,21 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         color: '#000',
+    },
+    editButtonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginBottom: 12,
+    },
+    editButton: {
+        backgroundColor: '#32425b',
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        alignItems: 'center',
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#222',
+        minWidth: 160,
     },
 });
 
