@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: Platform.OS === 'android' ? 180 : 170,
-        backgroundColor: '#CBA16B',
+        backgroundColor: '#77615E',
         zIndex: -1,
     },
     bannerWrapper: {
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
         height: Platform.OS === 'android' ? 180 : 170,
         justifyContent: 'flex-end',
         alignItems: 'center',
-        backgroundColor: '#CBA16B',
+        backgroundColor: '#77615E',
     },
     avatarWrapper: {
         position: 'absolute',
