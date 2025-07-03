@@ -8,14 +8,13 @@ import { users } from '../../assets/data/mockUsers';
 import Header from '../components/Header';
 import { RootStackParamList } from '../constants/navigation';
 
-
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, 'Home'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
 
 const Home = () => {
-  // 2. Strongly type useNavigation
+  
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
   return (
@@ -28,14 +27,22 @@ const Home = () => {
           style={styles.button}
           onPress={() => navigation.navigate('explore', { mode: 'Learn' })}
         >
-          <Text style={styles.buttonText}>Learn New Skills</Text>
+          <View style={styles.buttonContent}>
+            <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#77615E' }]} />
+            <Text style={styles.buttonText}>Learn New Skills</Text>
+            <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#77615E' }]} />
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('explore', { mode: 'Teach' })}
         >
-          <Text style={styles.buttonText}>Offer Your Skills</Text>
+          <View style={styles.buttonContent}>
+            <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#4E6487' }]} />
+            <Text style={styles.buttonText}>Offer Your Skills</Text>
+            <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#4E6487' }]} />
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -202,7 +209,24 @@ const styles = StyleSheet.create({
   },
   upcomingInfo: {
     flexShrink: 1,
-  }
+  },
+  buttonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  buttonBar: {
+    width: 120,
+    height: 3,
+    marginVertical: 4,
+    borderRadius: 2,
+  },
+  topBar: {
+    marginBottom: 8,
+  },
+  bottomBar: {
+    marginTop: 8,
+  },
 });
 
 export default Home;

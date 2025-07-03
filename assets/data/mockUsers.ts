@@ -5,24 +5,40 @@ import AvatarJohn from '../images/avatar-john.png';
 import AvatarLisa from '../images/avatar-lisa.png';
 
 export type MockUser = {
-    name: string;
-    profession: string;
-    skills: string[];
-    latitude: number;
-    longitude: number;
-    avatar: any;
-    locationText: string;
+  name: string;
+  profession: string;
+  skills: string[];
+  interests?: string[];
+  bio?: string;
+  latitude: number;
+  longitude: number;
+  avatar: any;
+  locationText: string;
 };
 
 export const users: Record<string, MockUser> = {
-    seattle: {
+  seattle: {
     name: 'John Smith',
     profession: 'Carpenter',
-    skills: ['Carpentry', 'Digital Art', 'Woodworking', 'Furniture Repair'],
+    locationText: 'Seattle, WA',
+    skills: ['Carpentry', 'Digital Art', 'Furniture Repair', 'Woodworking'],
+    interests: ['Car Repair', 'Drawing', 'Fitness', 'Programming'],
+    avatar: AvatarJohn,
     latitude: 47.6062,
     longitude: -122.3321,
+    bio: "I’m John - carpenter of 15+ years and proud Seattle local. I specialize in custom furniture, home repairs, and teaching beginner woodworking.",
+  },
+
+  john: {
+    name: 'John Smith',
+    profession: 'Carpenter',
+    locationText: 'Seattle, WA',
+    skills: ['Carpentry', 'Digital Art', 'Furniture Repair', 'Woodworking'],
+    interests: ['Car Repair', 'Drawing', 'Fitness', 'Programming'],
     avatar: AvatarJohn,
-    locationText: 'Seattle',
+    latitude: 47.6062,
+    longitude: -122.3321,
+    bio: "I’m John - carpenter of 15+ years and proud Seattle local. I specialize in custom furniture, home repairs, and teaching beginner woodworking.",
   },
   newyork: {
     name: 'Enzo Bartolli',

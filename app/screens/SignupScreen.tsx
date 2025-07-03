@@ -11,6 +11,8 @@ type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   explore: { mode: 'Learn' | 'Teach' };
+  Profile: undefined;
+  userProfile: { userId?: string };
 };
 
 // Type for the navigation prop
