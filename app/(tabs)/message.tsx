@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     width: '30%',
     alignItems: 'center',
     borderRadius: 8,
-    overflow: 'hidden', // ensure ripple is clipped inside
+    overflow: 'hidden',
     marginBottom: 16,
   },
   followAvatar: {
