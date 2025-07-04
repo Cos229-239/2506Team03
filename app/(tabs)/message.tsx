@@ -1,27 +1,11 @@
 import React from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { Avatar, Text } from 'react-native-paper';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Avatar, Text, TouchableRipple } from 'react-native-paper';
 
 const messages = [
-  {
-    id: '1',
-    name: 'Amber Edison',
-    text: 'Thanks for your help! Can’t wait to plan...',
-  },
-  {
-    id: '2',
-    name: 'Enzo Bartolli',
-    text: "Sunday looks good. I'll send the Zoom...",
-  },
-  {
-    id: '3',
-    name: 'Robert Campbell',
-    text: 'Looking forward to the skill swap - let...',
-  },
+  { id: '1', name: 'Amber Edison', text: 'Thanks for your help! Can’t wait to plan...' },
+  { id: '2', name: 'Enzo Bartolli', text: "Sunday looks good. I'll send the Zoom..." },
+  { id: '3', name: 'Robert Campbell', text: 'Looking forward to the skill swap - let...' },
 ];
 
 const following = [
@@ -42,34 +26,50 @@ const following = [
 const MessageScreen = () => {
   return (
     <View style={styles.container}>
-      {/* Messages Section (Static) */}
+      {/* Messages Section */}
       <View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Messages</Text>
-          <Text style={styles.seeAll}>See all...</Text>
+          <TouchableRipple onPress={() => {}} borderless>
+            <View style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>See all...</Text>
+            </View>
+          </TouchableRipple>
         </View>
 
         {messages.map((msg) => (
-          <View key={msg.id} style={styles.messageCard}>
-            <Avatar.Text
-              size={48}
-              label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              style={styles.messageAvatar}
-              labelStyle={{ fontSize: 18 }}
-            />
-            <View style={styles.messageContent}>
-              <Text style={styles.messageName}>{msg.name}</Text>
-              <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+          <TouchableRipple
+            key={msg.id}
+            onPress={() => {}}
+            rippleColor="rgba(0,0,0,0.1)"
+            borderless={false}
+            style={styles.rippleWrapper}
+          >
+            <View style={styles.messageCard}>
+              <Avatar.Text
+                size={48}
+                label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                style={styles.messageAvatar}
+                labelStyle={{ fontSize: 18 }}
+              />
+              <View style={styles.messageContent}>
+                <Text style={styles.messageName}>{msg.name}</Text>
+                <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+              </View>
             </View>
-          </View>
+          </TouchableRipple>
         ))}
       </View>
 
-      {/* Following Section (Scrollable) */}
+      {/* Following Section */}
       <View style={styles.followingWrapper}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Following</Text>
-          <Text style={styles.seeAll}>See all...</Text>
+          <TouchableRipple onPress={() => {}} borderless>
+            <View style={styles.seeAllButton}>
+              <Text style={styles.seeAllText}>See all...</Text>
+            </View>
+          </TouchableRipple>
         </View>
 
         <FlatList
@@ -80,16 +80,23 @@ const MessageScreen = () => {
           columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 24 }}
           showsVerticalScrollIndicator={true}
           renderItem={({ item }) => (
-            <View style={styles.followingItem}>
-              <Avatar.Text
-                size={80}
-                label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                style={styles.followAvatar}
-                labelStyle={{ fontSize: 24 }}
-              />
-              <Text style={styles.followName}>{item.name}</Text>
-              <Text style={styles.followRole}>{item.role}</Text>
-            </View>
+            <TouchableRipple
+              onPress={() => {}}
+              rippleColor="rgba(0,0,0,0.1)"
+              style={styles.followingRipple}
+              borderless
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Avatar.Text
+                  size={80}
+                  label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  style={styles.followAvatar}
+                  labelStyle={{ fontSize: 24 }}
+                />
+                <Text style={styles.followName}>{item.name}</Text>
+                <Text style={styles.followRole}>{item.role}</Text>
+              </View>
+            </TouchableRipple>
           )}
         />
       </View>
@@ -114,21 +121,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
-  seeAll: {
-    color: '#2E7D32',
+  seeAllButton: {
+    backgroundColor: '#9DD4B6',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  seeAllText: {
+    color: 'black',
+    fontSize: 13,
     fontWeight: '600',
-    fontSize: 14,
+  },
+  rippleWrapper: {
+    borderRadius: 16,
+    marginBottom: 10,
   },
   messageCard: {
     flexDirection: 'row',
-    backgroundColor: '#d8e7ff',
+    backgroundColor: '#98ADD4',
     borderRadius: 16,
     padding: 12,
-    marginBottom: 10,
     alignItems: 'center',
   },
   messageAvatar: {
-    backgroundColor: '#bbdefb',
+    backgroundColor: '#A0837F',
   },
   messageContent: {
     marginLeft: 12,
@@ -137,26 +153,33 @@ const styles = StyleSheet.create({
   messageName: {
     fontWeight: 'bold',
     fontSize: 15,
+    color: '#000',
   },
   messageText: {
     fontSize: 14,
+    color: '#000',
   },
   followingWrapper: {
     flex: 1,
     marginTop: 16,
   },
-  followingItem: {
+  followingRipple: {
     width: '30%',
     alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 16,
   },
   followAvatar: {
-    backgroundColor: '#cfd8dc',
+    backgroundColor: '#A0837F',
     marginBottom: 4,
+    alignSelf: 'center',
   },
   followName: {
     fontWeight: 'bold',
     fontSize: 14,
     textAlign: 'center',
+    color: '#000',
   },
   followRole: {
     fontSize: 12,

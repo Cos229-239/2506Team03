@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "2506Team03",
+    "name": "Skill Swap",
     "slug": "2506Team03",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "2506team03",
+    "scheme": "mycleantestapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -33,8 +33,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ],
-      "expo-font"
+      ]
     ],
     "experiments": {
       "typedRoutes": true
