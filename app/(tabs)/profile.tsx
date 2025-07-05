@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Chip } from 'react-native-paper';
 
-console.log("✅ Home screen is loaded");
+console.log("✅ Profile screen is loaded");
 
 export default function Profile() {
   return (
