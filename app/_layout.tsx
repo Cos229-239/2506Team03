@@ -1,8 +1,23 @@
+// app/_layout.tsx
+
 import { Stack } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../src/firebaseConfig';  // adjust if you placed firebaseConfig elsewhere
 
 export default function RootLayout() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // change to true to test tabs
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+    return unsubscribe;
+  }, []);
+
+  if (isLoggedIn === null) {
+    return null; // or a loading spinner if you want
+  }
 
   return (
     <Stack>
