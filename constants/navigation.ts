@@ -1,8 +1,8 @@
 export type RootStackParamList = {
   Signup: undefined;
   Login: undefined;
-  Home: undefined;
+  index: undefined;
   explore: { mode: 'Learn' | 'Teach' };
-  Profile: undefined;
+  profile: undefined;
   userProfile: { userId: string };
 };

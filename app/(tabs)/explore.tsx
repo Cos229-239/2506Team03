@@ -23,7 +23,7 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-import { RootStackParamList } from '../constants/navigation';
+import { RootStackParamList } from '../../constants/navigation.js';
 
 type UserType = {
   name: string;

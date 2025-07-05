@@ -6,10 +6,10 @@ import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
-import { RootStackParamList } from '../constants/navigation';
+import { RootStackParamList } from '../../constants/navigation';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<RootStackParamList, 'Home'>,
+  BottomTabNavigationProp<RootStackParamList, 'index'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
 

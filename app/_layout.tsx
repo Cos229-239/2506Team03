@@ -1,9 +1,9 @@
 // app/_layout.tsx
 
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../src/firebaseConfig';  // adjust if you placed firebaseConfig elsewhere
+import { useEffect, useState } from 'react';
+import { auth } from '../src/firebaseConfig'; // adjust if you placed firebaseConfig elsewhere
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);

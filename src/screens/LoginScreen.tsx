@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
 import { useRouter } from 'expo-router';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { auth } from '../firebaseConfig';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ export default function LoginScreen() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('✅ Login successful', userCredential.user.email);
       Alert.alert('Login Successful', `Welcome back, ${userCredential.user.email}!`);
-      router.replace('/(tabs)');
+      router.replace('/');
     } catch (error: any) {
       console.error(error);
       Alert.alert('Login Failed', error.message);

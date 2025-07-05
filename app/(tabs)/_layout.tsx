@@ -1,4 +1,3 @@
-// app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs, useNavigation } from 'expo-router';
@@ -15,7 +14,6 @@ export default function TabLayout() {
   const state = navigation?.getState?.();
   const currentRoute = state?.routes?.[state.index]?.name ?? '';
 
-  // hide the tab bar on these routes
   const hideTabBarRoutes = ['login', 'index'];
   const shouldHideTabBar = hideTabBarRoutes.includes(currentRoute);
 
@@ -26,57 +24,55 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-         tabBarStyle: shouldHideTabBar
-      ? { display: 'none' }
-      : {
-          backgroundColor: 'rgb(30, 58, 66)', // set your color here !!
-          borderTopWidth: 0,
-          position: Platform.OS === 'ios' ? 'absolute' : 'relative',
-        },
-  }}
->
-         {/* Explore Tab */}
-            <Tabs.Screen
-              name="explore"
-              options={{
-                      title: 'Explore',
-                tabBarIcon: ({ color }) => (
-                  <IconSymbol  name="compass" size={28} color={color} />
-                ),
-              }}
-            />
+        tabBarStyle: shouldHideTabBar
+          ? { display: 'none' }
+          : {
+            backgroundColor: 'rgb(30, 58, 66)',
+            borderTopWidth: 0,
+            position: Platform.OS === 'ios' ? 'absolute' : 'relative',
+          },
+      }}
+    >
 
-      {/* Profile Tab */}
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol name="compass" size={28} color={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="profile"
         options={{
           href: "/profile",
           title: 'Profile',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
+            <Ionicons name="person" size={28} color={color} />
           ),
         }}
       />
 
-      {/* Home Tab (center default) */}
       <Tabs.Screen
         name="index"
         options={{
           href: "/",
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="home" color={color} />
+            <Ionicons name="home" size={28} color={color} />
           ),
         }}
       />
 
-      {/* Message Tab */}
       <Tabs.Screen
-        name="message"
+        name="messages"
         options={{
-          title: 'Messages',
+          href: "/messages",
+          title: "Messages",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name="message" size={24} color={color} />
+            <MaterialIcons name="message" size={28} color={color} />
           ),
         }}
       />
@@ -86,7 +82,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="settings-sharp" size={24} color={color} />
+            <Ionicons name="settings-sharp" size={28} color={color} />
           ),
         }}
       />
