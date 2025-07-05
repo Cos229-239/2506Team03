@@ -11,7 +11,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
 
 const SettingsScreen = () => {
   const systemScheme = useColorScheme();
@@ -21,9 +21,9 @@ const SettingsScreen = () => {
 
   const colors = {
     background: theme.background,
-    sectionText: theme.sectionText ?? '#888888',
+    sectionText: '#888888',
     text: theme.text,
-    border: theme.border ?? '#EEEEEE',
+    border: '#EEEEEE',
     iconBlue: '#98ADD4',
     iconMauve: '#A0837F',
     iconGold: '#CBA16B',

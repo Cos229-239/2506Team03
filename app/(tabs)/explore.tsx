@@ -20,6 +20,7 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
+import { IconSymbol } from '../../components/ui/IconSymbol';
 
 type UserType = {
   name: string;
@@ -806,6 +807,59 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  calloutAccentBar: {
+    height: 6,
+    width: '100%',
+    backgroundColor: '#4e6487',
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  cityPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    minWidth: 100,
+  },
+  chevron: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 6,
+    marginTop: 2,
+  },
+  cityModalAccentBar: {
+    height: 6,
+    width: '85%',
+    backgroundColor: '#CBA16B',
+    borderRadius: 12,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  toggleLabel: {
+    marginTop: 6,
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#aaa',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    shadowColor: '#111',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  toggleLabelText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  toggleHintText: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+    textAlign: 'center',
+    letterSpacing: 0.5,
   },
   calloutAccentBar: {
     height: 6,
