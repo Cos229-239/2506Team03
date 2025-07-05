@@ -10,25 +10,26 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-
-import { Colors } from '../constants/Colors';
+import { Colors } from '../../constants/Colors';
+import { useRouter } from 'expo-router';
 
 const SettingsScreen = () => {
   const systemScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
-
   const theme = isDarkMode ? Colors.dark : Colors.light;
 
   const colors = {
     background: theme.background,
-    sectionText: theme.sectionText ?? '#888888',
+    sectionText: '#888888',
     text: theme.text,
-    border: theme.border ?? '#EEEEEE',
+    border: '#EEEEEE',
     iconBlue: '#98ADD4',
     iconMauve: '#A0837F',
     iconGold: '#CBA16B',
     pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0', 
   };
+
+  const router = useRouter();
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -68,6 +69,7 @@ const SettingsScreen = () => {
         textColor={colors.text}
         borderColor={colors.border}
         pressColor={colors.pressHighlight}
+        onPress={() => router.replace('/login')}
       />
 
       <Text style={[styles.sectionTitle, { color: colors.sectionText }]}>FEEDBACK</Text>
@@ -107,12 +109,14 @@ const SettingsItem = ({
   textColor,
   borderColor,
   pressColor,
+  onPress,
 }: {
   icon: React.ReactNode;
   label: string;
   textColor: string;
   borderColor: string;
   pressColor: string;
+  onPress?: () => void;
 }) => {
   const scale = useRef(new Animated.Value(1)).current;
   const [isPressed, setIsPressed] = useState(false);
@@ -134,7 +138,11 @@ const SettingsItem = ({
   };
 
   return (
-    <TouchableWithoutFeedback onPressIn={handlePressIn} onPressOut={handlePressOut}>
+    <TouchableWithoutFeedback
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+    >
       <View
         style={[
           styles.item,
