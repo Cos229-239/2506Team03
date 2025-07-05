@@ -27,20 +27,15 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: shouldHideTabBar
-          ? { display: 'none' }
-          : Platform.select({
-              ios: { position: 'absolute' },
-              default: {},
-            }),
-      }}
-
-
-
-
-
-      
-      >
+         tabBarStyle: shouldHideTabBar
+      ? { display: 'none' }
+      : {
+          backgroundColor: 'rgb(30, 58, 66)', // set your color here !!
+          borderTopWidth: 0,
+          position: Platform.OS === 'ios' ? 'absolute' : 'relative',
+        },
+  }}
+>
       {/* Explore Tab */}
       <Tabs.Screen
         name="explore"
