@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useRouter } from 'expo-router';
-
+console.log("✅ Settings screen is loaded");
 const SettingsScreen = () => {
   const systemScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
@@ -69,9 +69,11 @@ const SettingsScreen = () => {
         textColor={colors.text}
         borderColor={colors.border}
         pressColor={colors.pressHighlight}
-        onPress={() => router.replace('/login')}
+        onPress={() => {
+          console.log('Logout successful ❌');
+          router.replace('/login');
+        }}
       />
-
       <Text style={[styles.sectionTitle, { color: colors.sectionText }]}>FEEDBACK</Text>
 
       <SettingsItem

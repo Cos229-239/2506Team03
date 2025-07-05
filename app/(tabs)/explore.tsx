@@ -22,6 +22,9 @@ import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { IconSymbol } from '../../components/ui/IconSymbol';
 
+
+console.log("✅ Explore screen is loaded"); 
+
 type UserType = {
   name: string;
   profession: string;
