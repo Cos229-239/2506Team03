@@ -20,6 +20,7 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
+import { IconSymbol } from '../../components/ui/IconSymbol';
 
 type UserType = {
   name: string;
@@ -860,4 +861,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.5,
   },
+
+ 
 });

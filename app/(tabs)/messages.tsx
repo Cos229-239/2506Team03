@@ -23,7 +23,7 @@ const following = [
   { id: '12', name: 'Derek L.', role: 'Cycling Coach' },
 ];
 
-const MessageScreen = () => {
+const Messages = () => {
   return (
     <View style={styles.container}>
       {/* Messages Section */}
@@ -188,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessageScreen;
+export default Messages;

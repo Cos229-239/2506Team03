@@ -1,9 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
-const Home = () => {
+export default function Index() {
   return (
     <ScrollView style={styles.container}>
       <Header />
@@ -18,7 +18,7 @@ const Home = () => {
 
       <Text style={styles.sectionTitle}>Featured Matches</Text>
       <View style={styles.featuredRow}>
-        {[users.denver, users.seattle2, users.newyork2].map((user, index) => (
+        {[users.denver, users.seattle2, users.newyork2].map((user) => (
           <View key={user.name} style={styles.matchContainer}>
             <Image source={user.avatar} style={styles.avatar} />
             <Text style={styles.matchName}>{user.name}</Text>
@@ -58,18 +58,11 @@ const Home = () => {
       </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  welcome: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 28,
-  },
+  container: { padding: 20, backgroundColor: '#fff' },
+  welcome: { fontSize: 24, fontWeight: '600', marginBottom: 28 },
   buttonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -87,26 +80,10 @@ const styles = StyleSheet.create({
     width: '48%',
     alignItems: 'center',
   },
-  buttonText: {
-    fontWeight: '600',
-    fontSize: 18,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  matchName: {
-    fontWeight: '600',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  matchRole: {
-    fontStyle: 'italic',
-    fontSize: 14,
-    color: '#000',
-    marginBottom: 6,
-  },
+  buttonText: { fontWeight: '600', fontSize: 18 },
+  sectionTitle: { fontSize: 20, fontWeight: '600', marginBottom: 10 },
+  matchName: { fontWeight: '600', fontSize: 16, textAlign: 'center' },
+  matchRole: { fontStyle: 'italic', fontSize: 14, color: '#000', marginBottom: 6 },
   swapButton: {
     backgroundColor: '#ACC3EE',
     paddingVertical: 4,
@@ -114,10 +91,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
   },
-  swapButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  swapButtonText: { fontSize: 14, fontWeight: '500' },
   featuredRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -131,15 +105,8 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     marginBottom: 6,
   },
-  matchContainer: {
-    alignItems: 'center',
-    marginRight: 20,
-  },
-  upcomingRow: {
-    flexDirection: 'column',
-    gap: 20,
-    marginTop: 5,
-  },
+  matchContainer: { alignItems: 'center', marginRight: 20 },
+  upcomingRow: { flexDirection: 'column', gap: 20, marginTop: 5 },
   upcomingCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -149,15 +116,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#000',
     width: '100%',
-    position: 'relative',
     marginBottom: 1,
-  },
-  avatarWrapper: {
-    position: 'absolute',
-    top: -28,
-    left: 15,
-    zIndex: 1,
-    borderRadius: 40,
   },
   upcomingAvatar: {
     width: 80,
@@ -167,21 +126,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     resizeMode: 'cover',
   },
-  upcomingTitle: {
-    fontWeight: '700',
-    fontSize: 18,
-    marginTop: 4,
-    marginBottom: 4,
-    color: '#000',
-  },
-  upcomingText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  upcomingInfo: {
-    flexShrink: 1,
-  }
+  upcomingTitle: { fontWeight: '700', fontSize: 18, marginTop: 4, marginBottom: 4, color: '#000' },
+  upcomingText: { color: '#000', fontSize: 14, fontWeight: 'bold' },
+  upcomingInfo: { flexShrink: 1 },
 });
-
-export default Home;
