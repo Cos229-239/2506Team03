@@ -1,33 +1,31 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Slot, useRouter, useSegments } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+// app/_layout.tsx
+
+import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../src/firebaseConfig';  // adjust if you placed firebaseConfig elsewhere
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const router = useRouter();
-  const segments = useSegments();
-
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const inTabsGroup = segments[0] === '(tabs)';
-    if (!isLoggedIn && inTabsGroup) {
-      router.replace('/login');
-    }
-  }, [isLoggedIn, segments]);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+    return unsubscribe;
+  }, []);
 
-  if (!loaded) return null;
+  if (isLoggedIn === null) {
+    return null; // or a loading spinner if you want
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Slot />
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack>
+      {isLoggedIn ? (
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      ) : (
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+      )}
+    </Stack>
   );
 }

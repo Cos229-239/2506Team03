@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Avatar, Text, TouchableRipple } from 'react-native-paper';
-
+console.log("✅ Messages screen is loaded");
 const messages = [
   { id: '1', name: 'Amber Edison', text: 'Thanks for your help! Can’t wait to plan...' },
   { id: '2', name: 'Enzo Bartolli', text: "Sunday looks good. I'll send the Zoom..." },
@@ -23,7 +23,7 @@ const following = [
   { id: '12', name: 'Derek L.', role: 'Cycling Coach' },
 ];
 
-const MessageScreen = () => {
+const Messages = () => {
   return (
     <View style={styles.container}>
       {/* Messages Section */}
@@ -188,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MessageScreen;
+export default Messages;
