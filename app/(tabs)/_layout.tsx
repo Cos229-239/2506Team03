@@ -23,10 +23,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[systemScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+
          tabBarStyle: shouldHideTabBar
       ? { display: 'none' }
       : {
@@ -36,10 +37,12 @@ export default function TabLayout() {
         },
   }}
 >
+
       {/* Explore Tab */}
       <Tabs.Screen
         name="explore"
         options={{
+
           title: 'Explore',
           tabBarIcon: ({ color }) => (
             <IconSymbol  name="compass" size={28} color={color} />
@@ -47,46 +50,30 @@ export default function TabLayout() {
         }}
       />
 
-
-
-
-
-
-
-
       {/* Home Tab */}
       <Tabs.Screen
         name="index"
         options={{
+
+          href: "/index",
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="home" color={color} />
+            <IconSymbol size={28} name="compass" color={color} />
           ),
         }}
       />
-
-
-
-
-
 
       {/* Profile Tab */}
       <Tabs.Screen
         name="profile"
         options={{
+          href: "/profile",
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={24} color={color} />
           ),
         }}
       />
-
-
-
-
-
-
-
 
         {/* Messages Tab */}
         <Tabs.Screen
@@ -98,11 +85,6 @@ export default function TabLayout() {
             ),
           }}
         />
-
-
-
-
-
 
       {/* Settings Tab */}
       <Tabs.Screen
@@ -116,4 +98,3 @@ export default function TabLayout() {
       />
     </Tabs>
   );
-}
