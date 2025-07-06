@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     root: {
         flex: 1,
         position: 'relative',
-        backgroundColor: '#fff', // fallback in case banner doesn't fill
+        backgroundColor: '#fff',
         overflow: 'visible',
     },
     banner: {

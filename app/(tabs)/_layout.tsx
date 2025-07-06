@@ -14,7 +14,7 @@ export default function TabLayout() {
   const state = navigation?.getState?.();
   const currentRoute = state?.routes?.[state.index]?.name ?? '';
 
-  const hideTabBarRoutes = ['login', 'index'];
+  const hideTabBarRoutes = ['login', 'index', 'user/[userId]'];
   const shouldHideTabBar = hideTabBarRoutes.includes(currentRoute);
 
   return (

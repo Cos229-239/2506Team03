@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -23,8 +23,7 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-import { RootStackParamList } from '../../constants/navigation.js';
-
+import { RootStackParamList } from '../../constants/navigation';
 
 console.log("✅ Explore screen is loaded"); 
 
@@ -115,7 +114,7 @@ const Explore = () => {
 
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
 
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const mode = route.params?.mode;
@@ -151,6 +150,14 @@ const Explore = () => {
       }
     }, [route.params])
   );
+
+  useEffect(() => {
+  const unsubscribe = navigation.addListener('tabPress', () => {
+    setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
+  });
+
+  return unsubscribe;
+}, [navigation]);
 
   const selectedCityData = Object.values(groupedCities)
     .flat()
