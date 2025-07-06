@@ -32,12 +32,20 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.logo}>
-        <Text style={styles.logoIcon}>🔃</Text>
-        <Text style={styles.title}>Skill Swap</Text>
+        <Text style={styles.logoIcon}>🤝</Text>
+        <Text style={styles.title}>SkillSwap</Text>
         <Text style={styles.subtitle}>For users, by users.</Text>
       </View>
 
       <View style={styles.loginBox}>
+        {/* create account link above email */}
+        <View style={styles.linkRow}>
+          <TouchableOpacity onPress={() => router.push('/signup')}>
+            <Text style={styles.link}>Create an account</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* email input */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -47,6 +55,14 @@ export default function LoginScreen() {
           autoCapitalize="none"
         />
 
+        {/* forgot password link above password */}
+        <View style={styles.linkRow}>
+          <TouchableOpacity onPress={() => router.push('/+not-found')}>
+            <Text style={styles.link}>Forgot password?</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* password input */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -56,6 +72,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
+        {/* login button */}
         <TouchableOpacity
           style={[styles.loginButton, loading && { opacity: 0.6 }]}
           onPress={handleLogin}
@@ -95,11 +112,23 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: '#90e0a4',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 6,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#2e7d32',
   },
   loginButtonText: { fontWeight: 'bold', fontSize: 16, color: '#000' },
+ link: {
+  color: '#3a8ddf',
+  fontSize: 12,
+  textDecorationLine: 'underline',
+},
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 5,     // <-- pushes the link further down
+    marginBottom: -10,
+
+  },
 });

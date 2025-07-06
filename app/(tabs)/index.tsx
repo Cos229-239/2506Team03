@@ -7,7 +7,7 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
 import { RootStackParamList } from '../../constants/navigation';
-
+console.log("✅ Home screen is loaded");
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, 'index'>,
   NativeStackNavigationProp<RootStackParamList>

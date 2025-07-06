@@ -25,6 +25,9 @@ import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation.js';
 
+
+console.log("✅ Explore screen is loaded"); 
+
 type UserType = {
   name: string;
   profession: string;
