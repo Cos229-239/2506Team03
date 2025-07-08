@@ -1,7 +1,8 @@
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getFirestore, setDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import {
   Alert,
   ScrollView,

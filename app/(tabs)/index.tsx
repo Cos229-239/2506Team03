@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
