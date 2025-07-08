@@ -29,6 +29,6 @@ export default function RootLayout() {
   );
 }
 
-export const unstable_settings = {
-  initialRouteName: 'login',
-};
+// export const unstable_settings = {
+//   initialRouteName: 'login',
+// };
