@@ -1,9 +1,8 @@
-// app/_layout.tsx
 
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../src/firebaseConfig';  // adjust if you placed firebaseConfig elsewhere
+import { useEffect, useState } from 'react';
+import { auth } from '../src/firebaseConfig'; // adjust if you placed firebaseConfig elsewhere
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -20,12 +19,16 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
-      {isLoggedIn ? (
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      ) : (
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-      )}
-    </Stack>
+    <Stack screenOptions={{ headerShown: false }}>
+  {isLoggedIn ? (
+    <Stack.Screen name="(tabs)" />
+  ) : (
+    <Stack.Screen name="login" />
+  )}
+</Stack>
   );
 }
+
+export const unstable_settings = {
+  initialRouteName: 'login',
+};

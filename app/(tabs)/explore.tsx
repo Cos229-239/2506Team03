@@ -1,6 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+<<<<<<< HEAD
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
+=======
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { router } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+>>>>>>> 37277a8de57566240e7147b6545f211daa0e505b
 import {
   Animated,
   Dimensions,
@@ -21,8 +28,14 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
+<<<<<<< HEAD
 
 console.log("✅ Explore screen is loaded");
+=======
+import { RootStackParamList } from '../../constants/navigation';
+
+console.log("✅ Explore screen is loaded"); 
+>>>>>>> 37277a8de57566240e7147b6545f211daa0e505b
 
 type UserType = {
   name: string;
@@ -41,43 +54,50 @@ type City = {
   longitude: number;
 };
 
+type ExploreParams = {
+  mode?: 'Learn' | 'Teach';
+}
+
 const skillFilters: Record<string, string[]> = {
-  'Hands-on / Trade Skills': [
-    'Woodworking',
-    'Welding',
-    'Furniture Repair',
-    'Car Repair',
-    'Home Improvement',
-    'Carpentry'
-  ],
   'Creative / Art Skills': [
-    'Painting',
-    'Drawing',
     'Digital Art',
-    'Photography',
-    'Crafting & DIY',
+    'Drawing',
+    'Graphic Design',
     'Guitar',
+    'Knitting & Crochet',
+    'Painting',
+    'Photography',
     'Piano',
   ],
-  'Tech / Digital Skills': [
-    'Web Design',
-    'Programming',
-    'Video Editing',
-    '3D Modeling',
-    'IT Support',
+  'Hands-on / Trade Skills': [
+    'Automotive Repair',
+    'Car Repair',
+    'Carpentry',
+    'Furniture Repair',
+    'Home Improvement',
+    'Woodworking',
+    'Welding',
   ],
   'Lifestyle & Personal Growth': [
-    'Cooking',
     'Baking',
+    'Cooking',
     'Fitness',
-    'Languages',
-    'Language Tutoring – Italian',
-    'Language Tutoring – Spanish',
-    'Language Tutoring – French',
-    'Language Tutoring – German',
-    'Language Tutoring - Japanese',
     'Gardening',
+    'Language: English',
+    'Language: French',
+    'Language: German',
+    'Language: Italian',
+    'Language: Japanese',
+    'Language: Spanish',
     'Sewing & Tailoring',
+  ],
+  'Tech / Digital Skills': [
+    '3D Modeling',
+    'Digital Art',
+    'IT Support',
+    'Programming',
+    'Video Editing',
+    'Web Design',
   ],
 };
 
@@ -102,6 +122,16 @@ const Explore = () => {
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
+  const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
+
+  const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    const mode = route.params?.mode;
+    if (mode === 'Learn') setToggleMode('learn');
+    else if (mode === 'Teach') setToggleMode('teach');
+  }, [route.params]);
+
   useEffect(() => {
     if (showTooltip) {
       Animated.loop(
@@ -122,6 +152,22 @@ const Explore = () => {
       ).start();
     }
   }, [showTooltip]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!route.params?.mode) {
+        setToggleMode('everyone');
+      }
+    }, [route.params])
+  );
+
+  useEffect(() => {
+  const unsubscribe = navigation.addListener('tabPress', () => {
+    setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
+  });
+
+  return unsubscribe;
+}, [navigation]);
 
   const selectedCityData = Object.values(groupedCities)
     .flat()
@@ -620,7 +666,13 @@ const Explore = () => {
                       ))}
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
-                        onPress={() => console.log('View Profile Pressed')}
+                        onPress={() => {
+                          const userId = Object.entries(users).find(([_, u]) => u.name === selectedUser.name)?.[0];
+                          if (userId) {
+                            setProfileVisible(false);
+                            router.push(`/user/${userId}`);
+                          }
+                        }}
                       >
                         <Text style={styles.viewProfileBtnText}>View Profile</Text>
                       </TouchableOpacity>
