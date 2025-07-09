@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-import * as React from 'react';
-=======
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
->>>>>>> 37277a8de57566240e7147b6545f211daa0e505b
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';

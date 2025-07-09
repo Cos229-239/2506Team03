@@ -1,13 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-=======
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
->>>>>>> 37277a8de57566240e7147b6545f211daa0e505b
 import {
   Animated,
   Dimensions,
@@ -28,14 +23,9 @@ import type MapViewType from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
-<<<<<<< HEAD
-
-console.log("✅ Explore screen is loaded");
-=======
 import { RootStackParamList } from '../../constants/navigation';
 
 console.log("✅ Explore screen is loaded"); 
->>>>>>> 37277a8de57566240e7147b6545f211daa0e505b
 
 type UserType = {
   name: string;
