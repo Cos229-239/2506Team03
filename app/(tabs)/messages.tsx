@@ -1,5 +1,5 @@
+import * as React from 'react';
 import { useRouter } from 'expo-router';
-import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Avatar, Text, TouchableRipple } from 'react-native-paper';
 
