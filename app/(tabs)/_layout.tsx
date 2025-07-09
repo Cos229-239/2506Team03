@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs, useNavigation } from 'expo-router';
-import React from 'react';
+import * as React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import { HapticTab } from '../../components/HapticTab';
 import { IconSymbol } from '../../components/ui/IconSymbol';
@@ -27,17 +27,21 @@ export default function TabLayout() {
         tabBarStyle: shouldHideTabBar
           ? { display: 'none' }
           : {
-            backgroundColor: 'rgb(30, 58, 66)',
+            backgroundColor: 'rgb(50, 98, 111)',
             borderTopWidth: 0,
             position: Platform.OS === 'ios' ? 'absolute' : 'relative',
           },
       }}
     >
 
+
+
+
+
+
       <Tabs.Screen
         name="explore"
         options={{
-
           title: 'Explore',
           tabBarIcon: ({ color }) => (
             <IconSymbol name="compass" size={28} color={color} />
@@ -45,10 +49,15 @@ export default function TabLayout() {
         }}
       />
 
+
+
+
+
+
+
       <Tabs.Screen
         name="profile"
         options={{
-          href: "/profile",
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={28} color={color} />
@@ -56,10 +65,15 @@ export default function TabLayout() {
         }}
       />
 
+
+
+
+
+
+
       <Tabs.Screen
         name="index"
         options={{
-          href: "/",
           title: 'Home',
           tabBarIcon: ({ color }) => (
             <Ionicons name="home" size={28} color={color} />
@@ -67,16 +81,28 @@ export default function TabLayout() {
         }}
       />
 
+
+
+
+
+
+
       <Tabs.Screen
         name="messages"
         options={{
-          href: "/messages",
           title: "Messages",
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="message" size={28} color={color} />
           ),
         }}
       />
+
+
+
+
+
+
+
 
       <Tabs.Screen
         name="settings"

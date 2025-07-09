@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Avatar, Text, TouchableRipple } from 'react-native-paper';
 console.log("✅ Messages screen is loaded");
