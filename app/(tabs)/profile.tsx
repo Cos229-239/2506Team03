@@ -1,6 +1,8 @@
 import { useRoute } from '@react-navigation/native';
-import React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Chip } from 'react-native-paper';
 import { users } from '../../assets/data/mockUsers';
 
@@ -9,58 +11,91 @@ type Params = { userId?: string };
 const Profile = () => {
   const route = useRoute();
   const { userId } = (route.params || {}) as Params;
+  const auth = getAuth();
+  const db = getFirestore();
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+
+      const docRef = doc(db, 'users', currentUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setUserData(docSnap.data());
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const user = userId
     ? users[userId]
-    : {
+    : userData || {
       name: 'Sarah Lian',
       profession: 'Illustrator',
       locationText: 'Seattle, WA',
       avatar: require('../../assets/images/avatar-sarah.png'),
       bio: "I'm a freelance illustrator based in Seattle – looking to teach basic illustration and learn some cool new skills.... let's swap!",
       skills: ['Guitar', 'Digital Art', 'Graphic Design', 'Baking'],
-      interests: ['Gardening', 'Photography', 'Fitness', 'Car Repair'],
+      interests: ['Gardening', 'Photography', 'Fitness', 'Automotive Repair'],
     };
 
-     const isOwnProfile = !userId || userId === 'me';
+  const isOwnProfile = !userId || userId === 'me';
 
   return (
-    <View style={styles.root}>
-      {/* Banner and avatar stack */}
+    <ScrollView contentContainerStyle={[styles.root, { paddingBottom: 40 }]}>
       <View style={styles.bannerWrapper}>
         <View style={styles.banner} />
         <View style={styles.avatarWrapper}>
-          <Image source={user.avatar} style={styles.avatar} />
+          <Image
+            source={
+              typeof user.avatar === 'number'
+                ? user.avatar
+                : user.avatar
+                  ? { uri: user.avatar }
+                  : require('../../assets/images/avatar-default.png')
+            }
+            style={styles.avatar}
+          />
         </View>
       </View>
 
-      {/* Content area */}
       <View style={styles.container}>
         <View style={styles.avatarSpacer} />
-        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.name}>{user.name || 'Unnamed User'}</Text>
 
         <View style={styles.roleLocationRow}>
-          <Text style={styles.role}>{user.profession}</Text>
-          <Text style={styles.dot}>•</Text>
-          <Text style={styles.location}>{user.locationText}</Text>
+          <Text style={styles.role}>
+            {user.profession || (user as any).role || 'No role listed'}
+          </Text>
+          {(user.profession || (user as any).role) &&
+            (user.locationText || (user as any).location) && (
+              <Text style={styles.dot}>•</Text>
+            )}
+          <Text style={styles.location}>
+            {user.locationText || (user as any).location || 'No location listed'}
+          </Text>
         </View>
 
         {isOwnProfile ? (
-  <View style={styles.editButtonRow}>
-    <TouchableOpacity style={styles.editButton} onPress={() => {/* future: navigation.navigate('editProfile') */}}>
-      <Text style={styles.buttonText}>Edit Profile</Text>
-    </TouchableOpacity>
-  </View>
-) : (
-  <View style={styles.buttonRow}>
-    <View style={styles.button}>
-      <Text style={styles.buttonText}>Follow</Text>
-    </View>
-    <View style={[styles.button, styles.messageButton]}>
-      <Text style={styles.buttonText}>Message</Text>
-    </View>
-  </View>
-)}
+          <View style={styles.editButtonRow}>
+            <TouchableOpacity style={styles.editButton} onPress={() => { }}>
+              <Text style={styles.buttonText}>Edit Profile</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.buttonRow}>
+            <View style={styles.button}>
+              <Text style={styles.buttonText}>Follow</Text>
+            </View>
+            <View style={[styles.button, styles.messageButton]}>
+              <Text style={styles.buttonText}>Message</Text>
+            </View>
+          </View>
+        )}
 
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>Bio</Text>
@@ -71,7 +106,7 @@ const Profile = () => {
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>My Skills</Text>
         <View style={styles.box}>
-          {user.skills.sort().map((skill) => (
+          {user.skills.sort().map((skill: string) => (
             <Chip key={skill} style={styles.chip}>
               <Text style={styles.chipText}>{skill}</Text>
             </Chip>
@@ -81,14 +116,14 @@ const Profile = () => {
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>My Interests</Text>
         <View style={styles.box}>
-          {user.interests?.sort().map((interest) => (
+          {user.interests?.sort().map((interest: string) => (
             <Chip key={interest} style={styles.chip}>
               <Text style={styles.chipText}>{interest}</Text>
             </Chip>
           ))}
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -100,9 +135,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   root: {
-    flex: 1,
     position: 'relative',
-    backgroundColor: '#fff', // fallback in case banner doesn't fill
+    backgroundColor: '#fff',
     overflow: 'visible',
   },
   banner: {
@@ -227,20 +261,20 @@ const styles = StyleSheet.create({
     height: Platform.OS === 'android' ? 50 : 45,
   },
   editButtonRow: {
-  flexDirection: 'row',
-  justifyContent: 'center',
-  marginBottom: 12,
-},
-editButton: {
-  backgroundColor: '#32425b',
-  paddingHorizontal: 20,
-  paddingVertical: 8,
-  alignItems: 'center',
-  borderRadius: 20,
-  borderWidth: 2,
-  borderColor: '#222',
-  minWidth: 160,
-},
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  editButton: {
+    backgroundColor: '#32425b',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#222',
+    minWidth: 160,
+  },
 });
 
 export default Profile;

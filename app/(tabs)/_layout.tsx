@@ -4,7 +4,6 @@ import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import { HapticTab } from '../../components/HapticTab';
-import { IconSymbol } from '../../components/ui/IconSymbol';
 import TabBarBackground from '../../components/ui/TabBarBackground';
 import { Colors } from '../../constants/Colors';
 
@@ -37,10 +36,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-
           title: 'Explore',
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="compass" size={28} color={color} />
+            <Ionicons name="compass" size={28} color={color} />
           ),
         }}
       />
@@ -48,7 +46,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          href: "/profile",
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={28} color={color} />
@@ -70,7 +67,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="messages"
         options={{
-          href: "/messages",
           title: "Messages",
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="message" size={28} color={color} />

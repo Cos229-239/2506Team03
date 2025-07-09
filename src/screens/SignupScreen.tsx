@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, getFirestore, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
@@ -43,6 +43,10 @@ export default function SignUpScreen() {
       // create user in Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
+
+      await updateProfile(userCredential.user, {
+        displayName: name, // name is already pulled from your form
+      });
 
       // store extra fields in Firestore under users/{uid}
       await setDoc(doc(db, 'users', userId), {

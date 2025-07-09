@@ -61,8 +61,6 @@ const skillFilters: Record<string, string[]> = {
   ],
   'Hands-on / Trade Skills': [
     'Automotive Repair',
-    'Car Repair',
-    'Carpentry',
     'Furniture Repair',
     'Home Improvement',
     'Woodworking',
