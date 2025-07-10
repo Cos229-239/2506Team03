@@ -658,7 +658,7 @@ const Explore = () => {
                           const userId = Object.entries(users).find(([_, u]) => u.name === selectedUser.name)?.[0];
                           if (userId) {
                             setProfileVisible(false);
-                            router.push(`/user/${userId}`);
+                            router.push(`../user/${userId}`);
                           }
                         }}
                       >

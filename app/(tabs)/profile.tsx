@@ -1,126 +1,183 @@
 import { useRoute } from '@react-navigation/native';
-import { getAuth } from 'firebase/auth';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import React, { useEffect, useState } from 'react';
-import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Chip } from 'react-native-paper';
-import { users } from '../../assets/data/mockUsers';
+import { UserProfile, useUser } from '../../src/contexts/UserContext';
+import { db } from '../../src/firebaseConfig';
+
+const DEFAULT_AVATAR = 'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=827cee39-3e1e-4828-a070-0f8ff36fab86';
 
 type Params = { userId?: string };
 
 const Profile = () => {
   const route = useRoute();
   const { userId } = (route.params || {}) as Params;
-  const auth = getAuth();
-  const db = getFirestore();
-  const [userData, setUserData] = useState<any>(null);
+  const { user: loggedInUser, setUser } = useUser();
+  const router = useRouter();
+
+  const isOwnProfile = !userId || userId === 'me';
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-
-      const docRef = doc(db, 'users', currentUser.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setUserData(docSnap.data());
+    const fetchUser = async () => {
+      if (!isOwnProfile && userId) {
+        try {
+          const ref = doc(db, 'users', userId);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            setProfile(snap.data());
+          }
+        } catch (err) {
+          console.error('❌ Failed to load user:', err);
+        }
+      } else {
+        setProfile(loggedInUser);
       }
     };
 
-    fetchUserData();
-  }, []);
+    fetchUser();
+  }, [userId, loggedInUser]);
 
-  const user = userId
-    ? users[userId]
-    : userData || {
-      name: 'Sarah Lian',
-      profession: 'Illustrator',
-      locationText: 'Seattle, WA',
-      avatar: require('../../assets/images/avatar-sarah.png'),
-      bio: "I'm a freelance illustrator based in Seattle – looking to teach basic illustration and learn some cool new skills.... let's swap!",
-      skills: ['Guitar', 'Digital Art', 'Graphic Design', 'Baking'],
-      interests: ['Gardening', 'Photography', 'Fitness', 'Automotive Repair'],
-    };
+  const handleAvatarPress = () => {
+    if (!isOwnProfile) return;
 
-  const isOwnProfile = !userId || userId === 'me';
+    Alert.alert('Update Profile Picture', 'Choose an option', [
+      { text: 'Change Photo', onPress: handleChangePhoto },
+      { text: 'Delete Photo', onPress: handleDeletePhoto, style: 'destructive' },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  };
+
+  const handleChangePhoto = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permission denied', 'Camera roll access is required.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+
+      allowsEditing: true,
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const image = result.assets[0];
+      const storage = getStorage();
+      const imageRef = ref(storage, `avatar/${loggedInUser?.uid}.jpg`);
+
+      try {
+        const img = await fetch(image.uri);
+        const blob = await img.blob();
+        await uploadBytes(imageRef, blob);
+        const downloadURL = await getDownloadURL(imageRef);
+
+        await updateDoc(doc(db, 'users', loggedInUser!.uid), { avatar: downloadURL });
+
+        const updatedUser: UserProfile = {
+  ...(loggedInUser as UserProfile),
+  avatar: downloadURL,
+};
+        setProfile(updatedUser);
+        setUser(updatedUser);
+      } catch (err) {
+        console.error('Failed to upload image:', err);
+        Alert.alert('Upload failed', 'Could not upload profile image.');
+      }
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    try {
+      await updateDoc(doc(db, 'users', loggedInUser!.uid), { avatar: DEFAULT_AVATAR });
+
+      const updatedUser: UserProfile = {
+  ...(loggedInUser as UserProfile),
+  avatar: DEFAULT_AVATAR,
+};
+      setProfile(updatedUser);
+      setUser(updatedUser);
+    } catch (err) {
+      console.error('Failed to delete avatar:', err);
+      Alert.alert('Error', 'Could not delete avatar.');
+    }
+  };
+
+  if (!profile) {
+    return (
+      <View style={styles.root}>
+        <Text style={{ textAlign: 'center', marginTop: 100 }}>Loading user profile...</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView contentContainerStyle={[styles.root, { paddingBottom: 40 }]}>
+    <ScrollView contentContainerStyle={styles.root}>
       <View style={styles.bannerWrapper}>
         <View style={styles.banner} />
         <View style={styles.avatarWrapper}>
-          <Image
-            source={
-              typeof user.avatar === 'number'
-                ? user.avatar
-                : user.avatar
-                  ? { uri: user.avatar }
-                  : require('../../assets/images/avatar-default.png')
-            }
-            style={styles.avatar}
-          />
+          <TouchableOpacity onPress={handleAvatarPress}>
+            <Image
+              source={
+                profile.avatar
+                  ? { uri: profile.avatar }
+                  : { uri: DEFAULT_AVATAR }
+              }
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.container}>
         <View style={styles.avatarSpacer} />
-        <Text style={styles.name}>{user.name || 'Unnamed User'}</Text>
+        <Text style={styles.name}>{profile.name}</Text>
 
-        <View style={styles.roleLocationRow}>
-          <Text style={styles.role}>
-            {user.profession || (user as any).role || 'No role listed'}
-          </Text>
-          {(user.profession || (user as any).role) &&
-            (user.locationText || (user as any).location) && (
-              <Text style={styles.dot}>•</Text>
-            )}
-          <Text style={styles.location}>
-            {user.locationText || (user as any).location || 'No location listed'}
-          </Text>
-        </View>
+        {(profile.role || profile.location) && (
+          <View style={styles.roleLocationRow}>
+            {profile.role && <Text style={styles.role}>{profile.role}</Text>}
+            {profile.role && profile.location && <Text style={styles.dot}>•</Text>}
+            {profile.location && <Text style={styles.location}>{profile.location}</Text>}
+          </View>
+        )}
 
-        {isOwnProfile ? (
+        {isOwnProfile && (
           <View style={styles.editButtonRow}>
-            <TouchableOpacity style={styles.editButton} onPress={() => { }}>
+            <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
               <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.buttonRow}>
-            <View style={styles.button}>
-              <Text style={styles.buttonText}>Follow</Text>
-            </View>
-            <View style={[styles.button, styles.messageButton]}>
-              <Text style={styles.buttonText}>Message</Text>
-            </View>
           </View>
         )}
 
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>Bio</Text>
         <View style={styles.box}>
-          <Text style={styles.boxText}>{user.bio}</Text>
+          <Text style={styles.boxText}>{profile.bio || 'No bio provided.'}</Text>
         </View>
 
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>My Skills</Text>
         <View style={styles.box}>
-          {user.skills.sort().map((skill: string) => (
+          {profile.skills?.length ? profile.skills.sort().map((skill: string) => (
             <Chip key={skill} style={styles.chip}>
               <Text style={styles.chipText}>{skill}</Text>
             </Chip>
-          ))}
+          )) : <Text style={styles.boxText}>No skills listed.</Text>}
         </View>
 
         <View style={styles.sectionDivider} />
         <Text style={styles.sectionTitle}>My Interests</Text>
         <View style={styles.box}>
-          {user.interests?.sort().map((interest: string) => (
+          {profile.interests?.length ? profile.interests.sort().map((interest: string) => (
             <Chip key={interest} style={styles.chip}>
               <Text style={styles.chipText}>{interest}</Text>
             </Chip>
-          ))}
+          )) : <Text style={styles.boxText}>No interests listed.</Text>}
         </View>
       </View>
     </ScrollView>
@@ -135,9 +192,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   root: {
-    position: 'relative',
     backgroundColor: '#fff',
-    overflow: 'visible',
+    flexGrow: 1,
+    position: 'relative',
   },
   banner: {
     position: 'absolute',
@@ -183,55 +240,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  role: {
-    fontSize: 18,
-    color: '#333',
-  },
-  dot: {
-    marginHorizontal: 6,
-    fontSize: 18,
-    color: '#333',
-  },
-  location: {
-    fontSize: 18,
-    color: '#333',
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: '#32425b',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    alignItems: 'center',
-    minWidth: 100,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#222',
-  },
-  messageButton: {
-    backgroundColor: '#32425b',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 16,
-  },
+  role: { fontSize: 18, color: '#333' },
+  dot: { marginHorizontal: 6, fontSize: 18, color: '#333' },
+  location: { fontSize: 18, color: '#333' },
   sectionDivider: {
     height: 2,
     backgroundColor: '#ccc',
     marginVertical: 8,
     borderRadius: 1,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
   box: {
     backgroundColor: '#9DD4B6',
     borderRadius: 12,
@@ -242,11 +260,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#000',
   },
-  boxText: {
-    fontSize: 16,
-    lineHeight: 20,
-    color: '#000',
-  },
+  boxText: { fontSize: 16, lineHeight: 20, color: '#000' },
   chip: {
     margin: 4,
     backgroundColor: '#FFF',
@@ -254,12 +268,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#000',
   },
-  chipText: {
-    fontWeight: 'bold',
-  },
-  avatarSpacer: {
-    height: Platform.OS === 'android' ? 50 : 45,
-  },
+  chipText: { fontWeight: 'bold' },
+  avatarSpacer: { height: Platform.OS === 'android' ? 50 : 45 },
   editButtonRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -274,6 +284,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#222',
     minWidth: 160,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 16,
   },
 });
 

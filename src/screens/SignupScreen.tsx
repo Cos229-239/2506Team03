@@ -1,7 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, getFirestore, setDoc } from 'firebase/firestore';
-import React, { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import * as React from 'react';
+import { useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -10,11 +12,17 @@ import {
   TextInput,
   TouchableOpacity
 } from 'react-native';
-import { auth } from '../firebaseConfig';
+
+import { useUser } from '../../src/contexts/UserContext';
+import { auth, db } from '../firebaseConfig';
+
+// ✅ Default avatar from Firebase Storage
+const DEFAULT_AVATAR =
+  'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=827cee39-3e1e-4828-a070-0f8ff36fab86';
 
 export default function SignUpScreen() {
   const router = useRouter();
-  const db = getFirestore();
+  const { setUser } = useUser();
 
   const [form, setForm] = useState({
     name: '',
@@ -40,30 +48,34 @@ export default function SignUpScreen() {
     }
 
     try {
-      // create user in Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid;
+      const uid = userCredential.user.uid;
 
-      await updateProfile(userCredential.user, {
-        displayName: name,
-      });
-
-      // store extra fields in Firestore under users/{uid}
-      await setDoc(doc(db, 'users', userId), {
+      // ✅ Construct full user object
+      const userData = {
+        uid,
         name,
         email,
         role,
         location,
         bio,
+        avatar: DEFAULT_AVATAR,
         skills: skills.split(',').map((s) => s.trim()),
         interests: interests.split(',').map((i) => i.trim()),
-      });
+      };
+
+      // ✅ Save to Firestore
+      await setDoc(doc(db, 'users', uid), userData);
+
+      // ✅ Save to context + AsyncStorage
+      setUser(userData);
+      await AsyncStorage.setItem('user', JSON.stringify(userData));
 
       Alert.alert('Success', 'Account created successfully!');
-      router.replace('/(tabs)'); // after signup, go to home
+      router.replace('/'); // go to (tabs)/index
 
     } catch (error: any) {
-      console.error(error);
+      console.error('❌ Signup failed:', error);
       Alert.alert('Signup failed', error.message);
     }
   };
@@ -78,7 +90,6 @@ export default function SignUpScreen() {
         value={form.name}
         onChangeText={(val) => handleChange('name', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -86,7 +97,6 @@ export default function SignUpScreen() {
         autoCapitalize="none"
         onChangeText={(val) => handleChange('email', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Password"
@@ -94,21 +104,18 @@ export default function SignUpScreen() {
         value={form.password}
         onChangeText={(val) => handleChange('password', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Role (e.g. Carpenter, Designer)"
         value={form.role}
         onChangeText={(val) => handleChange('role', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Location"
         value={form.location}
         onChangeText={(val) => handleChange('location', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Short Bio"
@@ -116,14 +123,12 @@ export default function SignUpScreen() {
         onChangeText={(val) => handleChange('bio', val)}
         multiline
       />
-
       <TextInput
         style={styles.input}
         placeholder="Skills (comma separated)"
         value={form.skills}
         onChangeText={(val) => handleChange('skills', val)}
       />
-
       <TextInput
         style={styles.input}
         placeholder="Interests (comma separated)"
