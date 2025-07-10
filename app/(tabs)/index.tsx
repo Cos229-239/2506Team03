@@ -2,12 +2,12 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getAuth } from 'firebase/auth';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
 import { RootStackParamList } from '../../constants/navigation';
+import { useUser } from '../../src/contexts/UserContext';
 
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, 'index'>,
@@ -18,17 +18,15 @@ const Index = () => {
 
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const displayName = user?.displayName || '';
-  const firstName = displayName.split(' ')[0];
+  const { user } = useUser();
+  const firstName = user?.name?.trim().split(' ')[0] || 'friend';
 
   return (
     <ScrollView style={styles.container}>
       <Header />
       <Text style={styles.welcome}>
-  {`Welcome back, ${firstName || 'there'}! 🎉`}
-</Text>
+        {`Welcome back, ${firstName}! 🎉`}
+      </Text>
 
       <View style={styles.buttonGrid}>
         <TouchableOpacity
