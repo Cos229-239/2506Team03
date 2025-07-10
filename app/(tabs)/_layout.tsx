@@ -1,14 +1,13 @@
-// app/(tabs)/_layout.tsx
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs, useNavigation } from 'expo-router';
 import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 
-import { HapticTab } from '../../components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '../../components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
+import { HapticTab } from '../../components/HapticTab';
+import TabBarBackground from '../../components/ui/TabBarBackground';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -23,11 +22,10 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[systemScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-
          tabBarStyle: shouldHideTabBar
       ? { display: 'none' }
       : {
@@ -37,12 +35,9 @@ export default function TabLayout() {
         },
   }}
 >
-
-      {/* Explore Tab */}
       <Tabs.Screen
         name="explore"
         options={{
-
           title: 'Explore',
           tabBarIcon: ({ color }) => (
             <IconSymbol  name="compass" size={28} color={color} />
@@ -50,24 +45,33 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Home Tab */}
+
+
+
+
+
+
+
+    
       <Tabs.Screen
         name="index"
         options={{
-
-          href: "/index",
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="compass" color={color} />
+            <IconSymbol size={28} name="home" color={color} />
           ),
         }}
       />
 
-      {/* Profile Tab */}
+
+
+
+
+
+    
       <Tabs.Screen
         name="profile"
         options={{
-          href: "/profile",
           title: 'Profile',
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" size={24} color={color} />
@@ -75,7 +79,14 @@ export default function TabLayout() {
         }}
       />
 
-        {/* Messages Tab */}
+
+
+
+
+
+
+
+    
         <Tabs.Screen
           name="messages"
           options={{
@@ -86,7 +97,12 @@ export default function TabLayout() {
           }}
         />
 
-      {/* Settings Tab */}
+
+
+
+
+
+  
       <Tabs.Screen
         name="settings"
         options={{
@@ -98,3 +114,4 @@ export default function TabLayout() {
       />
     </Tabs>
   );
+}
