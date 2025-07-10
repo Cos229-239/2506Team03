@@ -1,9 +1,8 @@
-// app/_layout.tsx
-
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../src/firebaseConfig';  // adjust if you placed firebaseConfig elsewhere
+import { useEffect, useState } from 'react';
+import { UserProvider } from '../src/contexts/UserContext'; // ✅ import UserProvider
+import { auth } from '../src/firebaseConfig'; // adjust if needed
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -16,16 +15,18 @@ export default function RootLayout() {
   }, []);
 
   if (isLoggedIn === null) {
-    return null; // or a loading spinner if you want
+    return null; // show splash screen or spinner if desired
   }
 
   return (
-    <Stack>
-      {isLoggedIn ? (
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      ) : (
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-      )}
-    </Stack>
+    <UserProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        {isLoggedIn ? (
+          <Stack.Screen name="(tabs)" />
+        ) : (
+          <Stack.Screen name="login" />
+        )}
+      </Stack>
+    </UserProvider>
   );
 }

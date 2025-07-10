@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+// LoginScreen.tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { useState } from 'react';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useUser } from '../../src/contexts/UserContext';
+import { auth, db } from '../firebaseConfig';
+import { UserProfile } from '../../src/contexts/UserContext';
+
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -18,9 +26,22 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Login successful', userCredential.user.email);
-      Alert.alert('Login Successful', `Welcome back, ${userCredential.user.email}!`);
-      router.replace('/(tabs)');
+      const uid = userCredential.user.uid;
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      
+
+      if (userDoc.exists()) {
+       const userData: UserProfile = {
+  uid,
+  ...(userDoc.data() as Omit<UserProfile, 'uid'>),
+};
+        setUser(userData);
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+        Alert.alert('Login Successful', `Welcome back, ${userData.name || userCredential.user.email}!`);
+        router.replace('/');
+      } else {
+        Alert.alert('Error', 'No profile found for this user.');
+      }
     } catch (error: any) {
       console.error(error);
       Alert.alert('Login Failed', error.message);
@@ -38,14 +59,12 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.loginBox}>
-        {/* create account link above email */}
         <View style={styles.linkRow}>
           <TouchableOpacity onPress={() => router.push('/signup')}>
             <Text style={styles.link}>Create an account</Text>
           </TouchableOpacity>
         </View>
 
-        {/* email input */}
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={styles.input}
@@ -55,14 +74,12 @@ export default function LoginScreen() {
           autoCapitalize="none"
         />
 
-        {/* forgot password link above password */}
         <View style={styles.linkRow}>
           <TouchableOpacity onPress={() => router.push('/+not-found')}>
             <Text style={styles.link}>Forgot password?</Text>
           </TouchableOpacity>
         </View>
 
-        {/* password input */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -72,7 +89,6 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
 
-        {/* login button */}
         <TouchableOpacity
           style={[styles.loginButton, loading && { opacity: 0.6 }]}
           onPress={handleLogin}
@@ -119,16 +135,15 @@ const styles = StyleSheet.create({
     borderColor: '#2e7d32',
   },
   loginButtonText: { fontWeight: 'bold', fontSize: 16, color: '#000' },
- link: {
-  color: '#3a8ddf',
-  fontSize: 12,
-  textDecorationLine: 'underline',
-},
+  link: {
+    color: '#3a8ddf',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
   linkRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 5,     // <-- pushes the link further down
+    marginTop: 5,
     marginBottom: -10,
-
   },
 });

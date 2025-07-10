@@ -1,7 +1,10 @@
-import React from 'react';
+import * as React from 'react';
+import { useRouter } from 'expo-router';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Avatar, Text, TouchableRipple } from 'react-native-paper';
+
 console.log("✅ Messages screen is loaded");
+
 const messages = [
   { id: '1', name: 'Amber Edison', text: 'Thanks for your help! Can’t wait to plan...' },
   { id: '2', name: 'Enzo Bartolli', text: "Sunday looks good. I'll send the Zoom..." },
@@ -24,13 +27,15 @@ const following = [
 ];
 
 const Messages = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       {/* Messages Section */}
       <View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Messages</Text>
-          <TouchableRipple onPress={() => {}} borderless>
+          <TouchableRipple onPress={() => router.push('/message/all')} borderless>
             <View style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See all...</Text>
             </View>
