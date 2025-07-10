@@ -45,7 +45,7 @@ export default function SignUpScreen() {
       const userId = userCredential.user.uid;
 
       await updateProfile(userCredential.user, {
-        displayName: name, // name is already pulled from your form
+        displayName: name,
       });
 
       // store extra fields in Firestore under users/{uid}
