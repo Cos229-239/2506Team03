@@ -15,7 +15,7 @@ import {
 
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
-
+console.log("✅ Signup screen is loaded");
 // ✅ Default avatar from Firebase Storage
 const DEFAULT_AVATAR =
   'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=827cee39-3e1e-4828-a070-0f8ff36fab86';

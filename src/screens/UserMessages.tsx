@@ -1,16 +1,14 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const AllMessagesScreen = () => {
-  const router = useRouter();
+console.log("✅ UserMessages screen is loaded");
 
-  const handleBack = () => {
-    router.back(); // go back to the previous screen
-  };
+const UserMessages = () => {
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backText}>{'<'}</Text>
       </TouchableOpacity>
 
@@ -23,7 +21,7 @@ const AllMessagesScreen = () => {
   );
 };
 
-export default AllMessagesScreen;
+export default UserMessages;
 
 const styles = StyleSheet.create({
   container: {

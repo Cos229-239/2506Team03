@@ -10,7 +10,7 @@ import { auth, db } from '../firebaseConfig';
 import { UserProfile } from '../../src/contexts/UserContext';
 
 
-
+console.log("✅ Login screen is loaded");
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

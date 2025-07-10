@@ -13,7 +13,7 @@ import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-
+console.log("✅ Edit Profile screen is loaded");
 export default function EditProfile() {
   const { user, setUser } = useUser();
   const router = useRouter();

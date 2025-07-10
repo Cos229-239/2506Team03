@@ -35,7 +35,7 @@ const Messages = () => {
       <View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Messages</Text>
-          <TouchableRipple onPress={() => router.push('/message/all')} borderless>
+          <TouchableRipple onPress={() => router.push('/usermessages')} borderless>
             <View style={styles.seeAllButton}>
               <Text style={styles.seeAllText}>See all...</Text>
             </View>
