@@ -1,23 +1,43 @@
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { IconButton } from 'react-native-paper'; // Paper icon button
 
 const AllMessagesScreen = () => {
   const router = useRouter();
+  const messages: any[] = [];
 
   const handleBack = () => {
-    router.back(); // go back to the previous screen
+    router.back();
+  };
+
+  const handleNewMessage = () => {
+    console.log('📨 New Message button pressed');
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-        <Text style={styles.backText}>{'<'}</Text>
-      </TouchableOpacity>
+      {/* Back Button (Left) */}
+      <IconButton
+        icon="chevron-left"
+        size={32}
+        onPress={handleBack}
+        style={styles.backButton}
+      />
+
+      {/* New Message Button (Right) */}
+      <IconButton
+        icon="square-edit-outline"
+        size={28}
+        onPress={handleNewMessage}
+        style={styles.newMessageButton}
+      />
 
       <View style={styles.content}>
-        <Text style={styles.placeholder}>
-          This is the full messages screen (placeholder)
-        </Text>
+        {messages.length === 0 ? (
+          <Text style={styles.placeholder}>You have no new messages</Text>
+        ) : (
+          <Text style={styles.placeholder}>[Messages will be shown here]</Text>
+        )}
       </View>
     </View>
   );
@@ -34,14 +54,15 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 50,
-    left: 20,
+    top: 45,
+    left: 10,
     zIndex: 10,
-    padding: 10,
   },
-  backText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  newMessageButton: {
+    position: 'absolute',
+    top: 45,
+    right: 10,
+    zIndex: 10,
   },
   content: {
     marginTop: 80,
