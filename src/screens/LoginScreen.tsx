@@ -5,9 +5,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useUser } from '../../src/contexts/UserContext';
+import { UserProfile, useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
-import { UserProfile } from '../../src/contexts/UserContext';
 
 
 
@@ -28,13 +27,13 @@ export default function LoginScreen() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
       const userDoc = await getDoc(doc(db, 'users', uid));
-      
+
 
       if (userDoc.exists()) {
-       const userData: UserProfile = {
-  uid,
-  ...(userDoc.data() as Omit<UserProfile, 'uid'>),
-};
+        const userData: UserProfile = {
+          uid,
+          ...(userDoc.data() as Omit<UserProfile, 'uid'>),
+        };
         setUser(userData);
         await AsyncStorage.setItem('user', JSON.stringify(userData));
         Alert.alert('Login Successful', `Welcome back, ${userData.name || userCredential.user.email}!`);
@@ -60,8 +59,12 @@ export default function LoginScreen() {
 
       <View style={styles.loginBox}>
         <View style={styles.linkRow}>
-          <TouchableOpacity onPress={() => router.push('/signup')}>
-            <Text style={styles.link}>Create an account</Text>
+          <TouchableOpacity
+            onPress={() => router.push('/signup')}
+            style={{ paddingVertical: 4 }}
+
+          >
+            <Text style={[styles.link, { fontSize: 14 }]}>Create an account</Text>
           </TouchableOpacity>
         </View>
 
@@ -75,8 +78,11 @@ export default function LoginScreen() {
         />
 
         <View style={styles.linkRow}>
-          <TouchableOpacity onPress={() => router.push('/+not-found')}>
-            <Text style={styles.link}>Forgot password?</Text>
+          <TouchableOpacity
+            onPress={() => router.push('/+not-found')}
+            style={{ paddingVertical: 4 }}
+          >
+            <Text style={[styles.link, { fontSize: 14 }]}>Forgot password?</Text>
           </TouchableOpacity>
         </View>
 

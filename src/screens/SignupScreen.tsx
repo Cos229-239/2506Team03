@@ -82,6 +82,10 @@ export default function SignUpScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Create Account</Text>
 
       <TextInput
@@ -173,6 +177,16 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
   },
+  backButton: {
+    marginTop: 16,
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+
+  backButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+  }
 });
