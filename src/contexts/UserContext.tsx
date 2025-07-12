@@ -15,6 +15,8 @@ export type UserProfile = {
   interests?: string[];
   avatar?: string;
   location?: string;
+  latitude?: number;  
+  longitude?: number; 
 };
 
 type UserContextType = {
