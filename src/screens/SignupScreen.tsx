@@ -13,6 +13,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 
+import groupedCities from '../../assets/data/groupedCities.js';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
 
@@ -50,6 +51,10 @@ export default function SignUpScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
+      
+      const flatCities = Object.values(groupedCities).flat();
+      const baseCity = location.split(',')[0].trim();
+      const cityInfo = flatCities.find(c => c.name.split(',')[0] === baseCity);
 
       // ✅ Construct full user object
       const userData = {
@@ -58,6 +63,8 @@ export default function SignUpScreen() {
         email,
         role,
         location,
+        latitude:  cityInfo?.latitude  ?? 0,
+        longitude: cityInfo?.longitude ?? 0,
         bio,
         avatar: DEFAULT_AVATAR,
         skills: skills.split(',').map((s) => s.trim()),

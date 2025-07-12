@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -20,72 +21,86 @@ import {
 } from 'react-native';
 import 'react-native-get-random-values';
 import type MapViewType from 'react-native-maps';
+import type { LatLng } from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
-import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
+import { CityKey, MockUser, users as mockUsers } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
+import { db } from '../../src/firebaseConfig';
 
-console.log("✅ Explore screen is loaded"); 
-
-type UserType = {
-  name: string;
-  profession: string;
-  skills: string[];
-  latitude: number;
-  longitude: number;
-  avatar: any;
-  locationText: string;
-};
-
-type City = {
-  key: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-};
+console.log("✅ Explore screen is loaded");
 
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
 }
 
 const skillFilters: Record<string, string[]> = {
-  'Creative / Art Skills': [
-    'Digital Art',
-    'Drawing',
-    'Graphic Design',
-    'Guitar',
-    'Knitting & Crochet',
-    'Painting',
-    'Photography',
-    'Piano',
-  ],
   'Hands-on / Trade Skills': [
+    'Appliance Repair',
     'Automotive Repair',
-    'Furniture Repair',
+    'Bicycle Maintenance',
+    'Carpentry',
+    'Electrical Wiring',
+    'Furniture Restoration',
     'Home Improvement',
+    'Plumbing',
+    'Small Engine Repair',
     'Woodworking',
     'Welding',
   ],
-  'Lifestyle & Personal Growth': [
-    'Baking',
-    'Cooking',
-    'Fitness',
-    'Gardening',
-    'Language: English',
-    'Language: French',
-    'Language: German',
-    'Language: Italian',
-    'Language: Japanese',
-    'Language: Spanish',
-    'Sewing & Tailoring',
+  'Creative / Art Skills': [
+    'Animation (2D/3D)',
+    'Calligraphy',
+    'Creative Writing',
+    'Drums',
+    'Embroidery',
+    'Guitar & Bass',
+    'Graphic Design',
+    'Knitting & Crochet',
+    'Origami',
+    'Painting',
+    'Photography',
+    'Piano',
+    'Pottery & Ceramics',
+    'Scrapbooking',
+    'Singing & Vocal Training',
+    'Songwriting',
+    'Violin & Cello',
+    'Drawing',
   ],
   'Tech / Digital Skills': [
     '3D Modeling',
+    'AI Tools (e.g., ChatGPT, Midjourney)',
+    'App Development',
+    'Audio Editing',
+    'Cybersecurity Basics',
+    'Data Visualization',
     'Digital Art',
+    'Excel / Google Sheets Power Use',
+    'Game Development',
     'IT Support',
-    'Programming',
+    'Programming / Coding',
+    'UI/UX Design',
     'Video Editing',
     'Web Design',
+  ],
+  'Lifestyle & Personal Growth': [
+    'Baking',
+    'Budgeting & Personal Finance',
+    'Cooking',
+    'Fitness Training',
+    'Gardening',
+    'Interview Skills',
+    'Language – American Sign Language (ASL)',
+    'Language – French',
+    'Language – German',
+    'Language – Italian',
+    'Language – Japanese',
+    'Language – Spanish',
+    'Meditation & Mindfulness',
+    'Nutrition & Meal Prep',
+    'Resume Writing',
+    'Sewing & Tailoring',
   ],
 };
 
@@ -150,45 +165,105 @@ const Explore = () => {
   );
 
   useEffect(() => {
-  const unsubscribe = navigation.addListener('tabPress', () => {
-    setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const [allUsers, setAllUsers] = useState<MockUser[]>(Object.values(mockUsers));
+
+const flatCities = Object.values(groupedCities).flat();
+
+useEffect(() => {
+  const unsub = onSnapshot(collection(db, 'users'), snap => {
+    const live = snap.docs.map(doc => {
+      const d = doc.data() as any;
+      const base = d.location?.split(',')[0].trim();
+      const cityData = flatCities.find(c => c.name.split(',')[0] === base);
+
+      return {
+        id:           doc.id,
+        name:         d.name,
+        profession:   d.role      || '',
+        skills:       d.skills    || [],
+        avatar:       { uri: d.avatarUrl },
+        locationText: d.location,
+
+        // pick up your cityKey if you have it defined in groupedCities:
+        cityKey:      cityData?.key ?? '', 
+
+        // fall back to groupedCities coords if Firestore had none
+        latitude:     d.latitude  ?? cityData?.latitude  ?? 0,
+        longitude:    d.longitude ?? cityData?.longitude ?? 0,
+      } as MockUser;
+    });
+
+    setAllUsers([ ...Object.values(mockUsers), ...live ]);
   });
 
-  return unsubscribe;
-}, [navigation]);
+  return () => unsub();
+}, []);
+
+  const [userMarkerPositions, setUserMarkerPositions] = useState<Record<string, { latitude: number; longitude: number }>>({});
 
   const selectedCityData = Object.values(groupedCities)
     .flat()
     .find((c) => c.key === selectedCity);
 
+  const selectedUsers = useMemo<MockUser[]>(() => {
+    const cityName = selectedCityData!.name.split(',')[0];
+    console.log('• cityName =', cityName);
+    console.log('• allUsers locations =', allUsers.map(u => u.locationText));
+    return allUsers.filter(u =>
+      u.locationText.split(',')[0] === cityName
+    );
+  }, [allUsers, selectedCityData]);
+
   const mapCenter = selectedCityData
     ? {
       latitude: selectedCityData.latitude,
       longitude: selectedCityData.longitude,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
+      latitudeDelta: 0.2,
+      longitudeDelta: 0.2,
     }
     : {
       latitude: 37.7749,
       longitude: -122.4194,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
+      latitudeDelta: 0.2,
+      longitudeDelta: 0.2,
     };
-  const mockUser: MockUser = selectedUser ?? {
-    name: '',
-    profession: '',
-    skills: [],
-    avatar: null,
-    locationText: selectedCityData?.name ?? '',
-    latitude: selectedCityData?.latitude ?? 0,
-    longitude: selectedCityData?.longitude ?? 0,
-  };
+
+  useEffect(() => {
+    const newPositions: Record<string, LatLng> = {};
+    const R = 0.007; // radius in degrees ≈ 780 m (tweak as you like)
+
+    selectedUsers.forEach((user, i) => {
+      // angle in radians around the circle
+      const θ = (2 * Math.PI * i) / selectedUsers.length;
+      // latitude degrees offset
+      const dLat = R * Math.sin(θ);
+      // longitude degrees offset, scaled by cos(lat) to keep roughly equal distance
+      const dLng = (R * Math.cos(θ)) / Math.cos(mapCenter.latitude * (Math.PI / 180));
+
+      newPositions[user.name] = {
+        latitude: user.latitude + dLat,
+        longitude: user.longitude + dLng,
+      };
+    });
+
+    setUserMarkerPositions(newPositions);
+  }, [selectedUsers, mapCenter.latitude]);
+
+
   const mapRef = useRef<MapViewType | null>(null);
   const [cityModalVisible, setCityModalVisible] = useState(false);
   const platformModalOffset = Platform.select({
     ios: { marginTop: 25 },
     android: { marginTop: -5 },
   });
+
 
   const mapFrameHeight = Dimensions.get('window').height * 0.75;
 
@@ -315,64 +390,58 @@ const Explore = () => {
           style={styles.map}
           region={mapCenter}
         >
-          {Object.values(users).map((user, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: user.latitude,
-                longitude: user.longitude,
-              }}
-              anchor={{ x: 0.5, y: 1 }}
-              onPress={async () => {
-                setSelectedUser(user);
+          {selectedUsers.map(user => {
+            const randomized = userMarkerPositions[user.name]
+              ?? { latitude: user.latitude, longitude: user.longitude }
 
-                if (mapRef.current) {
-                  const region = {
-                    latitude: user.latitude + 0.0012,
-                    longitude: user.longitude,
-                    latitudeDelta: 0.025,
-                    longitudeDelta: 0.015,
-                  };
-
-                  mapRef.current.animateToRegion(region, 350);
-
-                  setTimeout(async () => {
-                    const updatedPoint = await mapRef.current?.pointForCoordinate({
-                      latitude: user.latitude,
-                      longitude: user.longitude,
+            return (
+              <Marker
+                key={user.id}
+                coordinate={randomized}
+                anchor={{ x: 0.5, y: 1 }}
+                onPress={async () => {
+                  setSelectedUser(user);
+                  if (mapRef.current) {
+                    mapRef.current.animateCamera({
+                      center: {
+                        latitude: randomized.latitude + 0.0012,
+                        longitude: randomized.longitude,
+                      },
                     });
-
-                    if (updatedPoint) {
-                      setMarkerScreenPosition({
-                        x: updatedPoint.x,
-                        y: updatedPoint.y - 20,
-                      });
-                      setProfileVisible(true);
-                    }
-                  }, 400);
-                }
-              }}
-            >
-              <View style={{ alignItems: 'center', marginBottom: 18 }}>
-                <Image
-                  source={user.avatar}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 19,
-                    borderWidth: 2,
-                    borderColor: '#000',
-                    backgroundColor: '#eee',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.3,
-                    shadowRadius: 3,
-                    shadowOffset: { width: 0, height: 2 },
-                  }}
-                  resizeMode="cover"
-                />
-              </View>
-            </Marker>
-          ))}
+                    setTimeout(async () => {
+                      const updatedPoint = await mapRef.current?.pointForCoordinate(randomized);
+                      if (updatedPoint) {
+                        setMarkerScreenPosition({
+                          x: updatedPoint.x,
+                          y: updatedPoint.y - 20,
+                        });
+                        setProfileVisible(true);
+                      }
+                    }, 400);
+                  }
+                }}
+              >
+                <View style={{ alignItems: 'center', marginBottom: 18 }}>
+                  <Image
+                    source={user.avatar}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 19,
+                      borderWidth: 2,
+                      borderColor: '#000',
+                      backgroundColor: '#eee',
+                      shadowColor: '#000',
+                      shadowOpacity: 0.3,
+                      shadowRadius: 3,
+                      shadowOffset: { width: 0, height: 2 },
+                    }}
+                    resizeMode="cover"
+                  />
+                </View>
+              </Marker>
+            );
+          })}
         </MapView>
 
         <Pressable
@@ -619,7 +688,7 @@ const Explore = () => {
 
                     {!collapsedStates.includes(state) && (
                       <View style={{ paddingLeft: 32, paddingTop: 4 }}>
-                        {cities.map((city: City) => (
+                        {cities.map((city: { key: string; name: string; latitude: number; longitude: number }) => (
                           <TouchableOpacity
                             key={city.key}
                             onPress={() => selectCity(city.key)}
@@ -655,7 +724,7 @@ const Explore = () => {
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
                         onPress={() => {
-                          const userId = Object.entries(users).find(([_, u]) => u.name === selectedUser.name)?.[0];
+                          const userId = Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
                           if (userId) {
                             setProfileVisible(false);
                             router.push(`../user/${userId}`);
@@ -904,5 +973,5 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
- 
+
 });
