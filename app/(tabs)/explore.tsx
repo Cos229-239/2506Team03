@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { collection, onSnapshot } from 'firebase/firestore';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -26,9 +26,8 @@ import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users as mockUsers } from '../../assets/data/mockUsers';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
+import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-
-console.log("✅ Explore screen is loaded");
 
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
@@ -107,6 +106,7 @@ const skillFilters: Record<string, string[]> = {
 const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
 
 const Explore = () => {
+  const { user: currentUser } = useUser();
   const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -114,7 +114,7 @@ const Explore = () => {
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
-  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
+  const [collapsedStates, setCollapsedStates] = useState<string[]>(Object.keys(groupedCities));
   const [showTooltip, setShowTooltip] = useState(true);
   const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
   const cycleToggleMode = () => {
@@ -122,18 +122,31 @@ const Explore = () => {
     const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
     setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
   };
-
+  const DEFAULT_AVATAR =
+    'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=d6ec896d-257e-4fb5-838a-e145d9f07aad';
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
-
   const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
+  const jitter = () => (Math.random() - 0.5) * 0.1;
 
   useEffect(() => {
     const mode = route.params?.mode;
     if (mode === 'Learn') setToggleMode('learn');
     else if (mode === 'Teach') setToggleMode('teach');
+    else setToggleMode('everyone');
   }, [route.params]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    if (toggleMode === 'teach') {
+      setSelectedSkills(currentUser.skills || []);
+    } else if (toggleMode === 'learn') {
+      setSelectedSkills(currentUser.interests || []);
+    } else {
+      setSelectedSkills([]);
+    }
+  }, [toggleMode, currentUser]);
 
   useEffect(() => {
     if (showTooltip) {
@@ -156,14 +169,6 @@ const Explore = () => {
     }
   }, [showTooltip]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!route.params?.mode) {
-        setToggleMode('everyone');
-      }
-    }, [route.params])
-  );
-
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
       setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
@@ -174,37 +179,33 @@ const Explore = () => {
 
   const [allUsers, setAllUsers] = useState<MockUser[]>(Object.values(mockUsers));
 
-const flatCities = Object.values(groupedCities).flat();
+  const flatCities = Object.values(groupedCities).flat();
 
-useEffect(() => {
-  const unsub = onSnapshot(collection(db, 'users'), snap => {
-    const live = snap.docs.map(doc => {
-      const d = doc.data() as any;
-      const base = d.location?.split(',')[0].trim();
-      const cityData = flatCities.find(c => c.name.split(',')[0] === base);
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'users'), snap => {
+      const live = snap.docs.map(doc => {
+        const d = doc.data() as any;
+        const base = d.location?.split(',')[0].trim();
+        const cityData = flatCities.find(c => c.name.split(',')[0] === base);
 
-      return {
-        id:           doc.id,
-        name:         d.name,
-        profession:   d.role      || '',
-        skills:       d.skills    || [],
-        avatar:       { uri: d.avatarUrl },
-        locationText: d.location,
+        return {
+          id: doc.id,
+          name: d.name,
+          profession: d.role || '',
+          skills: d.skills || [],
+          avatar: { uri: d.avatarUrl || DEFAULT_AVATAR },
+          locationText: d.location,
+          cityKey: cityData?.key ?? '',
+          latitude: (d.latitude ?? cityData?.latitude ?? 0) + jitter(),
+          longitude: (d.longitude ?? cityData?.longitude ?? 0) + jitter(),
+        } as MockUser;
+      });
 
-        // pick up your cityKey if you have it defined in groupedCities:
-        cityKey:      cityData?.key ?? '', 
-
-        // fall back to groupedCities coords if Firestore had none
-        latitude:     d.latitude  ?? cityData?.latitude  ?? 0,
-        longitude:    d.longitude ?? cityData?.longitude ?? 0,
-      } as MockUser;
+      setAllUsers([...Object.values(mockUsers), ...live]);
     });
 
-    setAllUsers([ ...Object.values(mockUsers), ...live ]);
-  });
-
-  return () => unsub();
-}, []);
+    return () => unsub();
+  }, []);
 
   const [userMarkerPositions, setUserMarkerPositions] = useState<Record<string, { latitude: number; longitude: number }>>({});
 
@@ -214,12 +215,30 @@ useEffect(() => {
 
   const selectedUsers = useMemo<MockUser[]>(() => {
     const cityName = selectedCityData!.name.split(',')[0];
-    console.log('• cityName =', cityName);
-    console.log('• allUsers locations =', allUsers.map(u => u.locationText));
     return allUsers.filter(u =>
       u.locationText.split(',')[0] === cityName
     );
   }, [allUsers, selectedCityData]);
+
+  const visibleUsers = useMemo(() => {
+    if (selectedSkills.length === 0) {
+      return selectedUsers;
+    }
+
+    const result = selectedUsers.filter(user => {
+      const hasMatch =
+        toggleMode === 'teach'
+          ? (user.interests || []).some(skill => selectedSkills.includes(skill))
+          : toggleMode === 'learn'
+            ? (user.skills || []).some(skill => selectedSkills.includes(skill))
+            : // everyone mode → check both
+            (user.skills || []).some(skill => selectedSkills.includes(skill)) ||
+            (user.interests || []).some(skill => selectedSkills.includes(skill));
+      return hasMatch;
+    });
+
+    return result;
+  }, [selectedUsers, selectedSkills, toggleMode]);
 
   const mapCenter = selectedCityData
     ? {
@@ -237,19 +256,18 @@ useEffect(() => {
 
   useEffect(() => {
     const newPositions: Record<string, LatLng> = {};
-    const R = 0.007; // radius in degrees ≈ 780 m (tweak as you like)
+    const R = 0.007;
 
     selectedUsers.forEach((user, i) => {
-      // angle in radians around the circle
       const θ = (2 * Math.PI * i) / selectedUsers.length;
-      // latitude degrees offset
       const dLat = R * Math.sin(θ);
-      // longitude degrees offset, scaled by cos(lat) to keep roughly equal distance
       const dLng = (R * Math.cos(θ)) / Math.cos(mapCenter.latitude * (Math.PI / 180));
+      const jitterLat = (Math.random() - 0.5) * 0.002;
+      const jitterLng = (Math.random() - 0.5) * 0.002;
 
       newPositions[user.name] = {
-        latitude: user.latitude + dLat,
-        longitude: user.longitude + dLng,
+        latitude: (user.latitude ?? 0) + dLat + jitterLat,
+        longitude: (user.longitude ?? 0) + dLng + jitterLng,
       };
     });
 
@@ -390,9 +408,11 @@ useEffect(() => {
           style={styles.map}
           region={mapCenter}
         >
-          {selectedUsers.map(user => {
-            const randomized = userMarkerPositions[user.name]
-              ?? { latitude: user.latitude, longitude: user.longitude }
+          {visibleUsers.map(user => {
+            const randomized = userMarkerPositions[user.name] ?? {
+              latitude: user.latitude,
+              longitude: user.longitude,
+            };
 
             return (
               <Marker

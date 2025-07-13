@@ -1,18 +1,16 @@
+import { useRouter } from 'expo-router';
+import { doc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
-  View,
+  Alert,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
+  TouchableOpacity
 } from 'react-native';
-import { doc, updateDoc } from 'firebase/firestore';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
 
 export default function EditProfile() {
   const { user, setUser } = useUser();
@@ -48,8 +46,7 @@ export default function EditProfile() {
       await updateDoc(userRef, updatedProfile);
 
       const updatedUser = { ...user, ...updatedProfile };
-      setUser(updatedUser);
-      await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+      await setUser(updatedUser);
 
       Alert.alert('Success', 'Your profile has been updated!');
       router.replace('/(tabs)/profile');
