@@ -24,84 +24,20 @@ import type MapViewType from 'react-native-maps';
 import type { LatLng } from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
 import { CityKey, MockUser, users as mockUsers } from '../../assets/data/mockUsers';
+import skillCategories from '../../assets/data/skillCategories';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
 
+
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
 }
 
-const skillFilters: Record<string, string[]> = {
-  'Hands-on / Trade Skills': [
-    'Appliance Repair',
-    'Automotive Repair',
-    'Bicycle Maintenance',
-    'Carpentry',
-    'Electrical Wiring',
-    'Furniture Restoration',
-    'Home Improvement',
-    'Plumbing',
-    'Small Engine Repair',
-    'Woodworking',
-    'Welding',
-  ],
-  'Creative / Art Skills': [
-    'Animation (2D/3D)',
-    'Calligraphy',
-    'Creative Writing',
-    'Drums',
-    'Embroidery',
-    'Guitar & Bass',
-    'Graphic Design',
-    'Knitting & Crochet',
-    'Origami',
-    'Painting',
-    'Photography',
-    'Piano',
-    'Pottery & Ceramics',
-    'Scrapbooking',
-    'Singing & Vocal Training',
-    'Songwriting',
-    'Violin & Cello',
-    'Drawing',
-  ],
-  'Tech / Digital Skills': [
-    '3D Modeling',
-    'AI Tools (e.g., ChatGPT, Midjourney)',
-    'App Development',
-    'Audio Editing',
-    'Cybersecurity Basics',
-    'Data Visualization',
-    'Digital Art',
-    'Excel / Google Sheets Power Use',
-    'Game Development',
-    'IT Support',
-    'Programming / Coding',
-    'UI/UX Design',
-    'Video Editing',
-    'Web Design',
-  ],
-  'Lifestyle & Personal Growth': [
-    'Baking',
-    'Budgeting & Personal Finance',
-    'Cooking',
-    'Fitness Training',
-    'Gardening',
-    'Interview Skills',
-    'Language – American Sign Language (ASL)',
-    'Language – French',
-    'Language – German',
-    'Language – Italian',
-    'Language – Japanese',
-    'Language – Spanish',
-    'Meditation & Mindfulness',
-    'Nutrition & Meal Prep',
-    'Resume Writing',
-    'Sewing & Tailoring',
-  ],
-};
+const skillFilters: Record<string, string[]> = Object.fromEntries(
+  skillCategories.map((cat) => [cat.category, cat.skills])
+);
 
 const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
 
