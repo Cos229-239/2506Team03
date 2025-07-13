@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { collection, getDocs, query } from 'firebase/firestore';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -16,105 +16,73 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
 import 'react-native-get-random-values';
-import type MapViewType from 'react-native-maps';
-import groupedCities from '../../assets/data/groupedCities.js';
-import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
+import { useUser } from '../../src/contexts/UserContext';
+import { router } from 'expo-router';
+import MapView, { Marker } from 'react-native-maps';
+import groupedCities from '../../assets/data/groupedCities';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
+import { db } from '../../src/firebaseConfig';
 
-console.log("✅ Explore screen is loaded"); 
 
-type UserType = {
-  name: string;
-  profession: string;
-  skills: string[];
-  latitude: number;
-  longitude: number;
-  avatar: any;
-  locationText: string;
+const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
+const skillFilters: Record<string, string[]> = {
+  'Creative / Art Skills': ['Digital Art', 'Drawing', 'Graphic Design', 'Guitar', 'Knitting & Crochet', 'Painting', 'Photography', 'Piano'],
+  'Hands-on / Trade Skills': ['Automotive Repair', 'Car Repair', 'Carpentry', 'Furniture Repair', 'Home Improvement', 'Woodworking', 'Welding'],
+  'Lifestyle & Personal Growth': ['Baking', 'Cooking', 'Fitness', 'Gardening', 'Language: English', 'Language: French', 'Language: German', 'Language: Italian', 'Language: Japanese', 'Language: Spanish', 'Sewing & Tailoring'],
+  'Tech / Digital Skills': ['3D Modeling', 'Digital Art', 'IT Support', 'Programming', 'Video Editing', 'Web Design'],
 };
-
 type City = {
   key: string;
   name: string;
   latitude: number;
   longitude: number;
 };
-
-type ExploreParams = {
-  mode?: 'Learn' | 'Teach';
-}
-
-const skillFilters: Record<string, string[]> = {
-  'Creative / Art Skills': [
-    'Digital Art',
-    'Drawing',
-    'Graphic Design',
-    'Guitar',
-    'Knitting & Crochet',
-    'Painting',
-    'Photography',
-    'Piano',
-  ],
-  'Hands-on / Trade Skills': [
-    'Automotive Repair',
-    'Car Repair',
-    'Carpentry',
-    'Furniture Repair',
-    'Home Improvement',
-    'Woodworking',
-    'Welding',
-  ],
-  'Lifestyle & Personal Growth': [
-    'Baking',
-    'Cooking',
-    'Fitness',
-    'Gardening',
-    'Language: English',
-    'Language: French',
-    'Language: German',
-    'Language: Italian',
-    'Language: Japanese',
-    'Language: Spanish',
-    'Sewing & Tailoring',
-  ],
-  'Tech / Digital Skills': [
-    '3D Modeling',
-    'Digital Art',
-    'IT Support',
-    'Programming',
-    'Video Editing',
-    'Web Design',
-  ],
-};
-
-const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
+const mapFrameHeight = Dimensions.get('window').height * 0.75;
+const platformModalOffset = Platform.select({ ios: { marginTop: 25 }, android: { marginTop: -5 } });
 
 const Explore = () => {
-  const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
-  const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
+  const { user: loggedInUser } = useUser();
+const [selectedCity, setSelectedCity] = useState<string | null>(loggedInUser?.location ?? null);
+  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
+  const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
-  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
   const [showTooltip, setShowTooltip] = useState(true);
-  const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
-  const cycleToggleMode = () => {
-    const currentIndex = TOGGLE_MODES.indexOf(toggleMode);
-    const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
-    setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
-  };
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
+  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
+  const [cityModalVisible, setCityModalVisible] = useState(false);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
 
   const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
+
+  const mapRef = useRef<any>(null);
+  
+useEffect(() => {
+  if (loggedInUser?.location) {
+    const matchingCity = Object.values(groupedCities)
+      .flat()
+      .find((c) => c.name === loggedInUser.location);
+    if (matchingCity) {
+      setSelectedCity(matchingCity.key);
+    }
+  }
+}, [loggedInUser]);
+
+  const cycleToggleMode = () => {
+    const currentIndex = TOGGLE_MODES.indexOf(toggleMode);
+    const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
+    setToggleMode(TOGGLE_MODES[nextIndex] as any);
+  };
 
   useEffect(() => {
     const mode = route.params?.mode;
@@ -145,11 +113,11 @@ const Explore = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (!route.params?.mode) {
-        setToggleMode('everyone');
-      }
+      if (!route.params?.mode) setToggleMode('everyone');
     }, [route.params])
   );
+
+
 
   useEffect(() => {
   const unsubscribe = navigation.addListener('tabPress', () => {
@@ -159,96 +127,71 @@ const Explore = () => {
   return unsubscribe;
 }, [navigation]);
 
-  const selectedCityData = Object.values(groupedCities)
-    .flat()
-    .find((c) => c.key === selectedCity);
 
+
+
+  const selectedCityData = Object.values(groupedCities).flat().find(c => c.key === selectedCity);
   const mapCenter = selectedCityData
     ? {
-      latitude: selectedCityData.latitude,
-      longitude: selectedCityData.longitude,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
-    }
+        latitude: selectedCityData.latitude,
+        longitude: selectedCityData.longitude,
+        latitudeDelta: 0.025,
+        longitudeDelta: 0.015,
+      }
     : {
-      latitude: 37.7749,
-      longitude: -122.4194,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
-    };
-  const mockUser: MockUser = selectedUser ?? {
-    name: '',
-    profession: '',
-    skills: [],
-    avatar: null,
-    locationText: selectedCityData?.name ?? '',
-    latitude: selectedCityData?.latitude ?? 0,
-    longitude: selectedCityData?.longitude ?? 0,
-  };
-  const mapRef = useRef<MapViewType | null>(null);
-  const [cityModalVisible, setCityModalVisible] = useState(false);
-  const platformModalOffset = Platform.select({
-    ios: { marginTop: 25 },
-    android: { marginTop: -5 },
-  });
+        latitude: 37.7749,
+        longitude: -122.4194,
+        latitudeDelta: 0.025,
+        longitudeDelta: 0.015,
+      };
 
-  const mapFrameHeight = Dimensions.get('window').height * 0.75;
+  const fetchUsersFromFirestore = async () => {
+    try {
+      const q = query(collection(db, 'users'));
+      const snapshot = await getDocs(q);
+      const allUsers = snapshot.docs.map(doc => doc.data());
+
+      const validUsers = allUsers.filter(user => {
+        const isValidCity = Object.values(groupedCities).flat().some(c => c.name === user.location);
+        return isValidCity && user.latitude && user.longitude;
+      });
+
+      setUsers(validUsers);
+    } catch (err) {
+      console.error('Error loading users:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsersFromFirestore();
+  }, []);
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills((prev) =>
-      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    setSelectedSkills(prev =>
+      prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
     );
   };
 
   const toggleCollapse = (category: string) => {
-    setCollapsedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+    setCollapsedCategories(prev =>
+      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
     );
   };
 
-  const toggleStateCollapse = (state: string) => {
-    setCollapsedStates((prev) =>
-      prev.includes(state)
-        ? prev.filter((s) => s !== state)
-        : [...prev, state]
-    );
-  };
-
-  const clearFilters = () => {
-    setSelectedSkills([]);
-    setCollapsedCategories([]);
-  };
-
-  const applyFilters = () => {
-    setFilterVisible(false);
-  };
+  const applyFilters = () => setFilterVisible(false);
+  const clearFilters = () => setSelectedSkills([]);
 
   const collapseAllStates = () => setCollapsedStates(Object.keys(groupedCities));
   const expandAllStates = () => setCollapsedStates([]);
-
-  let MapView: any;
-  let Marker: any;
-
-  if (Platform.OS !== 'web') {
-    MapView = require('react-native-maps').default;
-    Marker = require('react-native-maps').Marker;
-  }
-
-  const selectCity = (cityKey: string) => {
-    setProfileVisible(false);
-    setSelectedUser(null);
-    setSelectedCity(cityKey);
+  const toggleStateCollapse = (state: string) => {
+    setCollapsedStates(prev =>
+      prev.includes(state) ? prev.filter(s => s !== state) : [...prev, state]
+    );
+  };
+  const selectCity = (key: string) => {
+    setSelectedCity(key);
     setCityModalVisible(false);
   };
-
-  if (
-    !selectedCityData ||
-    !Number.isFinite(selectedCityData.latitude) ||
-    !Number.isFinite(selectedCityData.longitude)
-  ) {
-    console.warn('Invalid selectedCityData — skipping render to avoid map crash');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
@@ -355,24 +298,24 @@ const Explore = () => {
                 }
               }}
             >
-              <View style={{ alignItems: 'center', marginBottom: 18 }}>
+                <View style={{ alignItems: 'center', marginBottom: 18 }}>
                 <Image
-                  source={user.avatar}
+                  source={{ uri: user.avatar  }}
                   style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 19,
-                    borderWidth: 2,
-                    borderColor: '#000',
-                    backgroundColor: '#eee',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.3,
-                    shadowRadius: 3,
-                    shadowOffset: { width: 0, height: 2 },
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  borderWidth: 2,
+                  borderColor: '#000',
+                  backgroundColor: '#eee',
+                  shadowColor: '#000',
+                  shadowOpacity: 0.3,
+                  shadowRadius: 3,
+                  shadowOffset: { width: 0, height: 2 },
                   }}
                   resizeMode="cover"
                 />
-              </View>
+                </View>
             </Marker>
           ))}
         </MapView>
@@ -655,17 +598,18 @@ const Explore = () => {
                         <Text key={index}>{skill}</Text>
                       ))}
                       <TouchableOpacity
-                        style={styles.viewProfileBtn}
-                        onPress={() => {
-                          const userId = Object.entries(users).find(([_, u]) => u.name === selectedUser.name)?.[0];
-                          if (userId) {
-                            setProfileVisible(false);
-                            router.push(`../user/${userId}`);
-                          }
-                        }}
-                      >
-                        <Text style={styles.viewProfileBtnText}>View Profile</Text>
-                      </TouchableOpacity>
+  style={styles.viewProfileBtn}
+  onPress={() => {
+    if (selectedUser?.uid) {
+      setProfileVisible(false);
+      router.push(`/user/${selectedUser.uid}`);
+    } else {
+      console.warn('Missing user UID.');
+    }
+  }}
+>
+  <Text style={styles.viewProfileBtnText}>View Profile</Text>
+</TouchableOpacity>
                     </View>
                     <View style={styles.triangle} />
                   </View>
@@ -678,8 +622,6 @@ const Explore = () => {
     </View>
   );
 };
-
-export default Explore;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingBottom: 8 },
@@ -908,3 +850,6 @@ const styles = StyleSheet.create({
 
  
 });
+
+
+export default Explore;

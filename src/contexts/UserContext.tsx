@@ -84,3 +84,5 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     </UserContext.Provider>
   );
 };
+
+export default DEFAULT_AVATAR;

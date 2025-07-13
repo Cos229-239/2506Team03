@@ -1,3 +1,5 @@
+// ✅ Updated EditProfile.tsx to support city dropdown & coordinate saving
+
 import React, { useState } from 'react';
 import {
   View,
@@ -13,7 +15,11 @@ import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { Picker } from '@react-native-picker/picker';
+import groupedCities from '../../assets/data/groupedCities';
+
 console.log("✅ Edit Profile screen is loaded");
+
 export default function EditProfile() {
   const { user, setUser } = useUser();
   const router = useRouter();
@@ -23,6 +29,8 @@ export default function EditProfile() {
     bio: user?.bio || '',
     role: user?.role || '',
     location: user?.location || '',
+    latitude: user?.latitude || 0,
+    longitude: user?.longitude || 0,
     skills: (user?.skills || []).join(', '),
     interests: (user?.interests || []).join(', '),
   });
@@ -34,12 +42,15 @@ export default function EditProfile() {
   const handleSave = async () => {
     try {
       if (!user?.uid) throw new Error('User ID is missing');
+      if (!form.location) throw new Error('Please select a valid city.');
 
       const updatedProfile = {
         name: form.name,
         bio: form.bio,
         role: form.role,
         location: form.location,
+        latitude: form.latitude,
+        longitude: form.longitude,
         skills: form.skills.split(',').map((s) => s.trim()),
         interests: form.interests.split(',').map((i) => i.trim()),
       };
@@ -63,20 +74,75 @@ export default function EditProfile() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit Profile</Text>
 
-      {Object.entries(form).map(([key, value]) => (
-        <TextInput
-          key={key}
-          placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
-          value={value}
-          multiline={key === 'bio'}
-          onChangeText={(val) => handleChange(key, val)}
-          style={styles.input}
-        />
-      ))}
+      <TextInput
+        placeholder="Name"
+        value={form.name}
+        onChangeText={(val) => handleChange('name', val)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Role"
+        value={form.role}
+        onChangeText={(val) => handleChange('role', val)}
+        style={styles.input}
+      />
+
+      <Text style={{ marginBottom: 8, fontWeight: 'bold' }}>Select Your City</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.location}
+          onValueChange={(key: string) => {
+            const city = Object.values(groupedCities).flat().find((c) => c.key === key);
+            if (city) {
+              setForm({
+                ...form,
+                location: city.name,
+                latitude: city.latitude,
+                longitude: city.longitude,
+              });
+            }
+          }}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select a City" value="" />
+          {Object.values(groupedCities)
+            .flat()
+            .map((city) => (
+              <Picker.Item key={city.key} label={city.name} value={city.key} />
+            ))}
+        </Picker>
+      </View>
+
+      <TextInput
+        placeholder="Short Bio"
+        value={form.bio}
+        onChangeText={(val) => handleChange('bio', val)}
+        multiline
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Skills (comma separated)"
+        value={form.skills}
+        onChangeText={(val) => handleChange('skills', val)}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Interests (comma separated)"
+        value={form.interests}
+        onChangeText={(val) => handleChange('interests', val)}
+        style={styles.input}
+      />
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
+
+      <Text style={{ marginTop: 8, fontStyle: 'italic', fontSize: 12, color: 'gray' }}>
+        You must select a city from the dropdown in order to appear on the Explore map.
+      </Text>
     </ScrollView>
   );
 }
@@ -96,6 +162,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 12,
+    backgroundColor: '#f2f2f2',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
   button: {
     backgroundColor: '#90e0a4',
