@@ -43,7 +43,7 @@ const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
 
 const Explore = () => {
   const { user: currentUser } = useUser();
-  const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
+  const [selectedCity, setSelectedCity] = useState<CityKey | null>(null);
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -83,6 +83,16 @@ const Explore = () => {
       setSelectedSkills([]);
     }
   }, [toggleMode, currentUser]);
+
+  useEffect(() => {
+    if (!selectedCity && currentUser?.location) {
+      const baseCity = currentUser.location.split(',')[0].trim();
+      const match = flatCities.find(c => c.name.split(',')[0] === baseCity);
+      if (match) {
+        setSelectedCity(match.key as CityKey);
+      }
+    }
+  }, [currentUser, selectedCity]);
 
   useEffect(() => {
     if (showTooltip) {
@@ -150,7 +160,9 @@ const Explore = () => {
     .find((c) => c.key === selectedCity);
 
   const selectedUsers = useMemo<MockUser[]>(() => {
-    const cityName = selectedCityData!.name.split(',')[0];
+    if (!selectedCityData) return [];
+
+    const cityName = selectedCityData.name.split(',')[0];
     return allUsers.filter(u =>
       u.locationText.split(',')[0] === cityName
     );
