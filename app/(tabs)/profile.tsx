@@ -52,45 +52,46 @@ const Profile = () => {
     ]);
   };
 
-  const handleChangePhoto = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert('Permission denied', 'Camera roll access is required.');
-      return;
+ const handleChangePhoto = async () => {
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permissionResult.granted) {
+    Alert.alert('Permission denied', 'Camera roll access is required.');
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ fixed syntax
+    allowsEditing: true,
+    quality: 0.7,
+  });
+
+  if (!result.canceled && result.assets.length > 0) {
+    const image = result.assets[0];
+    const storage = getStorage();
+    const imageRef = ref(storage, `avatar/${loggedInUser?.uid}.jpg`);
+
+    try {
+      // ✅ Use fetch() to get blob — this is supported in Expo Go
+      const response = await fetch(image.uri);
+      const blob = await response.blob();
+
+      await uploadBytes(imageRef, blob);
+      const downloadURL = await getDownloadURL(imageRef);
+
+      await updateDoc(doc(db, 'users', loggedInUser!.uid), { avatar: downloadURL });
+
+      const updatedUser: UserProfile = {
+        ...(loggedInUser as UserProfile),
+        avatar: downloadURL,
+      };
+      setProfile(updatedUser);
+      setUser(updatedUser);
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      Alert.alert('Upload failed', 'Could not upload profile image.');
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-
-      allowsEditing: true,
-      quality: 0.7,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      const image = result.assets[0];
-      const storage = getStorage();
-      const imageRef = ref(storage, `avatar/${loggedInUser?.uid}.jpg`);
-
-      try {
-        const img = await fetch(image.uri);
-        const blob = await img.blob();
-        await uploadBytes(imageRef, blob);
-        const downloadURL = await getDownloadURL(imageRef);
-
-        await updateDoc(doc(db, 'users', loggedInUser!.uid), { avatar: downloadURL });
-
-        const updatedUser: UserProfile = {
-  ...(loggedInUser as UserProfile),
-  avatar: downloadURL,
+  }
 };
-        setProfile(updatedUser);
-        setUser(updatedUser);
-      } catch (err) {
-        console.error('Failed to upload image:', err);
-        Alert.alert('Upload failed', 'Could not upload profile image.');
-      }
-    }
-  };
 
   const handleDeletePhoto = async () => {
     try {

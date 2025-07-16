@@ -15,6 +15,8 @@ export type UserProfile = {
   interests?: string[];
   avatar?: string;
   location?: string;
+  latitude?: number;  
+  longitude?: number; 
 };
 
 type UserContextType = {
@@ -82,3 +84,5 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     </UserContext.Provider>
   );
 };
+
+export default DEFAULT_AVATAR;

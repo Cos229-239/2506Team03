@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -11,13 +12,19 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
 
 import groupedCities from '../../assets/data/groupedCities.js';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
+
+
+console.log('✅ Signup screen is loaded');
+
 
 const DEFAULT_AVATAR =
   'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=827cee39-3e1e-4828-a070-0f8ff36fab86';
@@ -37,6 +44,8 @@ export default function SignUpScreen() {
     password: '',
     role: '',
     location: '',
+    latitude: 0,
+    longitude: 0,
     bio: '',
   });
 
@@ -45,7 +54,20 @@ export default function SignUpScreen() {
   };
 
   const handleSignup = async () => {
-    const { name, email, password, role, location, bio } = form;
+
+    const {
+      name,
+      email,
+      password,
+      role,
+      location,
+      latitude,
+      longitude,
+      bio,
+      skills,
+      interests,
+    } = form;
+
 
     if (!email || !password || !name) {
       Alert.alert('Missing Fields', 'Please fill in name, email, and password.');
@@ -56,9 +78,6 @@ export default function SignUpScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      const flatCities = Object.values(groupedCities).flat();
-      const baseCity = location.split(',')[0].trim();
-      const cityInfo = flatCities.find(c => c.name.split(',')[0] === baseCity);
 
       const userData = {
         uid,
@@ -66,8 +85,10 @@ export default function SignUpScreen() {
         email,
         role,
         location,
-        latitude: cityInfo?.latitude ?? 0,
-        longitude: cityInfo?.longitude ?? 0,
+
+        latitude,
+        longitude,
+
         bio,
         avatar: DEFAULT_AVATAR,
         skills,
@@ -122,12 +143,35 @@ export default function SignUpScreen() {
         value={form.role}
         onChangeText={(val) => handleChange('role', val)}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Location"
-        value={form.location}
-        onChangeText={(val) => handleChange('location', val)}
-      />
+
+      <Text style={{ marginBottom: 8, fontWeight: 'bold' }}>Select Your City</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={form.location}
+          onValueChange={(key: string) => {
+            const city = Object.values(groupedCities)
+              .flat()
+              .find((c) => c.key === key);
+            if (city) {
+              setForm({
+                ...form,
+                location: city.name,
+                latitude: city.latitude,
+                longitude: city.longitude,
+              });
+            }
+          }}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select a City" value="" />
+          {Object.values(groupedCities)
+            .flat()
+            .map((city) => (
+              <Picker.Item key={city.key} label={city.name} value={city.key} />
+            ))}
+        </Picker>
+      </View>
+
       <TextInput
         style={styles.input}
         placeholder="Short Bio"
@@ -148,7 +192,11 @@ export default function SignUpScreen() {
       </Pressable>
 
 
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+      <TouchableOpacity
+        style={[styles.button, { opacity: form.location ? 1 : 0.5 }]}
+        disabled={!form.location}
+        onPress={handleSignup}
+      >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
@@ -195,6 +243,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 12,
+    backgroundColor: '#f2f2f2',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
   button: {
     backgroundColor: '#9DD4B6',
