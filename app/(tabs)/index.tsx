@@ -7,20 +7,26 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
 import { RootStackParamList } from '../../constants/navigation';
-console.log("✅ Home screen is loaded");
+import { useUser } from '../../src/contexts/UserContext';
+
 type HomeScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, 'index'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
 
 const Index = () => {
-  
+
   const navigation = useNavigation<HomeScreenNavigationProp>();
+
+  const { user } = useUser();
+  const firstName = user?.name?.trim().split(' ')[0] || 'friend';
 
   return (
     <ScrollView style={styles.container}>
       <Header />
-      <Text style={styles.welcome}>Welcome back, Sarah! 🎉</Text>
+      <Text style={styles.welcome}>
+        {`Welcome back, ${firstName}! 🎉`}
+      </Text>
 
       <View style={styles.buttonGrid}>
         <TouchableOpacity

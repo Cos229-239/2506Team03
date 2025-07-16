@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import {
   Alert,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,17 +17,26 @@ import {
 } from 'react-native';
 import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
 
+import groupedCities from '../../assets/data/groupedCities.js';
+import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
 
+
 console.log('✅ Signup screen is loaded');
+
 
 const DEFAULT_AVATAR =
   'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=827cee39-3e1e-4828-a070-0f8ff36fab86';
 
+
 export default function SignUpScreen() {
   const router = useRouter();
   const { setUser } = useUser();
+  const [skills, setSkills] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showInterestModal, setShowInterestModal] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -37,8 +47,6 @@ export default function SignUpScreen() {
     latitude: 0,
     longitude: 0,
     bio: '',
-    skills: '',
-    interests: '',
   });
 
   const handleChange = (key: string, value: string) => {
@@ -46,6 +54,7 @@ export default function SignUpScreen() {
   };
 
   const handleSignup = async () => {
+
     const {
       name,
       email,
@@ -59,6 +68,7 @@ export default function SignUpScreen() {
       interests,
     } = form;
 
+
     if (!email || !password || !name) {
       Alert.alert('Missing Fields', 'Please fill in name, email, and password.');
       return;
@@ -68,18 +78,21 @@ export default function SignUpScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
+
       const userData = {
         uid,
         name,
         email,
         role,
         location,
+
         latitude,
         longitude,
+
         bio,
         avatar: DEFAULT_AVATAR,
-        skills: skills.split(',').map((s) => s.trim()),
-        interests: interests.split(',').map((i) => i.trim()),
+        skills,
+        interests,
       };
 
       await setDoc(doc(db, 'users', uid), userData);
@@ -98,6 +111,10 @@ export default function SignUpScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Create Account</Text>
 
       <TextInput
@@ -162,18 +179,18 @@ export default function SignUpScreen() {
         onChangeText={(val) => handleChange('bio', val)}
         multiline
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Skills (comma separated)"
-        value={form.skills}
-        onChangeText={(val) => handleChange('skills', val)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Interests (comma separated)"
-        value={form.interests}
-        onChangeText={(val) => handleChange('interests', val)}
-      />
+      <Pressable onPress={() => setShowSkillModal(true)} style={styles.selectBox}>
+        <Text style={styles.selectText}>
+          {skills.length > 0 ? skills.join(', ') : 'Select your skills'}
+        </Text>
+      </Pressable>
+
+      <Pressable onPress={() => setShowInterestModal(true)} style={styles.selectBox}>
+        <Text style={styles.selectText}>
+          {interests.length > 0 ? interests.join(', ') : 'Select your interests'}
+        </Text>
+      </Pressable>
+
 
       <TouchableOpacity
         style={[styles.button, { opacity: form.location ? 1 : 0.5 }]}
@@ -182,6 +199,28 @@ export default function SignUpScreen() {
       >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
+
+      <SkillSelectorModal
+        visible={showSkillModal}
+        onClose={() => setShowSkillModal(false)}
+        mode="skills"
+        initialSelected={skills}
+        onSave={(selected) => {
+          setSkills(selected);
+          setShowSkillModal(false);
+        }}
+      />
+
+      <SkillSelectorModal
+        visible={showInterestModal}
+        onClose={() => setShowInterestModal(false)}
+        mode="interests"
+        initialSelected={interests}
+        onSave={(selected) => {
+          setInterests(selected);
+          setShowInterestModal(false);
+        }}
+      />
     </ScrollView>
   );
 }
@@ -228,6 +267,29 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontWeight: 'bold',
+    fontSize: 20,
+  },
+  backButton: {
+    marginTop: 16,
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  backButtonText: {
     fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  selectBox: {
+    backgroundColor: '#f2f2f2',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  selectText: {
+    fontSize: 15,
+    color: '#646161ff',
+    fontWeight: 'normal',
   },
 });

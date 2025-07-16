@@ -149,7 +149,7 @@ const Profile = () => {
 
         {isOwnProfile && (
           <View style={styles.editButtonRow}>
-            <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
+            <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile' as any)}>
               <Text style={styles.buttonText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
