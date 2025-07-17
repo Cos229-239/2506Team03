@@ -15,9 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
-
-import groupedCities from '../../assets/data/groupedCities.js';
+import groupedCities from '../../assets/data/groupedCities';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
@@ -64,10 +62,9 @@ export default function SignUpScreen() {
       latitude,
       longitude,
       bio,
-      skills,
-      interests,
     } = form;
 
+    
 
     if (!email || !password || !name) {
       Alert.alert('Missing Fields', 'Please fill in name, email, and password.');
@@ -77,18 +74,15 @@ export default function SignUpScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
-
-
+ 
       const userData = {
         uid,
         name,
         email,
         role,
         location,
-
         latitude,
         longitude,
-
         bio,
         avatar: DEFAULT_AVATAR,
         skills,

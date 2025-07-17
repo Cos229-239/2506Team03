@@ -1,4 +1,6 @@
 
+import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
 import { doc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
@@ -8,15 +10,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
+import groupedCities from '../../assets/data/groupedCities';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
-import groupedCities from '../../assets/data/groupedCities';
 
 console.log("✅ Edit Profile screen is loaded");
 
@@ -162,7 +162,6 @@ export default function EditProfile() {
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
-<<<
       <SkillSelectorModal
         visible={showSkillModal}
         onClose={() => setShowSkillModal(false)}
