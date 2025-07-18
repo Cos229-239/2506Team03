@@ -64,7 +64,7 @@ export default function SignUpScreen() {
       bio,
     } = form;
 
-    
+
 
     if (!email || !password || !name) {
       Alert.alert('Missing Fields', 'Please fill in name, email, and password.');
@@ -74,7 +74,7 @@ export default function SignUpScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
- 
+
       const userData = {
         uid,
         name,
@@ -105,7 +105,6 @@ export default function SignUpScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>

@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import {
   Alert,
   Pressable,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -79,9 +80,13 @@ export default function EditProfile() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <Text style={styles.backButtonText}>← Back</Text>
+    </TouchableOpacity>
+
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit Profile</Text>
-
 
       <TextInput
         placeholder="Name"
@@ -131,21 +136,6 @@ export default function EditProfile() {
         style={styles.input}
       />
 
-      <TextInput
-        placeholder="Skills (comma separated)"
-        value={form.skills}
-        onChangeText={(val) => handleChange('skills', val)}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Interests (comma separated)"
-        value={form.interests}
-        onChangeText={(val) => handleChange('interests', val)}
-        style={styles.input}
-      />
-
-
       <Pressable onPress={() => setShowSkillModal(true)} style={styles.selectBox}>
         <Text style={styles.selectText}>
           {skills.length > 0 ? skills.join(', ') : 'Select your skills'}
@@ -169,6 +159,7 @@ export default function EditProfile() {
         initialSelected={skills}
         onSave={(selected) => {
           setSkills(selected);
+          setForm({ ...form, skills: selected.join(', ') });
           setShowSkillModal(false);
         }}
       />
@@ -180,6 +171,7 @@ export default function EditProfile() {
         initialSelected={interests}
         onSave={(selected) => {
           setInterests(selected);
+          setForm({ ...form, interests: selected.join(', ') });
           setShowInterestModal(false);
         }}
       />
@@ -189,6 +181,7 @@ export default function EditProfile() {
       </Text>
 
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -246,4 +239,14 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
     color: '#201f1fff',
   },
+  backButton: {
+  marginTop: 16,
+  marginBottom: 4,
+  marginLeft: 4,
+},
+backButtonText: {
+  fontSize: 16,
+  color: '#333',
+  fontWeight: 'bold',
+},
 });
