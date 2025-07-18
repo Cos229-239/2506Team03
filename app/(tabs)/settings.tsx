@@ -1,6 +1,8 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   ScrollView,
@@ -12,12 +14,43 @@ import {
   useColorScheme,
 } from 'react-native';
 import { Colors } from '../../constants/Colors';
-import { useRouter } from 'expo-router';
+import { useUser } from '../../src/contexts/UserContext';
+import { db } from '../../src/firebaseConfig';
+
 console.log("✅ Settings screen is loaded");
+
 const SettingsScreen = () => {
   const systemScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemScheme === 'dark');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const theme = isDarkMode ? Colors.dark : Colors.light;
+  const { user } = useUser();
+
+  useEffect(() => {
+    const loadNotificationSetting = async () => {
+      if (!user?.uid) return;
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setNotificationsEnabled(data.notificationsEnabled || false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications setting:', error);
+      }
+    };
+    loadNotificationSetting();
+  }, [user]);
+
+  const toggleNotifications = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    if (!user?.uid) return;
+    try {
+      await setDoc(doc(db, 'users', user.uid), { notificationsEnabled: value }, { merge: true });
+    } catch (error) {
+      console.error('Failed to update notifications setting:', error);
+    }
+  };
 
   const colors = {
     background: theme.background,
@@ -27,7 +60,7 @@ const SettingsScreen = () => {
     iconBlue: '#98ADD4',
     iconMauve: '#A0837F',
     iconGold: '#CBA16B',
-    pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0', 
+    pressHighlight: isDarkMode ? '#2a2a2a' : '#f0f0f0',
   };
 
   const router = useRouter();
@@ -57,13 +90,20 @@ const SettingsScreen = () => {
         borderColor={colors.border}
         pressColor={colors.pressHighlight}
       />
-      <SettingsItem
-        icon={<Ionicons name="notifications-outline" size={24} color={colors.iconBlue} />}
-        label="Notifications"
-        textColor={colors.text}
-        borderColor={colors.border}
-        pressColor={colors.pressHighlight}
-      />
+
+      <View style={[styles.toggleContainer, { borderColor: colors.border }]}>
+        <View style={styles.itemLeft}>
+          <Ionicons name="notifications-outline" size={24} color={colors.iconBlue} />
+          <Text style={[styles.toggleLabel, { color: colors.text, marginLeft: 15 }]}>Enable Notifications</Text>
+        </View>
+        <Switch
+          value={notificationsEnabled}
+          onValueChange={toggleNotifications}
+          trackColor={{ false: '#ccc', true: '#4CAF50' }}
+          thumbColor={notificationsEnabled ? '#fff' : '#fff'}
+        />
+      </View>
+
       <SettingsItem
         icon={<MaterialCommunityIcons name="logout" size={24} color={colors.iconMauve} />}
         label="Logout"
@@ -75,6 +115,7 @@ const SettingsScreen = () => {
           router.replace('/login');
         }}
       />
+
       <Text style={[styles.sectionTitle, { color: colors.sectionText }]}>FEEDBACK</Text>
 
       <SettingsItem
