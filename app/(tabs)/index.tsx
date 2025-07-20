@@ -32,14 +32,14 @@ const Index = () => {
     if (ALWAYS_SHOW_TUTORIAL) {
       setTimeout(() => {
         start();
-      }, 5000);
+      }, 3000);
     } else {
       try {
         const hasSeen = await AsyncStorage.getItem('hasSeenHomeTutorial');
         if (!hasSeen) {
           setTimeout(() => {
             start();
-          }, 5000);
+          }, 3000);
         }
       } catch (err) { }
     }

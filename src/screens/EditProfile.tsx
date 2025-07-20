@@ -240,9 +240,9 @@ const styles = StyleSheet.create({
     color: '#201f1fff',
   },
   backButton: {
-  marginTop: 16,
+  marginTop: 28,
   marginBottom: 4,
-  marginLeft: 4,
+  marginLeft: 10,
 },
 backButtonText: {
   fontSize: 16,
