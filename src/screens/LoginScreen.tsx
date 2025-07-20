@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser, setLoginComplete } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -28,7 +28,6 @@ export default function LoginScreen() {
       const uid = userCredential.user.uid;
       const userDoc = await getDoc(doc(db, 'users', uid));
 
-
       if (userDoc.exists()) {
         const userData: UserProfile = {
           uid,
@@ -36,8 +35,19 @@ export default function LoginScreen() {
         };
         setUser(userData);
         await AsyncStorage.setItem('user', JSON.stringify(userData));
-        Alert.alert('Login Successful', `Welcome back, ${userData.name || userCredential.user.email}!`);
-        router.replace('/');
+        Alert.alert(
+          'Login Successful',
+          `Welcome back, ${userData.name || userCredential.user.email}!`,
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                setLoginComplete(true);       // ✅ flag that login is complete
+                router.replace('/');          // ✅ only navigate after alert closes
+              },
+            },
+          ]
+        );
       } else {
         Alert.alert('Error', 'No profile found for this user.');
       }

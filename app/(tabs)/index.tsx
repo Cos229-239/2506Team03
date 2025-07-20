@@ -20,7 +20,7 @@ const Index = () => {
 
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
-  const { user } = useUser();
+  const { user, loginComplete } = useUser();
   const firstName = user?.name?.trim().split(' ')[0] || 'friend';
   const WalkthroughableTouchableOpacity = walkthroughable(TouchableOpacity);
   const WalkthroughableView = walkthroughable(View);
@@ -32,24 +32,24 @@ const Index = () => {
     if (ALWAYS_SHOW_TUTORIAL) {
       setTimeout(() => {
         start();
-      }, 3000);
+      }, 500);
     } else {
       try {
         const hasSeen = await AsyncStorage.getItem('hasSeenHomeTutorial');
         if (!hasSeen) {
           setTimeout(() => {
             start();
-          }, 3000);
+          }, 500);
         }
       } catch (err) { }
     }
   };
 
   useEffect(() => {
-    if (stepsReady) {
+    if (stepsReady && loginComplete) {
       launchTutorial();
     }
-  }, [stepsReady]);
+  }, [stepsReady, loginComplete]);
 
   useEffect(() => {
     if (!visible && currentStep?.name === 'upcomingSwaps' && !ALWAYS_SHOW_TUTORIAL) {

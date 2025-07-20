@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // ✅ Default avatar fallback
 const DEFAULT_AVATAR =
@@ -15,20 +15,24 @@ export type UserProfile = {
   interests?: string[];
   avatar?: string;
   location?: string;
-  latitude?: number;  
-  longitude?: number; 
+  latitude?: number;
+  longitude?: number;
 };
 
 type UserContextType = {
   user: UserProfile | null;
   setUser: (user: UserProfile | null) => void;
   loadingUser: boolean;
+  loginComplete: boolean;
+  setLoginComplete: (val: boolean) => void;
 };
 
 const UserContext = createContext<UserContextType>({
   user: null,
-  setUser: () => {},
+  setUser: () => { },
   loadingUser: true,
+  loginComplete: false,
+  setLoginComplete: () => { },
 });
 
 export const useUser = () => useContext(UserContext);
@@ -36,6 +40,7 @@ export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUserState] = useState<UserProfile | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [loginComplete, setLoginComplete] = useState(false);
 
   // ✅ Load user from AsyncStorage on mount
   useEffect(() => {
@@ -79,7 +84,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, loadingUser }}>
+    <UserContext.Provider value={{ user, setUser, loadingUser, loginComplete, setLoginComplete }}>
       {children}
     </UserContext.Provider>
   );
