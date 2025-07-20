@@ -64,12 +64,20 @@ const Index = () => {
   return (
     <ScrollView style={styles.container}>
       <Header />
-      <Text style={styles.welcome}>
-        {`Welcome back, ${firstName}! 🎉`}
-      </Text>
+      <CopilotStep
+        text="Welcome to Skill Swap! Here are some quick tips to get you started."
+        order={1}
+        name="welcomeMessage"
+      >
+        <WalkthroughableView>
+          <Text style={styles.welcome}>
+            {`Welcome back, ${firstName}! 🎉`}
+          </Text>
+        </WalkthroughableView>
+      </CopilotStep>
       <View style={styles.buttonGrid}>
 
-        <CopilotStep text="Tap here to browse users offering skills near you." order={1} name="learnButton">
+        <CopilotStep text="Tap here to browse users offering skills near you." order={2} name="learnButton">
           <WalkthroughableTouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('explore', { mode: 'Learn' })}
@@ -82,7 +90,7 @@ const Index = () => {
           </WalkthroughableTouchableOpacity>
         </CopilotStep>
 
-        <CopilotStep text="Tap here to offer your skills to others." order={2} name="teachButton">
+        <CopilotStep text="Tap here to offer your skills to others." order={3} name="teachButton">
           <WalkthroughableTouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('explore', { mode: 'Teach' })}
@@ -96,7 +104,7 @@ const Index = () => {
         </CopilotStep>
       </View>
 
-      <CopilotStep text="These are suggested matches based on your selected interests." order={3} name="featuredMatches">
+      <CopilotStep text="Here are some suggested matches based on your selected interests." order={4} name="featuredMatches">
         <WalkthroughableView>
           <Text style={styles.sectionTitle}>Featured Matches</Text>
           <View style={styles.featuredRow}>
@@ -114,7 +122,7 @@ const Index = () => {
         </WalkthroughableView>
       </CopilotStep>
 
-      <CopilotStep text="Your confirmed swaps appear here so you don’t miss a thing!" order={4} name="upcomingSwaps">
+      <CopilotStep text="Your confirmed upcoming swaps appear here so you don’t miss a thing. Have fun skill swapping!" order={5} name="upcomingSwaps">
         <WalkthroughableView>
           <Text style={styles.sectionTitle}>Upcoming Swaps</Text>
           <View style={styles.upcomingRow}>

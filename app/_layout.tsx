@@ -21,7 +21,12 @@ export default function RootLayout() {
 
   return (
     <UserProvider>
-      <CopilotProvider>
+      <CopilotProvider
+        tooltipStyle={{
+          backgroundColor: '#fff',
+          borderRadius: 8,
+        }}
+      >
         <Stack screenOptions={{ headerShown: false }}>
           {isLoggedIn ? (
             <Stack.Screen name="(tabs)" />

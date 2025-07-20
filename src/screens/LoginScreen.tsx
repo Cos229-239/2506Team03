@@ -42,8 +42,10 @@ export default function LoginScreen() {
             {
               text: 'OK',
               onPress: () => {
-                setLoginComplete(true);       // ✅ flag that login is complete
-                router.replace('/');          // ✅ only navigate after alert closes
+                setTimeout(() => {
+                  setLoginComplete(true);
+                  router.replace('/');
+                }, 250);
               },
             },
           ]
