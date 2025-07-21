@@ -48,65 +48,6 @@ const Explore = () => {
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
-<<<<<<< HEAD
-  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
-  const [cityModalVisible, setCityModalVisible] = useState(false);
-
-  // Add these functions to fix the error
-  const collapseAllStates = () => {
-    setCollapsedStates(Object.keys(groupedCities));
-  };
-
-  const expandAllStates = () => {
-    setCollapsedStates([]);
-  };
-
-  // Fix: Add clearFilters and applyFilters
-  const clearFilters = () => {
-    setSelectedSkills([]);
-  };
-
-  const applyFilters = () => {
-    setFilterVisible(false);
-  };
-
-  // Toggle collapse for skill categories
-  const toggleCollapse = (category: string) => {
-    setCollapsedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  // Toggle collapse for states in city modal
-  const toggleStateCollapse = (state: string) => {
-    setCollapsedStates(prev =>
-      prev.includes(state)
-        ? prev.filter(s => s !== state)
-        : [...prev, state]
-    );
-  };
-
-  // Toggle skill selection
-  const toggleSkill = (skill: string) => {
-    setSelectedSkills(prev =>
-      prev.includes(skill)
-        ? prev.filter(s => s !== skill)
-        : [...prev, skill]
-    );
-  };
-
-  // Cycles toggleMode between 'teach', 'learn', and 'everyone'
-  const cycleToggleMode = () => {
-    setToggleMode(prev => {
-      if (prev === 'everyone') return 'teach';
-      if (prev === 'teach') return 'learn';
-      return 'everyone';
-    });
-  };
-
-=======
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
   const [collapsedStates, setCollapsedStates] = useState<string[]>(Object.keys(groupedCities));
@@ -119,7 +60,6 @@ const Explore = () => {
   };
   const DEFAULT_AVATAR =
     'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=d6ec896d-257e-4fb5-838a-e145d9f07aad';
->>>>>>> e973101b84380289cd0fe6780a3cf9f7425a884e
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
   const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
