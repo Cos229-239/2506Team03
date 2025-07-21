@@ -153,7 +153,7 @@ const Explore = () => {
     return () => unsub();
   }, []);
 
-<<<<<<< HEAD
+
 const selectedCityData = flatCities.find(c => c.key === selectedCity);
 
 const visibleUsers = users.filter(user => {
