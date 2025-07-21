@@ -15,8 +15,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+<<<<<<< HEAD
 import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
 
+=======
+import groupedCities from '../../assets/data/groupedCities';
+>>>>>>> e973101b84380289cd0fe6780a3cf9f7425a884e
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
@@ -65,9 +69,8 @@ export default function SignUpScreen() {
       latitude,
       longitude,
       bio,
-      skills,
-      interests,
     } = form;
+
 
 
     if (!email || !password || !name) {
@@ -79,17 +82,14 @@ export default function SignUpScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-
       const userData = {
         uid,
         name,
         email,
         role,
         location,
-
         latitude,
         longitude,
-
         bio,
         avatar: DEFAULT_AVATAR,
         skills,
@@ -112,7 +112,6 @@ export default function SignUpScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>

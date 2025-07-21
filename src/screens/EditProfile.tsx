@@ -1,9 +1,12 @@
 
+import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
 import { doc, updateDoc } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
   Alert,
   Pressable,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,13 +14,10 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import groupedCities from '../../assets/data/groupedCities';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
-import groupedCities from '../../assets/data/groupedCities';
 
 console.log("✅ Edit Profile screen is loaded");
 
@@ -80,9 +80,13 @@ export default function EditProfile() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <Text style={styles.backButtonText}>← Back</Text>
+    </TouchableOpacity>
+
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Edit Profile</Text>
-
 
       <TextInput
         placeholder="Name"
@@ -132,21 +136,6 @@ export default function EditProfile() {
         style={styles.input}
       />
 
-      <TextInput
-        placeholder="Skills (comma separated)"
-        value={form.skills}
-        onChangeText={(val) => handleChange('skills', val)}
-        style={styles.input}
-      />
-
-      <TextInput
-        placeholder="Interests (comma separated)"
-        value={form.interests}
-        onChangeText={(val) => handleChange('interests', val)}
-        style={styles.input}
-      />
-
-
       <Pressable onPress={() => setShowSkillModal(true)} style={styles.selectBox}>
         <Text style={styles.selectText}>
           {skills.length > 0 ? skills.join(', ') : 'Select your skills'}
@@ -163,7 +152,10 @@ export default function EditProfile() {
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e973101b84380289cd0fe6780a3cf9f7425a884e
       <SkillSelectorModal
         visible={showSkillModal}
         onClose={() => setShowSkillModal(false)}
@@ -171,6 +163,7 @@ export default function EditProfile() {
         initialSelected={skills}
         onSave={(selected) => {
           setSkills(selected);
+          setForm({ ...form, skills: selected.join(', ') });
           setShowSkillModal(false);
         }}
       />
@@ -182,6 +175,7 @@ export default function EditProfile() {
         initialSelected={interests}
         onSave={(selected) => {
           setInterests(selected);
+          setForm({ ...form, interests: selected.join(', ') });
           setShowInterestModal(false);
         }}
       />
@@ -191,6 +185,7 @@ export default function EditProfile() {
       </Text>
 
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -248,4 +243,14 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
     color: '#201f1fff',
   },
+  backButton: {
+  marginTop: 16,
+  marginBottom: 4,
+  marginLeft: 4,
+},
+backButtonText: {
+  fontSize: 16,
+  color: '#333',
+  fontWeight: 'bold',
+},
 });
