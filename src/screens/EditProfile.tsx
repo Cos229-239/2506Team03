@@ -152,10 +152,6 @@ export default function EditProfile() {
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e973101b84380289cd0fe6780a3cf9f7425a884e
       <SkillSelectorModal
         visible={showSkillModal}
         onClose={() => setShowSkillModal(false)}
