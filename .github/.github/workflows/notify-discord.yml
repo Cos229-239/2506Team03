@@ -1,0 +1,40 @@
+name: Notify Discord
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Gather commit data
+        run: |
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "ACTOR=${{ github.actor }}" >> $GITHUB_ENV
+          echo "COMMIT=$(git log -1 --pretty=format:'%h %s')" >> $GITHUB_ENV
+          echo "LINK=https://github.com/${{ github.repository }}/commit/${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Post to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          cat <<EOF > payload.json
+          {
+            "content": ":white_check_mark: Push to \`$REPO\` on \`$BRANCH\` by \`$ACTOR\`\nCommit: $COMMIT\n<$LINK>"
+          }
+          EOF
+
+          echo "=== payload.json ==="
+          cat payload.json
+          echo "===================="
+
+          curl -s -H "Content-Type: application/json" \
+               -d @payload.json \
+               "$WEBHOOK"
