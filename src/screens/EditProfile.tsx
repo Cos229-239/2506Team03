@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
@@ -162,7 +163,7 @@ export default function EditProfile() {
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
-<<<
+
       <SkillSelectorModal
         visible={showSkillModal}
         onClose={() => setShowSkillModal(false)}

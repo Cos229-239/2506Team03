@@ -56,6 +56,60 @@ const Explore = () => {
   const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
   const [cityModalVisible, setCityModalVisible] = useState(false);
 
+  // Add these functions to fix the error
+  const collapseAllStates = () => {
+    setCollapsedStates(Object.keys(groupedCities));
+  };
+
+  const expandAllStates = () => {
+    setCollapsedStates([]);
+  };
+
+  // Fix: Add clearFilters and applyFilters
+  const clearFilters = () => {
+    setSelectedSkills([]);
+  };
+
+  const applyFilters = () => {
+    setFilterVisible(false);
+  };
+
+  // Toggle collapse for skill categories
+  const toggleCollapse = (category: string) => {
+    setCollapsedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  // Toggle collapse for states in city modal
+  const toggleStateCollapse = (state: string) => {
+    setCollapsedStates(prev =>
+      prev.includes(state)
+        ? prev.filter(s => s !== state)
+        : [...prev, state]
+    );
+  };
+
+  // Toggle skill selection
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills(prev =>
+      prev.includes(skill)
+        ? prev.filter(s => s !== skill)
+        : [...prev, skill]
+    );
+  };
+
+  // Cycles toggleMode between 'teach', 'learn', and 'everyone'
+  const cycleToggleMode = () => {
+    setToggleMode(prev => {
+      if (prev === 'everyone') return 'teach';
+      if (prev === 'teach') return 'learn';
+      return 'everyone';
+    });
+  };
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
   const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
@@ -152,22 +206,37 @@ const Explore = () => {
     fetchUsersFromFirestore();
   }, []);
 
-  const selectedCityData = flatCities.find(c => c.key === selectedCity);
+const selectedCityData = flatCities.find(c => c.key === selectedCity);
 
-  const visibleUsers = users.filter(user => {
-    const hasSkillMatch = toggleMode === 'teach'
-      ? (user.interests || []).some((skill: string) => selectedSkills.includes(skill))
-      : toggleMode === 'learn'
-        ? (user.skills || []).some((skill: string) => selectedSkills.includes(skill))
-        : (user.skills || []).some((skill: string) => selectedSkills.includes(skill)) ||
-          (user.interests || []).some((skill: string) => selectedSkills.includes(skill));
+const visibleUsers = users.filter(user => {
+  const hasSkillMatch = toggleMode === 'teach'
+    ? (user.interests || []).some((skill: string) => selectedSkills.includes(skill))
+    : toggleMode === 'learn'
+      ? (user.skills || []).some((skill: string) => selectedSkills.includes(skill))
+      : (user.skills || []).some((skill: string) => selectedSkills.includes(skill)) ||
+        (user.interests || []).some((skill: string) => selectedSkills.includes(skill));
 
-    return selectedCityData &&
-      user.location?.split(',')[0] === selectedCityData.name.split(',')[0] &&
-      (selectedSkills.length === 0 || hasSkillMatch);
-  });
+  return selectedCityData &&
+    user.location?.split(',')[0] === selectedCityData.name.split(',')[0] &&
+    (selectedSkills.length === 0 || hasSkillMatch);
+});
 
-  // ... Rest of component logic (MapView rendering, modals, toggleMode button) remains unchanged
+// Define mapCenter region based on selectedCityData
+const mapCenter = selectedCityData
+  ? {
+      latitude: selectedCityData.latitude,
+      longitude: selectedCityData.longitude,
+      latitudeDelta: 0.08,
+      longitudeDelta: 0.08,
+    }
+  : {
+      latitude: 37.0902, // Default to USA center if no city selected
+      longitude: -95.7129,
+      latitudeDelta: 20,
+      longitudeDelta: 20,
+    };
+
+// ... Rest of component logic (MapView rendering, modals, toggleMode button) remains unchanged
 
  return (
     <View style={styles.container}>

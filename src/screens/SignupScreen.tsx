@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
 
-import groupedCities from '../../assets/data/groupedCities.js';
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
@@ -47,6 +46,8 @@ export default function SignUpScreen() {
     latitude: 0,
     longitude: 0,
     bio: '',
+    skills: [],
+    interests: [],
   });
 
   const handleChange = (key: string, value: string) => {
