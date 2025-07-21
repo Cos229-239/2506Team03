@@ -245,7 +245,7 @@ const mapCenter = selectedCityData
     };
 
 // ... Rest of component logic (MapView rendering, modals, toggleMode button) remains unchanged
-=======
+
   const [userMarkerPositions, setUserMarkerPositions] = useState<Record<string, { latitude: number; longitude: number }>>({});
 
   const selectedCityData = Object.values(groupedCities)
