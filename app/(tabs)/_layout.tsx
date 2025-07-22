@@ -1,10 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Tabs, useNavigation } from 'expo-router';
-import * as React from 'react';
+import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import { HapticTab } from '../../components/HapticTab';
-import { IconSymbol } from '../../components/ui/IconSymbol';
 import TabBarBackground from '../../components/ui/TabBarBackground';
 import { Colors } from '../../constants/Colors';
 
@@ -27,33 +26,22 @@ export default function TabLayout() {
         tabBarStyle: shouldHideTabBar
           ? { display: 'none' }
           : {
-            backgroundColor: 'rgb(50, 98, 111)',
+            backgroundColor: 'rgb(30, 58, 66)',
             borderTopWidth: 0,
             position: Platform.OS === 'ios' ? 'absolute' : 'relative',
           },
       }}
     >
 
-
-
-
-
-
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="compass" size={28} color={color} />
+            <Ionicons name="compass" size={28} color={color} />
           ),
         }}
       />
-
-
-
-
-
-
 
       <Tabs.Screen
         name="profile"
@@ -65,12 +53,6 @@ export default function TabLayout() {
         }}
       />
 
-
-
-
-
-
-
       <Tabs.Screen
         name="index"
         options={{
@@ -81,12 +63,6 @@ export default function TabLayout() {
         }}
       />
 
-
-
-
-
-
-
       <Tabs.Screen
         name="messages"
         options={{
@@ -96,13 +72,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-
-
-
-
-
-
 
       <Tabs.Screen
         name="settings"

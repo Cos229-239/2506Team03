@@ -10,11 +10,13 @@ import {
 import { Avatar, Text } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const messages = [
-  // Example structure — can be empty or filled with real data later
-  // { id: '1', name: 'Amber Edison', text: 'Thanks for your help!' },
-  // { id: '2', name: 'Enzo Bartolli', text: "I'll send the Zoom..." },
-];
+type Message = {
+  id: string;
+  name: string;
+  text: string;
+};
+
+const messages: Message[] = [];
 
 const Messages = () => {
   const router = useRouter();
