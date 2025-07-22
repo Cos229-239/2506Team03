@@ -1,8 +1,9 @@
 import { Stack } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { UserProvider } from '../src/contexts/UserContext'; // ✅ import UserProvider
-import { auth } from '../src/firebaseConfig'; // adjust if needed
+import { CopilotProvider } from 'react-native-copilot';
+import { UserProvider } from '../src/contexts/UserContext';
+import { auth } from '../src/firebaseConfig';
 
 export default function RootLayout() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -15,18 +16,25 @@ export default function RootLayout() {
   }, []);
 
   if (isLoggedIn === null) {
-    return null; // show splash screen or spinner if desired
+    return null;
   }
 
   return (
     <UserProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
-          <Stack.Screen name="(tabs)" />
-        ) : (
-          <Stack.Screen name="login" />
-        )}
-      </Stack>
+      <CopilotProvider
+        tooltipStyle={{
+          backgroundColor: '#fff',
+          borderRadius: 8,
+        }}
+      >
+        <Stack screenOptions={{ headerShown: false }}>
+          {isLoggedIn ? (
+            <Stack.Screen name="(tabs)" />
+          ) : (
+            <Stack.Screen name="login" />
+          )}
+        </Stack>
+      </CopilotProvider>
     </UserProvider>
   );
 }
