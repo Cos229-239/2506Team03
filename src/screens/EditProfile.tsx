@@ -200,6 +200,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+    fontSize: 16, 
+    color: '#201f1fff',
   },
   pickerContainer: {
     borderWidth: 1,

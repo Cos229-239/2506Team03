@@ -280,15 +280,6 @@ const Explore = () => {
     setCityModalVisible(false);
   };
 
-  if (
-    !selectedCityData ||
-    !Number.isFinite(selectedCityData.latitude) ||
-    !Number.isFinite(selectedCityData.longitude)
-  ) {
-    console.warn('Invalid selectedCityData — skipping render to avoid map crash');
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.fullWidthHeader}>
