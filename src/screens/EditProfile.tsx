@@ -200,6 +200,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#ccc',
+    fontSize: 16, 
+    color: '#201f1fff',
   },
   pickerContainer: {
     borderWidth: 1,
@@ -240,9 +242,9 @@ const styles = StyleSheet.create({
     color: '#201f1fff',
   },
   backButton: {
-  marginTop: 16,
+  marginTop: 28,
   marginBottom: 4,
-  marginLeft: 4,
+  marginLeft: 10,
 },
 backButtonText: {
   fontSize: 16,

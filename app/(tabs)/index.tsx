@@ -1,9 +1,12 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { CopilotStep, useCopilot, walkthroughable } from 'react-native-copilot';
 import { users } from '../../assets/data/mockUsers';
 import Header from '../../components/Header';
 import { RootStackParamList } from '../../constants/navigation';
@@ -18,80 +21,148 @@ const Index = () => {
 
   const navigation = useNavigation<HomeScreenNavigationProp>();
 
-  const { user } = useUser();
+  const { user, loginComplete } = useUser();
   const firstName = user?.name?.trim().split(' ')[0] || 'friend';
+  const WalkthroughableTouchableOpacity = walkthroughable(TouchableOpacity);
+  const WalkthroughableView = walkthroughable(View);
+  const { start, currentStep, visible } = useCopilot();
+  const ALWAYS_SHOW_TUTORIAL = true; //Switch to false if you want the tutorial to only show on first viewing
+  const [stepsReady, setStepsReady] = useState(false);
+
+  const launchTutorial = async () => {
+    if (ALWAYS_SHOW_TUTORIAL) {
+      setTimeout(() => {
+        start();
+      }, 500);
+    } else {
+      try {
+        const hasSeen = await AsyncStorage.getItem('hasSeenHomeTutorial');
+        if (!hasSeen) {
+          setTimeout(() => {
+            start();
+          }, 500);
+        }
+      } catch (err) { }
+    }
+  };
+
+  useEffect(() => {
+    if (stepsReady && loginComplete) {
+      launchTutorial();
+    }
+  }, [stepsReady, loginComplete]);
+
+  useEffect(() => {
+    if (!visible && currentStep?.name === 'upcomingSwaps' && !ALWAYS_SHOW_TUTORIAL) {
+      AsyncStorage.setItem('hasSeenHomeTutorial', 'true');
+    }
+  }, [visible, currentStep]);
+
+  useEffect(() => {
+    setStepsReady(true);
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
       <Header />
-      <Text style={styles.welcome}>
-        {`Welcome back, ${firstName}! 🎉`}
-      </Text>
-
+      <CopilotStep
+        text="Welcome to Skill Swap! Here are some quick tips to get you started."
+        order={1}
+        name="welcomeMessage"
+      >
+        <WalkthroughableView>
+          <Text style={styles.welcome}>
+            {`Welcome back, ${firstName}! 🎉`}
+          </Text>
+        </WalkthroughableView>
+      </CopilotStep>
       <View style={styles.buttonGrid}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('explore', { mode: 'Learn' })}
-        >
-          <View style={styles.buttonContent}>
-            <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#77615E' }]} />
-            <Text style={styles.buttonText}>Learn New Skills</Text>
-            <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#77615E' }]} />
-          </View>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('explore', { mode: 'Teach' })}
-        >
-          <View style={styles.buttonContent}>
-            <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#4E6487' }]} />
-            <Text style={styles.buttonText}>Offer Your Skills</Text>
-            <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#4E6487' }]} />
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.sectionTitle}>Featured Matches</Text>
-      <View style={styles.featuredRow}>
-        {[users.denver, users.seattle2, users.newyork2].map((user, index) => (
-          <View key={user.name} style={styles.matchContainer}>
-            <Image source={user.avatar} style={styles.avatar} />
-            <Text style={styles.matchName}>{user.name}</Text>
-            <Text style={styles.matchRole}>{user.profession}</Text>
-            <TouchableOpacity style={styles.swapButton}>
-              <Text style={styles.swapButtonText}>Request Swap</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-
-      <Text style={styles.sectionTitle}>Upcoming Swaps</Text>
-      <View style={styles.upcomingRow}>
-        {[
-          {
-            name: 'Italian Lessons w/ Enzo B.',
-            date: '6/22/2025 — 4:00pm EST',
-            location: 'Remote: Zoom',
-            avatar: require('../../assets/images/avatar-enzo.png'),
-          },
-          {
-            name: 'Oil Changes w/ Robert C.',
-            date: '6/29/2025 — 2:00pm EST',
-            location: 'Local: Seattle, WA',
-            avatar: require('../../assets/images/avatar-robert.png'),
-          },
-        ].map((swap, index) => (
-          <View key={index} style={styles.upcomingCard}>
-            <Image source={swap.avatar} style={styles.upcomingAvatar} />
-            <View style={styles.upcomingInfo}>
-              <Text style={styles.upcomingTitle}>{swap.name}</Text>
-              <Text style={styles.upcomingText}>{swap.date}</Text>
-              <Text style={styles.upcomingText}>{swap.location}</Text>
+        <CopilotStep text="Tap here to browse users offering skills near you." order={2} name="learnButton">
+          <WalkthroughableTouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('explore', { mode: 'Learn' })}
+          >
+            <View style={styles.buttonContent}>
+              <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#77615E' }]} />
+              <Text style={styles.buttonText}>Learn New Skills</Text>
+              <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#77615E' }]} />
             </View>
-          </View>
-        ))}
+          </WalkthroughableTouchableOpacity>
+        </CopilotStep>
+
+        <CopilotStep text="Tap here to offer your skills to others." order={3} name="teachButton">
+          <WalkthroughableTouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('explore', { mode: 'Teach' })}
+          >
+            <View style={styles.buttonContent}>
+              <View style={[styles.buttonBar, styles.topBar, { backgroundColor: '#4E6487' }]} />
+              <Text style={styles.buttonText}>Offer Your Skills</Text>
+              <View style={[styles.buttonBar, styles.bottomBar, { backgroundColor: '#4E6487' }]} />
+            </View>
+          </WalkthroughableTouchableOpacity>
+        </CopilotStep>
       </View>
+
+      <CopilotStep text="Here are some suggested matches based on your selected interests." order={4} name="featuredMatches">
+        <WalkthroughableView>
+          <Text style={styles.sectionTitle}>Featured Matches</Text>
+          <View style={styles.featuredRow}>
+            {[users.denver, users.seattle2, users.newyork2].map((user) => (
+              <View key={`${user.name}-${Index}`} style={styles.matchContainer}>
+                <Image source={user.avatar} style={styles.avatar} />
+                <Text style={styles.matchName}>{user.name}</Text>
+                <Text style={styles.matchRole}>{user.profession}</Text>
+                <TouchableOpacity
+                  style={styles.swapButton}
+                  onPress={() => {
+                    router.push({
+                      pathname: '/message/chat',
+                      params: {
+                        user: JSON.stringify(user),
+                      },
+                    });
+                  }}
+                >
+                  <Text style={styles.swapButtonText}>Request Swap</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </WalkthroughableView>
+      </CopilotStep>
+
+      <CopilotStep text="Your confirmed upcoming swaps appear here so you don’t miss a thing. Have fun skill swapping!" order={5} name="upcomingSwaps">
+        <WalkthroughableView>
+          <Text style={styles.sectionTitle}>Upcoming Swaps</Text>
+          <View style={styles.upcomingRow}>
+            {[
+              {
+                name: 'Italian Lessons w/ Enzo B.',
+                date: '6/22/2025 — 4:00pm EST',
+                location: 'Remote: Zoom',
+                avatar: require('../../assets/images/avatar-enzo.png'),
+              },
+              {
+                name: 'Oil Changes w/ Robert C.',
+                date: '6/29/2025 — 2:00pm EST',
+                location: 'Local: Seattle, WA',
+                avatar: require('../../assets/images/avatar-robert.png'),
+              },
+            ].map((swap, index) => (
+              <View key={index} style={styles.upcomingCard}>
+                <Image source={swap.avatar} style={styles.upcomingAvatar} />
+                <View style={styles.upcomingInfo}>
+                  <Text style={styles.upcomingTitle}>{swap.name}</Text>
+                  <Text style={styles.upcomingText}>{swap.date}</Text>
+                  <Text style={styles.upcomingText}>{swap.location}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </WalkthroughableView>
+      </CopilotStep>
     </ScrollView>
   );
 };

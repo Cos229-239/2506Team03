@@ -1,3 +1,4 @@
+import { auth } from '@/src/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -29,7 +30,6 @@ import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-
 
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
@@ -314,15 +314,6 @@ const mapCenter = selectedCityData
     setCityModalVisible(false);
   };
 
-  if (
-    !selectedCityData ||
-    !Number.isFinite(selectedCityData.latitude) ||
-    !Number.isFinite(selectedCityData.longitude)
-  ) {
-    console.warn('Invalid selectedCityData — skipping render to avoid map crash');
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.fullWidthHeader}>
@@ -391,6 +382,8 @@ const mapCenter = selectedCityData
           region={mapCenter}
         >
           {visibleUsers.map(user => {
+            const isCurrentUser = user.id === auth.currentUser?.uid;
+
             const randomized = userMarkerPositions[user.name] ?? {
               latitude: user.latitude,
               longitude: user.longitude,
@@ -402,6 +395,14 @@ const mapCenter = selectedCityData
                 coordinate={randomized}
                 anchor={{ x: 0.5, y: 1 }}
                 onPress={async () => {
+
+                  const isCurrentUser = user.id === auth.currentUser?.uid;
+
+                  if (isCurrentUser) {
+                    router.push('/(tabs)/profile');
+                    return;
+                  }
+
                   setSelectedUser(user);
                   if (mapRef.current) {
                     mapRef.current.animateCamera({
@@ -430,8 +431,8 @@ const mapCenter = selectedCityData
                       width: 38,
                       height: 38,
                       borderRadius: 19,
-                      borderWidth: 2,
-                      borderColor: '#000',
+                      borderWidth: 3,
+                      borderColor: isCurrentUser ? '#CBA16B' : '#000',
                       backgroundColor: '#eee',
                       shadowColor: '#000',
                       shadowOpacity: 0.3,
@@ -440,6 +441,11 @@ const mapCenter = selectedCityData
                     }}
                     resizeMode="cover"
                   />
+                  {isCurrentUser && (
+                    <Text style={{ color: '#cc862bff', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>
+                      You
+                    </Text>
+                  )}
                 </View>
               </Marker>
             );
@@ -726,7 +732,12 @@ const mapCenter = selectedCityData
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
                         onPress={() => {
-                          const userId = Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
+                          console.log('✅ View Profile button was tapped');
+                          console.log('Selected User Name:', selectedUser.name);
+                          console.log('Selected User object:', selectedUser);
+                          const userId =
+                            selectedUser.id ||
+                            Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
                           if (userId) {
                             setProfileVisible(false);
                             router.push(`../user/${userId}`);
@@ -855,7 +866,7 @@ const styles = StyleSheet.create({
   applyButtonText: { color: 'white', fontWeight: 'bold' },
   clearButtonText: { color: 'white', fontWeight: 'bold' },
   closeIcon: { position: 'absolute', top: 8, right: 8, zIndex: 1 },
-  closeText: { fontSize: 18, fontWeight: 'bold' },
+  closeText: { fontSize: 24, fontWeight: 'bold' },
   calloutContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -974,6 +985,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.5,
   },
-
-
 });
