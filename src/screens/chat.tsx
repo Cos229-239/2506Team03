@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from 'react-native-paper';
@@ -21,7 +21,10 @@ const dialogueOptions = [
 const ChatScreen = () => {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const params = useLocalSearchParams();
+  const [selectedUser, setSelectedUser] = useState<any>(
+    params.user ? JSON.parse(params.user as string) : null
+  );
   const [chatMessages, setChatMessages] = useState<string[]>([]);
 
   const handleSelectUser = (user: any) => {

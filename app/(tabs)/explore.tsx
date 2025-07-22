@@ -1,3 +1,4 @@
+import { auth } from '@/src/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
@@ -29,7 +30,6 @@ import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
 import { useUser } from '../../src/contexts/UserContext';
 import { db } from '../../src/firebaseConfig';
-
 
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
@@ -348,6 +348,8 @@ const Explore = () => {
           region={mapCenter}
         >
           {visibleUsers.map(user => {
+            const isCurrentUser = user.id === auth.currentUser?.uid;
+
             const randomized = userMarkerPositions[user.name] ?? {
               latitude: user.latitude,
               longitude: user.longitude,
@@ -359,6 +361,14 @@ const Explore = () => {
                 coordinate={randomized}
                 anchor={{ x: 0.5, y: 1 }}
                 onPress={async () => {
+
+                  const isCurrentUser = user.id === auth.currentUser?.uid;
+
+                  if (isCurrentUser) {
+                    router.push('/(tabs)/profile');
+                    return;
+                  }
+
                   setSelectedUser(user);
                   if (mapRef.current) {
                     mapRef.current.animateCamera({
@@ -387,8 +397,8 @@ const Explore = () => {
                       width: 38,
                       height: 38,
                       borderRadius: 19,
-                      borderWidth: 2,
-                      borderColor: '#000',
+                      borderWidth: 3,
+                      borderColor: isCurrentUser ? '#CBA16B' : '#000',
                       backgroundColor: '#eee',
                       shadowColor: '#000',
                       shadowOpacity: 0.3,
@@ -397,6 +407,11 @@ const Explore = () => {
                     }}
                     resizeMode="cover"
                   />
+                  {isCurrentUser && (
+                    <Text style={{ color: '#cc862bff', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>
+                      You
+                    </Text>
+                  )}
                 </View>
               </Marker>
             );

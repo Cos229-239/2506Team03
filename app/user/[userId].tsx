@@ -1,5 +1,6 @@
 import DEFAULT_AVATAR from '@/src/contexts/UserContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { router } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -19,7 +20,6 @@ const UserProfile = () => {
       try {
         let uid = userId;
 
-        // Handle 'me' or undefined by falling back to auth.currentUser
         if (!uid || uid === 'me') {
           const currentUser = auth.currentUser;
           if (!currentUser) {
@@ -76,13 +76,13 @@ const UserProfile = () => {
         <View style={styles.banner} />
         <View style={styles.avatarWrapper}>
           <Image
-  source={
-    typeof user.avatar === 'string'
-      ? { uri: user.avatar }
-      : user.avatar || { uri: DEFAULT_AVATAR }
-  }
-  style={styles.avatar}
-/>
+            source={
+              typeof user.avatar === 'string'
+                ? { uri: user.avatar }
+                : user.avatar || { uri: DEFAULT_AVATAR }
+            }
+            style={styles.avatar}
+          />
         </View>
       </View>
 
@@ -100,9 +100,23 @@ const UserProfile = () => {
           <View style={styles.button}>
             <Text style={styles.buttonText}>Follow</Text>
           </View>
-          <View style={[styles.button, styles.messageButton]}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: '/message/chat',
+                params: {
+                  user: JSON.stringify({
+                    id: userId || auth.currentUser?.uid,
+                    name: user.name,
+                    role: user.profession,
+                  }),
+                },
+              })
+            }
+            style={[styles.button, styles.messageButton]}
+          >
             <Text style={styles.buttonText}>Message</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.sectionDivider} />
