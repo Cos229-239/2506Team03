@@ -3,6 +3,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CopilotStep, useCopilot, walkthroughable } from 'react-native-copilot';
@@ -113,7 +114,17 @@ const Index = () => {
                 <Image source={user.avatar} style={styles.avatar} />
                 <Text style={styles.matchName}>{user.name}</Text>
                 <Text style={styles.matchRole}>{user.profession}</Text>
-                <TouchableOpacity style={styles.swapButton}>
+                <TouchableOpacity
+                  style={styles.swapButton}
+                  onPress={() => {
+                    router.push({
+                      pathname: '/message/chat',
+                      params: {
+                        user: JSON.stringify(user),
+                      },
+                    });
+                  }}
+                >
                   <Text style={styles.swapButtonText}>Request Swap</Text>
                 </TouchableOpacity>
               </View>
