@@ -1,3 +1,4 @@
+import DEFAULT_AVATAR from '@/src/contexts/UserContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -74,7 +75,14 @@ const UserProfile = () => {
       <View style={styles.bannerWrapper}>
         <View style={styles.banner} />
         <View style={styles.avatarWrapper}>
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          <Image
+  source={
+    typeof user.avatar === 'string'
+      ? { uri: user.avatar }
+      : user.avatar || { uri: DEFAULT_AVATAR }
+  }
+  style={styles.avatar}
+/>
         </View>
       </View>
 
@@ -268,7 +276,7 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   closeText: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#000',
   },

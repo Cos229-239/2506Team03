@@ -692,7 +692,12 @@ const Explore = () => {
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
                         onPress={() => {
-                          const userId = Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
+                          console.log('✅ View Profile button was tapped');
+                          console.log('Selected User Name:', selectedUser.name);
+                          console.log('Selected User object:', selectedUser);
+                          const userId =
+                            selectedUser.id ||
+                            Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
                           if (userId) {
                             setProfileVisible(false);
                             router.push(`../user/${userId}`);
@@ -821,7 +826,7 @@ const styles = StyleSheet.create({
   applyButtonText: { color: 'white', fontWeight: 'bold' },
   clearButtonText: { color: 'white', fontWeight: 'bold' },
   closeIcon: { position: 'absolute', top: 8, right: 8, zIndex: 1 },
-  closeText: { fontSize: 18, fontWeight: 'bold' },
+  closeText: { fontSize: 24, fontWeight: 'bold' },
   calloutContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -940,6 +945,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.5,
   },
-
-
 });
