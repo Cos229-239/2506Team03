@@ -153,39 +153,6 @@ const Explore = () => {
     return () => unsub();
   }, []);
 
-
-const selectedCityData = flatCities.find(c => c.key === selectedCity);
-
-const visibleUsers = users.filter(user => {
-  const hasSkillMatch = toggleMode === 'teach'
-    ? (user.interests || []).some((skill: string) => selectedSkills.includes(skill))
-    : toggleMode === 'learn'
-      ? (user.skills || []).some((skill: string) => selectedSkills.includes(skill))
-      : (user.skills || []).some((skill: string) => selectedSkills.includes(skill)) ||
-        (user.interests || []).some((skill: string) => selectedSkills.includes(skill));
-
-  return selectedCityData &&
-    user.location?.split(',')[0] === selectedCityData.name.split(',')[0] &&
-    (selectedSkills.length === 0 || hasSkillMatch);
-});
-
-// Define mapCenter region based on selectedCityData
-const mapCenter = selectedCityData
-  ? {
-      latitude: selectedCityData.latitude,
-      longitude: selectedCityData.longitude,
-      latitudeDelta: 0.08,
-      longitudeDelta: 0.08,
-    }
-  : {
-      latitude: 37.0902, // Default to USA center if no city selected
-      longitude: -95.7129,
-      latitudeDelta: 20,
-      longitudeDelta: 20,
-    };
-
-// ... Rest of component logic (MapView rendering, modals, toggleMode button) remains unchanged
-
   const [userMarkerPositions, setUserMarkerPositions] = useState<Record<string, { latitude: number; longitude: number }>>({});
 
   const selectedCityData = Object.values(groupedCities)
@@ -262,7 +229,6 @@ const mapCenter = selectedCityData
     ios: { marginTop: 25 },
     android: { marginTop: -5 },
   });
-
 
 
   const mapFrameHeight = Dimensions.get('window').height * 0.75;

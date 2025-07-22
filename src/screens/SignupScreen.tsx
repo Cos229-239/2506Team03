@@ -15,12 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-<<<<<<< HEAD
-import groupedCities from '../../assets/data/groupedCities'; // ✅ corrected import
-
-=======
 import groupedCities from '../../assets/data/groupedCities';
->>>>>>> e973101b84380289cd0fe6780a3cf9f7425a884e
 import SkillSelectorModal from '../../components/SkillSelectorModal';
 import { useUser } from '../../src/contexts/UserContext';
 import { auth, db } from '../firebaseConfig';
