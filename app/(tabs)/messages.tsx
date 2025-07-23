@@ -1,196 +1,118 @@
-import * as React from 'react';
 import { useRouter } from 'expo-router';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { Avatar, Text, TouchableRipple } from 'react-native-paper';
+import React from 'react';
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Avatar, Text } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-console.log("✅ Messages screen is loaded");
+type Message = {
+  id: string;
+  name: string;
+  text: string;
+};
 
-const messages = [
-  { id: '1', name: 'Amber Edison', text: 'Thanks for your help! Can’t wait to plan...' },
-  { id: '2', name: 'Enzo Bartolli', text: "Sunday looks good. I'll send the Zoom..." },
-  { id: '3', name: 'Robert Campbell', text: 'Looking forward to the skill swap - let...' },
-];
-
-const following = [
-  { id: '1', name: 'Rosalia T.', role: 'Trainer' },
-  { id: '2', name: 'Robert C.', role: 'Car Mechanic' },
-  { id: '3', name: 'Amber E.', role: 'Baker' },
-  { id: '4', name: 'Thalia V.', role: 'Gardener' },
-  { id: '5', name: 'Enzo B.', role: 'Language Tutor' },
-  { id: '6', name: 'John S.', role: 'Carpenter' },
-  { id: '7', name: 'Lana M.', role: 'Yoga Instructor' },
-  { id: '8', name: 'Miguel H.', role: 'Photographer' },
-  { id: '9', name: 'Chloe K.', role: 'Designer' },
-  { id: '10', name: 'Sam R.', role: 'Mechanic' },
-  { id: '11', name: 'Ava G.', role: 'Makeup Artist' },
-  { id: '12', name: 'Derek L.', role: 'Cycling Coach' },
-];
+const messages: Message[] = [];
 
 const Messages = () => {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      {/* Messages Section */}
-      <View>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Messages</Text>
-          <TouchableRipple onPress={() => router.push('/message/all')} borderless>
-            <View style={styles.seeAllButton}>
-              <Text style={styles.seeAllText}>See all...</Text>
-            </View>
-          </TouchableRipple>
-        </View>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Messages</Text>
+        <TouchableOpacity onPress={() => router.push('/message/chat')}>
+          <Icon name="square-edit-outline" size={28} color="#000" />
+        </TouchableOpacity>
+      </View>
 
-        {messages.map((msg) => (
-          <TouchableRipple
-            key={msg.id}
-            onPress={() => {}}
-            rippleColor="rgba(0,0,0,0.1)"
-            borderless={false}
-            style={styles.rippleWrapper}
-          >
-            <View style={styles.messageCard}>
+      {/* Messages List */}
+      {messages.length > 0 ? (
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.messageCard} onPress={() => {}}>
               <Avatar.Text
                 size={48}
-                label={msg.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                style={styles.messageAvatar}
+                label={item.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)}
+                style={styles.avatar}
                 labelStyle={{ fontSize: 18 }}
               />
-              <View style={styles.messageContent}>
-                <Text style={styles.messageName}>{msg.name}</Text>
-                <Text style={styles.messageText} numberOfLines={1}>{msg.text}</Text>
+              <View style={styles.messageInfo}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.text} numberOfLines={1}>
+                  {item.text}
+                </Text>
               </View>
-            </View>
-          </TouchableRipple>
-        ))}
-      </View>
-
-      {/* Following Section */}
-      <View style={styles.followingWrapper}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Following</Text>
-          <TouchableRipple onPress={() => {}} borderless>
-            <View style={styles.seeAllButton}>
-              <Text style={styles.seeAllText}>See all...</Text>
-            </View>
-          </TouchableRipple>
-        </View>
-
-        <FlatList
-          data={following}
-          keyExtractor={(item) => item.id}
-          numColumns={3}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 24 }}
-          showsVerticalScrollIndicator={true}
-          renderItem={({ item }) => (
-            <TouchableRipple
-              onPress={() => {}}
-              rippleColor="rgba(0,0,0,0.1)"
-              style={styles.followingRipple}
-              borderless
-            >
-              <View style={{ alignItems: 'center' }}>
-                <Avatar.Text
-                  size={80}
-                  label={item.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                  style={styles.followAvatar}
-                  labelStyle={{ fontSize: 24 }}
-                />
-                <Text style={styles.followName}>{item.name}</Text>
-                <Text style={styles.followRole}>{item.role}</Text>
-              </View>
-            </TouchableRipple>
+            </TouchableOpacity>
           )}
         />
-      </View>
-    </View>
+      ) : (
+        <Text style={styles.emptyText}>You have no messages.</Text>
+      )}
+    </SafeAreaView>
   );
 };
+
+export default Messages;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
-  sectionHeader: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
     marginTop: 24,
+    marginBottom: 16,
   },
-  sectionTitle: {
+  headerTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
-    fontSize: 18,
-  },
-  seeAllButton: {
-    backgroundColor: '#9DD4B6',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  seeAllText: {
-    color: 'black',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  rippleWrapper: {
-    borderRadius: 16,
-    marginBottom: 10,
   },
   messageCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#98ADD4',
     borderRadius: 16,
     padding: 12,
-    alignItems: 'center',
+    marginBottom: 12,
   },
-  messageAvatar: {
+  avatar: {
     backgroundColor: '#A0837F',
   },
-  messageContent: {
+  messageInfo: {
     marginLeft: 12,
     flex: 1,
   },
-  messageName: {
+  name: {
     fontWeight: 'bold',
-    fontSize: 15,
+    fontSize: 16,
     color: '#000',
   },
-  messageText: {
+  text: {
     fontSize: 14,
     color: '#000',
   },
-  followingWrapper: {
-    flex: 1,
-    marginTop: 16,
-  },
-  followingRipple: {
-    width: '30%',
-    alignItems: 'center',
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  followAvatar: {
-    backgroundColor: '#A0837F',
-    marginBottom: 4,
-    alignSelf: 'center',
-  },
-  followName: {
-    fontWeight: 'bold',
+  emptyText: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginVertical: 20,
     fontSize: 14,
-    textAlign: 'center',
-    color: '#000',
-  },
-  followRole: {
-    fontSize: 12,
-    color: 'gray',
-    textAlign: 'center',
+    color: '#555',
   },
 });
-
-export default Messages;

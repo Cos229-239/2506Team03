@@ -1,8 +1,10 @@
+import { auth } from '@/src/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -20,88 +22,35 @@ import {
 } from 'react-native';
 import 'react-native-get-random-values';
 import type MapViewType from 'react-native-maps';
+import type { LatLng } from 'react-native-maps';
 import groupedCities from '../../assets/data/groupedCities.js';
-import { CityKey, MockUser, users } from '../../assets/data/mockUsers';
+import { CityKey, MockUser, users as mockUsers } from '../../assets/data/mockUsers';
+import skillCategories from '../../assets/data/skillCategories';
 import FilterIcon from '../../assets/images/filter-icon.png';
 import { RootStackParamList } from '../../constants/navigation';
-
-console.log("✅ Explore screen is loaded"); 
-
-type UserType = {
-  name: string;
-  profession: string;
-  skills: string[];
-  latitude: number;
-  longitude: number;
-  avatar: any;
-  locationText: string;
-};
-
-type City = {
-  key: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-};
+import { useUser } from '../../src/contexts/UserContext';
+import { db } from '../../src/firebaseConfig';
 
 type ExploreParams = {
   mode?: 'Learn' | 'Teach';
 }
 
-const skillFilters: Record<string, string[]> = {
-  'Creative / Art Skills': [
-    'Digital Art',
-    'Drawing',
-    'Graphic Design',
-    'Guitar',
-    'Knitting & Crochet',
-    'Painting',
-    'Photography',
-    'Piano',
-  ],
-  'Hands-on / Trade Skills': [
-    'Automotive Repair',
-    'Car Repair',
-    'Carpentry',
-    'Furniture Repair',
-    'Home Improvement',
-    'Woodworking',
-    'Welding',
-  ],
-  'Lifestyle & Personal Growth': [
-    'Baking',
-    'Cooking',
-    'Fitness',
-    'Gardening',
-    'Language: English',
-    'Language: French',
-    'Language: German',
-    'Language: Italian',
-    'Language: Japanese',
-    'Language: Spanish',
-    'Sewing & Tailoring',
-  ],
-  'Tech / Digital Skills': [
-    '3D Modeling',
-    'Digital Art',
-    'IT Support',
-    'Programming',
-    'Video Editing',
-    'Web Design',
-  ],
-};
+const skillFilters: Record<string, string[]> = Object.fromEntries(
+  skillCategories.map((cat) => [cat.category, cat.skills])
+);
 
 const TOGGLE_MODES = ['teach', 'learn', 'everyone'];
 
 const Explore = () => {
-  const [selectedCity, setSelectedCity] = useState<CityKey>('seattle');
+  const { user: currentUser } = useUser();
+  const [selectedCity, setSelectedCity] = useState<CityKey | null>(null);
   const [selectedUser, setSelectedUser] = useState<MockUser | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const [profileVisible, setProfileVisible] = useState(false);
   const [markerScreenPosition, setMarkerScreenPosition] = useState<{ x: number; y: number } | null>(null);
-  const [collapsedStates, setCollapsedStates] = useState<string[]>([]);
+  const [collapsedStates, setCollapsedStates] = useState<string[]>(Object.keys(groupedCities));
   const [showTooltip, setShowTooltip] = useState(true);
   const [toggleMode, setToggleMode] = useState<'teach' | 'learn' | 'everyone'>('everyone');
   const cycleToggleMode = () => {
@@ -109,18 +58,41 @@ const Explore = () => {
     const nextIndex = (currentIndex + 1) % TOGGLE_MODES.length;
     setToggleMode(TOGGLE_MODES[nextIndex] as typeof toggleMode);
   };
-
+  const DEFAULT_AVATAR =
+    'https://firebasestorage.googleapis.com/v0/b/xskill-swapx.firebasestorage.app/o/profile.jpg?alt=media&token=d6ec896d-257e-4fb5-838a-e145d9f07aad';
   const pulseAnim = useRef(new Animated.Value(1)).current;
-
   const route = useRoute<RouteProp<RootStackParamList, 'explore'>>();
-
   const navigation = useNavigation<BottomTabNavigationProp<RootStackParamList>>();
+  const jitter = () => (Math.random() - 0.5) * 0.1;
 
   useEffect(() => {
     const mode = route.params?.mode;
     if (mode === 'Learn') setToggleMode('learn');
     else if (mode === 'Teach') setToggleMode('teach');
+    else setToggleMode('everyone');
   }, [route.params]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    if (toggleMode === 'teach') {
+      setSelectedSkills(currentUser.skills || []);
+    } else if (toggleMode === 'learn') {
+      setSelectedSkills(currentUser.interests || []);
+    } else {
+      setSelectedSkills([]);
+    }
+  }, [toggleMode, currentUser]);
+
+  useEffect(() => {
+    if (!selectedCity && currentUser?.location) {
+      const baseCity = currentUser.location.split(',')[0].trim();
+      const match = flatCities.find(c => c.name.split(',')[0] === baseCity);
+      if (match) {
+        setSelectedCity(match.key as CityKey);
+      }
+    }
+  }, [currentUser, selectedCity]);
 
   useEffect(() => {
     if (showTooltip) {
@@ -143,54 +115,121 @@ const Explore = () => {
     }
   }, [showTooltip]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!route.params?.mode) {
-        setToggleMode('everyone');
-      }
-    }, [route.params])
-  );
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const [allUsers, setAllUsers] = useState<MockUser[]>(Object.values(mockUsers));
+
+  const flatCities = Object.values(groupedCities).flat();
 
   useEffect(() => {
-  const unsubscribe = navigation.addListener('tabPress', () => {
-    setToggleMode((prev) => (prev !== 'everyone' ? 'everyone' : prev));
-  });
+    const unsub = onSnapshot(collection(db, 'users'), snap => {
+      const live = snap.docs.map(doc => {
+        const d = doc.data() as any;
+        const base = d.location?.split(',')[0].trim();
+        const cityData = flatCities.find(c => c.name.split(',')[0] === base);
 
-  return unsubscribe;
-}, [navigation]);
+        return {
+          id: doc.id,
+          name: d.name,
+          profession: d.role || '',
+          skills: d.skills || [],
+          avatar: { uri: d.avatarUrl || DEFAULT_AVATAR },
+          locationText: d.location,
+          cityKey: cityData?.key ?? '',
+          latitude: (d.latitude ?? cityData?.latitude ?? 0) + jitter(),
+          longitude: (d.longitude ?? cityData?.longitude ?? 0) + jitter(),
+        } as MockUser;
+      });
+
+      setAllUsers([...Object.values(mockUsers), ...live]);
+    });
+
+    return () => unsub();
+  }, []);
+
+  const [userMarkerPositions, setUserMarkerPositions] = useState<Record<string, { latitude: number; longitude: number }>>({});
 
   const selectedCityData = Object.values(groupedCities)
     .flat()
     .find((c) => c.key === selectedCity);
 
+  const selectedUsers = useMemo<MockUser[]>(() => {
+    if (!selectedCityData) return [];
+
+    const cityName = selectedCityData.name.split(',')[0];
+    return allUsers.filter(u =>
+      u.locationText.split(',')[0] === cityName
+    );
+  }, [allUsers, selectedCityData]);
+
+  const visibleUsers = useMemo(() => {
+    if (selectedSkills.length === 0) {
+      return selectedUsers;
+    }
+
+    const result = selectedUsers.filter(user => {
+      const hasMatch =
+        toggleMode === 'teach'
+          ? (user.interests || []).some(skill => selectedSkills.includes(skill))
+          : toggleMode === 'learn'
+            ? (user.skills || []).some(skill => selectedSkills.includes(skill))
+            : // everyone mode → check both
+            (user.skills || []).some(skill => selectedSkills.includes(skill)) ||
+            (user.interests || []).some(skill => selectedSkills.includes(skill));
+      return hasMatch;
+    });
+
+    return result;
+  }, [selectedUsers, selectedSkills, toggleMode]);
+
   const mapCenter = selectedCityData
     ? {
       latitude: selectedCityData.latitude,
       longitude: selectedCityData.longitude,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
+      latitudeDelta: 0.2,
+      longitudeDelta: 0.2,
     }
     : {
       latitude: 37.7749,
       longitude: -122.4194,
-      latitudeDelta: 0.025,
-      longitudeDelta: 0.015,
+      latitudeDelta: 0.2,
+      longitudeDelta: 0.2,
     };
-  const mockUser: MockUser = selectedUser ?? {
-    name: '',
-    profession: '',
-    skills: [],
-    avatar: null,
-    locationText: selectedCityData?.name ?? '',
-    latitude: selectedCityData?.latitude ?? 0,
-    longitude: selectedCityData?.longitude ?? 0,
-  };
+
+  useEffect(() => {
+    const newPositions: Record<string, LatLng> = {};
+    const R = 0.007;
+
+    selectedUsers.forEach((user, i) => {
+      const θ = (2 * Math.PI * i) / selectedUsers.length;
+      const dLat = R * Math.sin(θ);
+      const dLng = (R * Math.cos(θ)) / Math.cos(mapCenter.latitude * (Math.PI / 180));
+      const jitterLat = (Math.random() - 0.5) * 0.002;
+      const jitterLng = (Math.random() - 0.5) * 0.002;
+
+      newPositions[user.name] = {
+        latitude: (user.latitude ?? 0) + dLat + jitterLat,
+        longitude: (user.longitude ?? 0) + dLng + jitterLng,
+      };
+    });
+
+    setUserMarkerPositions(newPositions);
+  }, [selectedUsers, mapCenter.latitude]);
+
+
   const mapRef = useRef<MapViewType | null>(null);
   const [cityModalVisible, setCityModalVisible] = useState(false);
   const platformModalOffset = Platform.select({
     ios: { marginTop: 25 },
     android: { marginTop: -5 },
   });
+
 
   const mapFrameHeight = Dimensions.get('window').height * 0.75;
 
@@ -240,15 +279,6 @@ const Explore = () => {
     setSelectedCity(cityKey);
     setCityModalVisible(false);
   };
-
-  if (
-    !selectedCityData ||
-    !Number.isFinite(selectedCityData.latitude) ||
-    !Number.isFinite(selectedCityData.longitude)
-  ) {
-    console.warn('Invalid selectedCityData — skipping render to avoid map crash');
-    return null;
-  }
 
   return (
     <View style={styles.container}>
@@ -317,64 +347,75 @@ const Explore = () => {
           style={styles.map}
           region={mapCenter}
         >
-          {Object.values(users).map((user, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: user.latitude,
-                longitude: user.longitude,
-              }}
-              anchor={{ x: 0.5, y: 1 }}
-              onPress={async () => {
-                setSelectedUser(user);
+          {visibleUsers.map(user => {
+            const isCurrentUser = user.id === auth.currentUser?.uid;
 
-                if (mapRef.current) {
-                  const region = {
-                    latitude: user.latitude + 0.0012,
-                    longitude: user.longitude,
-                    latitudeDelta: 0.025,
-                    longitudeDelta: 0.015,
-                  };
+            const randomized = userMarkerPositions[user.name] ?? {
+              latitude: user.latitude,
+              longitude: user.longitude,
+            };
 
-                  mapRef.current.animateToRegion(region, 350);
+            return (
+              <Marker
+                key={user.id}
+                coordinate={randomized}
+                anchor={{ x: 0.5, y: 1 }}
+                onPress={async () => {
 
-                  setTimeout(async () => {
-                    const updatedPoint = await mapRef.current?.pointForCoordinate({
-                      latitude: user.latitude,
-                      longitude: user.longitude,
+                  const isCurrentUser = user.id === auth.currentUser?.uid;
+
+                  if (isCurrentUser) {
+                    router.push('/(tabs)/profile');
+                    return;
+                  }
+
+                  setSelectedUser(user);
+                  if (mapRef.current) {
+                    mapRef.current.animateCamera({
+                      center: {
+                        latitude: randomized.latitude + 0.0012,
+                        longitude: randomized.longitude,
+                      },
                     });
-
-                    if (updatedPoint) {
-                      setMarkerScreenPosition({
-                        x: updatedPoint.x,
-                        y: updatedPoint.y - 20,
-                      });
-                      setProfileVisible(true);
-                    }
-                  }, 400);
-                }
-              }}
-            >
-              <View style={{ alignItems: 'center', marginBottom: 18 }}>
-                <Image
-                  source={user.avatar}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 19,
-                    borderWidth: 2,
-                    borderColor: '#000',
-                    backgroundColor: '#eee',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.3,
-                    shadowRadius: 3,
-                    shadowOffset: { width: 0, height: 2 },
-                  }}
-                  resizeMode="cover"
-                />
-              </View>
-            </Marker>
-          ))}
+                    setTimeout(async () => {
+                      const updatedPoint = await mapRef.current?.pointForCoordinate(randomized);
+                      if (updatedPoint) {
+                        setMarkerScreenPosition({
+                          x: updatedPoint.x,
+                          y: updatedPoint.y - 20,
+                        });
+                        setProfileVisible(true);
+                      }
+                    }, 400);
+                  }
+                }}
+              >
+                <View style={{ alignItems: 'center', marginBottom: 18 }}>
+                  <Image
+                    source={user.avatar}
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: 19,
+                      borderWidth: 3,
+                      borderColor: isCurrentUser ? '#CBA16B' : '#000',
+                      backgroundColor: '#eee',
+                      shadowColor: '#000',
+                      shadowOpacity: 0.3,
+                      shadowRadius: 3,
+                      shadowOffset: { width: 0, height: 2 },
+                    }}
+                    resizeMode="cover"
+                  />
+                  {isCurrentUser && (
+                    <Text style={{ color: '#cc862bff', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>
+                      You
+                    </Text>
+                  )}
+                </View>
+              </Marker>
+            );
+          })}
         </MapView>
 
         <Pressable
@@ -621,7 +662,7 @@ const Explore = () => {
 
                     {!collapsedStates.includes(state) && (
                       <View style={{ paddingLeft: 32, paddingTop: 4 }}>
-                        {cities.map((city: City) => (
+                        {cities.map((city: { key: string; name: string; latitude: number; longitude: number }) => (
                           <TouchableOpacity
                             key={city.key}
                             onPress={() => selectCity(city.key)}
@@ -657,7 +698,12 @@ const Explore = () => {
                       <TouchableOpacity
                         style={styles.viewProfileBtn}
                         onPress={() => {
-                          const userId = Object.entries(users).find(([_, u]) => u.name === selectedUser.name)?.[0];
+                          console.log('✅ View Profile button was tapped');
+                          console.log('Selected User Name:', selectedUser.name);
+                          console.log('Selected User object:', selectedUser);
+                          const userId =
+                            selectedUser.id ||
+                            Object.entries(mockUsers).find(([_, u]) => u.name === selectedUser.name)?.[0];
                           if (userId) {
                             setProfileVisible(false);
                             router.push(`../user/${userId}`);
@@ -786,7 +832,7 @@ const styles = StyleSheet.create({
   applyButtonText: { color: 'white', fontWeight: 'bold' },
   clearButtonText: { color: 'white', fontWeight: 'bold' },
   closeIcon: { position: 'absolute', top: 8, right: 8, zIndex: 1 },
-  closeText: { fontSize: 18, fontWeight: 'bold' },
+  closeText: { fontSize: 24, fontWeight: 'bold' },
   calloutContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -905,6 +951,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.5,
   },
-
- 
 });
