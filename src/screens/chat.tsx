@@ -151,7 +151,7 @@ const ChatScreen = () => {
                 </TouchableOpacity>
                 {selectedTags.length > 0 && (
                   <TouchableOpacity
-                    style={[styles.tagButton, { backgroundColor: '#b1b1b1ff' }]}
+                    style={[styles.tagButton, { backgroundColor: '#9da29f' }]}
                     onPress={() => setSelectedTags([])}
                   >
                     <Text style={styles.tagButtonText}>Clear All</Text>
