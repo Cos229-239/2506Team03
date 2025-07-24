@@ -119,7 +119,7 @@ export default function EditProfile() {
           style={styles.input}
         />
 
-        <Text style={styles.label}>Select Your City</Text>
+        <Text style={styles.label}>Location</Text>
         <Pressable onPress={() => setShowCityModal(true)} style={styles.selectBox}>
           <Text style={styles.selectText}>
             {form.location ? form.location.split(',')[0] : 'Select a city'}
