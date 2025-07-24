@@ -7,14 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Avatar, Menu, Provider } from 'react-native-paper';
+import { Avatar, Chip, Menu, Provider } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import SkillSelectorModal from '../../components/SkillSelectorModal';
 
 const following = [
-  { id: '1', name: 'Jane Doe', role: 'Tutor' },
-  { id: '2', name: 'Michael Smith', role: 'Language Coach' },
-  { id: '3', name: 'Alice Johnson', role: 'Career Mentor' },
-  { id: '4', name: 'Leo Knight', role: 'Fitness Instructor' },
+  { id: '1', name: 'Jane Doe', role: 'Tutor', interests: ['Art', 'Cooking'] },
+  { id: '2', name: 'Michael Smith', role: 'Language Coach', interests: ['Languages', 'Travel'] },
+  { id: '3', name: 'Alice Johnson', role: 'Career Mentor', interests: ['Career', 'Networking'] },
+  { id: '4', name: 'Leo Knight', role: 'Fitness Instructor', interests: ['Fitness', 'Health'] },
 ];
 
 const dialogueOptions = [
@@ -33,6 +34,8 @@ const ChatScreen = () => {
   );
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [tagModalVisible, setTagModalVisible] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleSelectUser = (user: any) => {
     setSelectedUser(user);
@@ -98,36 +101,130 @@ const ChatScreen = () => {
     }
   };
 
+  const suggestedUsers = selectedTags.length === 0 ? [] : following.filter((user) =>
+    user.interests?.some((tag) => selectedTags.includes(tag))
+  );
+
   return (
     <Provider>
       <View style={styles.container}>
         {renderHeader()}
 
         {!selectedUser ? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.followingList}
-          >
-            {following.map((user) => (
-              <TouchableOpacity
-                key={user.id}
-                onPress={() => handleSelectUser(user)}
-                style={styles.followingItem}
-              >
-                <Avatar.Text
-                  size={64}
-                  label={user.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                    .slice(0, 2)}
-                  style={styles.avatar}
-                />
-                <Text style={styles.name}>{user.name}</Text>
-                <Text style={styles.role}>{user.role}</Text>
-              </TouchableOpacity>
-            ))}
+          <ScrollView>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.followingList}
+            >
+              {following.map((user) => (
+                <TouchableOpacity
+                  key={user.id}
+                  onPress={() => handleSelectUser(user)}
+                  style={styles.followingItem}
+                >
+                  <Avatar.Text
+                    size={64}
+                    label={user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)}
+                    style={styles.avatar}
+                  />
+                  <Text style={styles.name}>{user.name}</Text>
+                  <Text style={styles.role}>{user.role}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={{ marginTop: 24 }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Filter by Topic</Text>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                <TouchableOpacity
+                  style={styles.tagButton}
+                  onPress={() => setTagModalVisible(true)}
+                >
+                  <Text style={styles.tagButtonText}>
+                    {selectedTags.length > 0 ? 'Edit Tags' : '+ Select Tags'}
+                  </Text>
+                </TouchableOpacity>
+                {selectedTags.length > 0 && (
+                  <TouchableOpacity
+                    style={[styles.tagButton, { backgroundColor: '#b1b1b1ff' }]}
+                    onPress={() => setSelectedTags([])}
+                  >
+                    <Text style={styles.tagButtonText}>Clear All</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {selectedTags.length > 0 && (
+                <ScrollView
+                  horizontal
+                  style={{ maxHeight: 80, marginBottom: 16 }}
+                  contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {selectedTags.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      style={styles.chip}
+                      textStyle={styles.chipText}
+                      onClose={() =>
+                        setSelectedTags((prev) => prev.filter((t) => t !== tag))
+                      }
+                    >
+                      {tag}
+                    </Chip>
+                  ))}
+                </ScrollView>
+              )}
+
+              {selectedTags.length > 0 && (
+                <>
+                  <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Suggested Users</Text>
+                  {suggestedUsers.length > 0 ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                      {suggestedUsers.map((user) => (
+                        <TouchableOpacity
+                          key={user.id}
+                          onPress={() => handleSelectUser(user)}
+                          style={{ alignItems: 'center', marginRight: 16, marginBottom: 16, width: 80 }}
+                        >
+                          <Avatar.Text
+                            size={64}
+                            label={user.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)}
+                            style={styles.avatar}
+                          />
+                          <Text style={styles.name}>{user.name}</Text>
+                          <Text style={styles.role}>{user.role}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={{ textAlign: 'center', color: 'gray' }}>
+                      No suggested users
+                    </Text>
+                  )}
+                </>
+              )}
+            </View>
+
+            <SkillSelectorModal
+              visible={tagModalVisible}
+              mode="interests"
+              initialSelected={selectedTags}
+              onClose={() => setTagModalVisible(false)}
+              onSave={(tags) => {
+                setSelectedTags(tags);
+                setTagModalVisible(false);
+              }}
+            />
           </ScrollView>
         ) : (
           <>
@@ -243,5 +340,27 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     color: '#000',
+  },
+  tagButton: {
+    backgroundColor: '#CBA16B',
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  tagButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  chip: {
+    backgroundColor: '#CAD4E8',
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipText: {
+    color: '#192232',
+    fontWeight: '500',
   },
 });
