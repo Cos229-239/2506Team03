@@ -97,10 +97,10 @@ const SettingsScreen = () => {
           <Text style={[styles.toggleLabel, { color: colors.text, marginLeft: 15 }]}>Enable Notifications</Text>
         </View>
         <Switch
-          value={notificationsEnabled}
-          onValueChange={toggleNotifications}
-          trackColor={{ false: '#ccc', true: '#4CAF50' }}
-          thumbColor={notificationsEnabled ? '#fff' : '#fff'}
+       value={notificationsEnabled}
+      onValueChange={toggleNotifications}
+      trackColor={{ false: '#ccc', true: '#666' }}
+      thumbColor="#fff"
         />
       </View>
 
